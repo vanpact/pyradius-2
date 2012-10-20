@@ -9,7 +9,7 @@
 
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
-import PreTreatments #import Applier, CannyTreatment, GaborTreatment
+import PreTreatments, Treatments #import Applier, CannyTreatment, GaborTreatment
 from threading import Thread
 
 class Window(QtGui.QMainWindow):
@@ -187,12 +187,13 @@ class Window(QtGui.QMainWindow):
     def chooseTreatment(self, index):
         self.filterApplied = PreTreatments.Applier(self.source)
         if(index == 0):
-            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([50, 500],[90, 565]))
+#            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([50, 500],[90, 565]))
+            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment([[140, 270], [50, 560]])
             self.filterApplied = self.filterApplied + PreTreatments.ReduceSizeTreatment()
             self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment(performance=True)
 #            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(3.0)
             self.filterApplied = self.filterApplied + PreTreatments.CannyTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.blobDetectionTreatment()
             self.filterApplied = self.filterApplied + PreTreatments.IncreaseSizeTreatment()
+            self.filterApplied = self.filterApplied + Treatments.blobDetectionTreatment(offset = [50, 140])
         
 

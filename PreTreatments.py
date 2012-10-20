@@ -17,6 +17,7 @@ import math, time
 from imageConverter import ImageConverter
 from threading import Thread
 import threading 
+from Treatments import AbstractTreatment
 
 class Applier(QtCore.QObject):#QtCore.QThread):
     
@@ -24,6 +25,7 @@ class Applier(QtCore.QObject):#QtCore.QThread):
     
     def __init__(self, src=None):
         super(Applier, self).__init__()
+        self.filtersToPreApply = []
         self.filtersToApply = []
         self.processedVideo = []
         self.wait=True
@@ -45,6 +47,9 @@ class Applier(QtCore.QObject):#QtCore.QThread):
         
     def __add__(self, other):
         if(isinstance(other, AbstractPreTreatment)):
+            self.filtersToPreApply.append(other)
+            return self
+        elif(isinstance(other, AbstractTreatment)):
             self.filtersToApply.append(other)
             return self
         else:
@@ -52,6 +57,10 @@ class Applier(QtCore.QObject):#QtCore.QThread):
     
     def __sub__(self, other):
         if(isinstance(other, AbstractPreTreatment)):
+            self.filtersToPreApply.reverse()
+            self.filtersToPreApply.remove(other)
+            self.filtersToPreApply.reverse()
+        elif(isinstance(other, AbstractTreatment)):
             self.filtersToApply.reverse()
             self.filtersToApply.remove(other)
             self.filtersToApply.reverse()
@@ -60,11 +69,14 @@ class Applier(QtCore.QObject):#QtCore.QThread):
             raise TypeError("Object send to the applier has to be a pretreatment.")
         
     def empty(self):
-        self.filterToApply = []
+        self.filterToPreApply = []
         
     def apply(self, img):
+        imgPre = img
+        for preTreatment in self.filtersToPreApply:
+            imgPre = preTreatment.compute(imgPre)
         for treatment in self.filtersToApply:
-            img = treatment.compute(img)
+            img = treatment.compute(imgPre, img)
         return img
     
     def applyNext(self):
@@ -99,7 +111,7 @@ class Applier(QtCore.QObject):#QtCore.QThread):
         else: 
             raise ValueError("You have to use the applier on each frame you want to process and the file name has to finish by '.avi'.")
             
-class AbstractPreTreatment(object):
+class AbstractPreTreatment(AbstractTreatment):
     
     def __init__(self):
         '''
@@ -108,9 +120,7 @@ class AbstractPreTreatment(object):
         if(type(self) is AbstractPreTreatment):
             raise NotImplementedError('This class is abstract and cannot be instantiated') 
         super(AbstractPreTreatment, self).__init__()
-        
-    def compute(self, img):
-            raise NotImplementedError( "The method need to be implemented" )
+
     
 class CannyTreatment(AbstractPreTreatment):
     '''
@@ -330,48 +340,9 @@ class cropTreatment(AbstractPreTreatment):
         if(self.roi is not None and self.roi[0][1]>=0 and self.roi[1][0]>=0 and self.roi[0][0]<self.roi[0][1] and self.roi[1][0]<self.roi[1][1] and self.roi[0][1]<img.shape[0] and self.roi[1][1]<img.shape[1]):
             return img[self.roi[0][0]:self.roi[0][1],self.roi[1][0]:self.roi[1][1]].copy()
         else: 
-            raise ValueError("Incorrect size for the region of interest when cropping.")
+            raise ValueError("Incorrect size for the region of interest when cropping.")    
 
-class blobDetectionTreatment(AbstractPreTreatment):
-    
-    def __init__(self, mode = cv2.cv.CV_RETR_LIST, method=cv2.cv.CV_CHAIN_APPROX_NONE):
-        self.mode = mode
-        self.method = method
-        
-    def extractData(self, contours):
-        #find angle
-        alpha = []
-        for c in contours:
-            xy = c[:,0,:]
-            (vx, vy, x0, y0) = cv2.fitLine(points=xy, distType=cv2.cv.CV_DIST_L2, param=0, reps=10, aeps=0.01)
-            alpha.append(numpy.arctan2(vy,vx))
-        angles = numpy.asarray(alpha)
-    
-        #grouping all segments
-        data = numpy.zeros((0,3))
-        for alpha,c in zip(angles,contours):
-            x = c[:,0,0]
-            y = c[:,0,1]
-            if alpha<1 and alpha>-1:
-                a = numpy.ones_like(x)*alpha
-                data = numpy.vstack((data,numpy.hstack((x[:,numpy.newaxis],y[:,numpy.newaxis],a[:,numpy.newaxis]))))
-        return data
-    
-    def normalizeData(self, data):
-        edata = data.copy()
-        ndata = (edata - numpy.mean(edata,0))/numpy.std(edata,0)
-        return ndata
 
-    def compute(self, img):
-        contours, hierarchy = cv2.findContours(img.copy(), mode=self.mode, method=self.method)
-        for c in contours:
-            xy = c[:,0,:]
-            (vx, vy, x0, y0) = cv2.fitLine(points=xy, distType=cv2.cv.CV_DIST_L2, param=0, reps=10, aeps=0.01)
-            cv2.line(img, (x0, y0), (x0+vx*20., y0+vy*20.), cv2.cv.Scalar(255, 0, 0), 1, cv2.CV_AA, 0)
-#        data = self.extractData(contours)
-#        for c in contours
-#        cv2.line(img, pt1, pt2, color)
-        return img#self.normalizeData(data)
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
