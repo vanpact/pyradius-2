@@ -19,7 +19,7 @@ from threading import Thread
 import threading 
 from Treatments import AbstractTreatment
 
-class Applier(QtCore.QObject):#QtCore.QThread):
+class Applier(QtCore.QThread):
     
     frameComputed = QtCore.pyqtSignal()
     
@@ -32,7 +32,7 @@ class Applier(QtCore.QObject):#QtCore.QThread):
         if(isinstance(src, Movie)):
             self.src = src
         elif src is not None:
-            raise TypeError("Src must be none or a Movie!")
+            raise TypeError("Src must be None or a Movie!")
     
     def toggle(self):
         self.wait = not self.wait

@@ -135,10 +135,11 @@ class Window(QtGui.QMainWindow):
 #            self.source.play()
     
     def toggleProcessVideo(self):
+        """Pause and play the video processing"""
         self.filterApplied.toggle()
-        self.filterApplied.run()
-#        if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
-#                self.filterApplied.start(QtCore.QThread.HighestPriority)
+#        self.filterApplied.run()
+        if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
+                self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
     def frameChanged(self):
@@ -185,6 +186,7 @@ class Window(QtGui.QMainWindow):
         self.source.play()
         
     def chooseTreatment(self, index):
+        """Add the filters to be applied."""
         self.filterApplied = PreTreatments.Applier(self.source)
         if(index == 0):
             self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
