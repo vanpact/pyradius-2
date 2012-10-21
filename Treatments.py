@@ -25,25 +25,6 @@ class blobDetectionTreatment(AbstractTreatment):
         self.xoffset = offset[0]
         self.yoffset = offset[1]
         
-    def extractData(self, contours):
-        #find angle
-        alpha = []
-        for c in contours:
-            xy = c[:,0,:]
-            (vx, vy, x0, y0) = cv2.fitLine(points=xy, distType=cv2.cv.CV_DIST_L2, param=0, reps=10, aeps=0.01)
-            alpha.append(numpy.arctan2(vy,vx))
-        angles = numpy.asarray(alpha)
-    
-        #grouping all segments
-        data = numpy.zeros((0,3))
-        for alpha,c in zip(angles,contours):
-            x = c[:,0,0]
-            y = c[:,0,1]
-            if alpha<1 and alpha>-1:
-                a = numpy.ones_like(x)*alpha
-                data = numpy.vstack((data,numpy.hstack((x[:,numpy.newaxis],y[:,numpy.newaxis],a[:,numpy.newaxis]))))
-        return data
-    
     def normalizeData(self, data):
         edata = data.copy()
         ndata = (edata - numpy.mean(edata,0))/numpy.std(edata,0)
@@ -52,23 +33,37 @@ class blobDetectionTreatment(AbstractTreatment):
     def compute(self, imgPre, img):
         contours, hierarchy = cv2.findContours(imgPre.copy(), mode=self.mode, method=self.method)
         allLines = []
-        meanvx = 0
-        meanvy = 0
-        meanx0 = 0
-        meany0 = 0
+        data = numpy.zeros((len(contours), 2), dtype=numpy.float32)
+        datax = numpy.zeros((len(contours), 1), dtype=numpy.float32)
+        datavx = numpy.zeros((len(contours), 1), dtype=numpy.float32)
+        datavy = numpy.zeros((len(contours), 1), dtype=numpy.float32)
+        i=0
         for c in contours:
             xy = c[:,0,:]
-            allLines.append(cv2.fitLine(points=xy, distType=cv2.cv.CV_DIST_L2, param=0, reps=10, aeps=0.01))
-        for vx, vy, x0, y0 in allLines:
-            meanvx = meanvx + vx
-            meanvy = meanvy + vy
-            meanx0 = meanx0 + x0
-            meany0 = meany0 + y0
-        meanvx = meanvx/len(allLines)
-        meanvy = meanvy/len(allLines)
-        meanx0 = meanx0/len(allLines)
-        meany0 = meany0/len(allLines)
-        cv2.line(img, (meanx0+self.xoffset, meany0+self.yoffset), (meanx0+self.xoffset+meanvx*100., meany0+self.yoffset+meanvy*100.), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+            (vx, vy, x0, y0) = cv2.fitLine(points=xy, distType=cv2.cv.CV_DIST_L2, param=0, reps=10, aeps=0.01)
+            data[i, :] = numpy.array([y0[0], numpy.arctan2(vy, vx)[0]], dtype=numpy.float32)
+            datax[i] = x0
+            datavx[i] = vx
+            datavy[i] = vy
+            i = i + 1
+        retval, bestLabels, centers = cv2.kmeans(data, 4, criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_MAX_ITER, 1, 10) , attempts=cv2.KMEANS_PP_CENTERS, flags=cv2.KMEANS_PP_CENTERS)
+        mx0 = numpy.int(numpy.mean((datax)[bestLabels==0]))
+        my0 = numpy.int(numpy.mean((data[:, 0:1])[bestLabels==0]))
+        mvx0 = numpy.int(numpy.mean((datavx)[bestLabels==0])*100)
+        mvy0 = numpy.int(numpy.mean((datavy)[bestLabels==0])*100)
+        
+        mx1 = numpy.int(numpy.mean((datax)[bestLabels==1]))
+        my1 = numpy.int(numpy.mean((data[:, 0:1])[bestLabels==1]))
+        mvx1 = numpy.int(numpy.mean((datavx)[bestLabels==1])*100)
+        mvy1 = numpy.int(numpy.mean((datavy)[bestLabels==1])*100)
+        
+        mx2 = numpy.int(numpy.mean((datax)[bestLabels==2]))
+        my2 = numpy.int(numpy.mean((data[:, 0:1])[bestLabels==2]))
+        mvx2 = numpy.int(numpy.mean((datavx)[bestLabels==2])*100)
+        mvy2 = numpy.int(numpy.mean((datavy)[bestLabels==2])*100)
+        cv2.line(img, (mx0+self.xoffset, my0+self.yoffset), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+        cv2.line(img, (mx1+self.xoffset, my1+self.yoffset), (mx1+self.xoffset+mvx1, my1+self.yoffset+mvy1), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+        cv2.line(img, (mx2+self.xoffset, my2+self.yoffset), (mx2+self.xoffset+mvx2, my2+self.yoffset+mvy2), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 #        data = self.extractData(contours)
 #        for c in contours
 #        cv2.line(img, pt1, pt2, color)
