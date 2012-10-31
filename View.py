@@ -105,17 +105,18 @@ class Window(QtGui.QMainWindow):
         controlLayout = QtGui.QHBoxLayout()
         self.playButton = QtGui.QPushButton('play')
         self.playButton.resize(50, 50)
-#        self.timeSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
+        self.timeSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
         controlLayout.addWidget(self.playButton)
-#        controlLayout.addWidget(self.timeSlider)
+        controlLayout.addWidget(self.timeSlider)
         self.playButton.clicked.connect(self.toggleProcessVideo)
-#        self.timeSlider.valueChanged.connect(self.jumpToFrame)
+        self.timeSlider.valueChanged.connect(self.jumpToFrame)
         
 #        preTreatmentLayout = QtGui.QHBoxLayout()
         preTreatmentComboBox = QtGui.QComboBox()
-        preTreatmentComboBox.addItem('Canny+Gabor')
+        preTreatmentComboBox.addItem('Muscles:Gabor+Sobel')
+        preTreatmentComboBox.addItem('Aponeurosis:Sobel+Gabor')
         preTreatmentComboBox.currentIndexChanged.connect(self.chooseTreatment)
-        self.chooseTreatment(0)
+        self.chooseTreatment(1)
         controlLayout.addWidget(preTreatmentComboBox)
         
         mainLayout.addWidget(videoWidget)
@@ -161,7 +162,7 @@ class Window(QtGui.QMainWindow):
 #        if (not(self.videoItem.present(frame))):
             self.surface.stop()
 #            self.videoItem.stop()
-#        self.timeSlider.setValue(self.source.currentPositionRatio()*self.timeSlider.maximum())
+        self.timeSlider.setValue(self.source.currentPositionRatio()*self.timeSlider.maximum())
 
     def jumpToFrame(self, value):
         """ Jump to a position in the movie. 
@@ -189,13 +190,25 @@ class Window(QtGui.QMainWindow):
         """Add the filters to be applied."""
         self.filterApplied = PreTreatments.Applier(self.source)
         if(index == 0):
-            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
-#            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment([[140, 270], [50, 565]])
+#            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
+            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment([[140, 270], [50, 565]])
             self.filterApplied = self.filterApplied + PreTreatments.ReduceSizeTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment(performance=True)
-#            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(3.0)
-            self.filterApplied = self.filterApplied + PreTreatments.CannyTreatment()
+#            self.filterApplied = self.filterApplied + PreTreatments.LaplacianTreatment()
+            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment()
+#            self.filterApplied = self.filterApplied + PreTreatments.CannyTreatment()
+            self.filterApplied = self.filterApplied + PreTreatments.SobelTreatment()
+            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(20.0)
+            self.filterApplied = self.filterApplied + PreTreatments.ThresholdTreatment(230)
             self.filterApplied = self.filterApplied + PreTreatments.IncreaseSizeTreatment()
-            self.filterApplied = self.filterApplied + Treatments.blobDetectionTreatment(offset = [50, 90])
-        
+            self.filterApplied = self.filterApplied + Treatments.blobDetectionTreatment(offset = [50, 140])
+        elif(index == 1):
+            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
+            self.filterApplied = self.filterApplied + PreTreatments.ReduceSizeTreatment()
+#            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment()
+            self.filterApplied = self.filterApplied + PreTreatments.SobelTreatment(dx=0)
+            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(20.0)
+            self.filterApplied = self.filterApplied + PreTreatments.ThresholdTreatment(230)
+            self.filterApplied = self.filterApplied + PreTreatments.erosionTreatment(size=(14, 1))
+            self.filterApplied = self.filterApplied + PreTreatments.IncreaseSizeTreatment()
+            self.filterApplied = self.filterApplied + Treatments.AponeurosisDetector(offset = [50, 90])
 

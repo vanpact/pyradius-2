@@ -19,15 +19,49 @@ from threading import Thread
 import threading 
 from Treatments import AbstractTreatment
 
+class Mixer(QtCore.QObject):
+    def __init__(self):
+        super(Mixer, self).__init__()
+        self.applierToMix=None
+        
+    def __add__(self, applier):
+        if(isinstance(applier, Applier)):
+            self.applierToMix.append(Applier)
+            return self
+        
+    def __sub__(self, applier):
+        if(isinstance(applier, Applier)):
+            self.filtersToPreApply.reverse()
+            self.filtersToPreApply.remove(applier)
+            self.filtersToPreApply.reverse()
+            return self
+        
+    def empty(self):
+        self.applierToMix = []
+        
+#    def mix(self):
+#        for a in self.applierToMix:
+#            a.frameComputed.connect()
+        
+        
 class Applier(QtCore.QThread):
-    
+    """This is the class which apply all the filters. For the preTreatment and the treatments."""
     frameComputed = QtCore.pyqtSignal()
     
     def __init__(self, src=None):
+        """Constructor of the class.
+        
+        Kwargs:
+            src: the video source on which the filters will be applied.
+        
+         Raises:
+             TypeError: if the type of the source is neither a Movie nor None.
+        """
         super(Applier, self).__init__()
         self.filtersToPreApply = []
         self.filtersToApply = []
         self.processedVideo = []
+        self.lastComputedFrame = None
         self.wait=True
         if(isinstance(src, Movie)):
             self.src = src
@@ -35,6 +69,7 @@ class Applier(QtCore.QThread):
             raise TypeError("Src must be None or a Movie!")
     
     def toggle(self):
+        """Toggle the applier state. if wait is true, the applier will pause the processing of the video."""
         self.wait = not self.wait
         
     def setSource(self, src=file):
@@ -85,7 +120,8 @@ class Applier(QtCore.QThread):
         if(len(ndimg.shape)>2):
             ndimg = ndimg[:, :, 0]*0.299+ndimg[:, :, 1]*0.587+ndimg[:, :, 2]*0.114
         ndimg = self.apply(ndimg)
-        self.processedVideo.append(ndimg)
+        self.lastComputedFrame=ndimg
+#        self.processedVideo.append(ndimg)
         self.frameComputed.emit()
         return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
     
@@ -100,7 +136,7 @@ class Applier(QtCore.QThread):
         self.applyAll()
         
     def getLastComputedFrame(self):
-        frameToSend = ImageConverter.ndarrayToQimage(self.processedVideo[-1]).copy()
+        frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame).copy()#self.processedVideo[-1]).copy()
         return QtMultimedia.QVideoFrame(frameToSend)
     
     def saveResult(self, fileName):
@@ -130,7 +166,7 @@ class CannyTreatment(AbstractPreTreatment):
     ratio = 3
     kernelSize = 3
     
-    def __init__(self, minThreshold = 25, ratio = 3, kernelSize = 3):
+    def __init__(self, minThreshold = 25, ratio = 3, kernelSize = 7):
         '''
         Constructor
         '''
@@ -143,6 +179,7 @@ class CannyTreatment(AbstractPreTreatment):
         if(len(img.shape)==2):
     #        image = cv2.cvtColor( image, cv2.cv.CV_RGB2GRAY)
 #            img = cv2.blur(img, self.kernelSize)
+#            edges = cv2.medianBlur(numpy.uint8(img), 3)
             edges = cv2.Canny(numpy.uint8(img), self.minThreshold, self.minThreshold*self.ratio, apertureSize=self.kernelSize)#self.kernelSize )
 #            result = numpy.zeros( img.shape, img.dtype )
     #        image.copyTo(result, edges)
@@ -154,7 +191,7 @@ class CannyTreatment(AbstractPreTreatment):
 class GaborTreatment(AbstractPreTreatment):
     filters = []
     
-    def __init__(self, performance=True, ksize = 31, sigma = 1.0, lambd = 15.0, gamma = 0.02, psi = 0, ktype = numpy.float32):
+    def __init__(self, ksize = 31, sigma = 0.5, lambd = 15.0, gamma = 0.02, psi = 0, ktype = numpy.float32):
         super(GaborTreatment, self).__init__()
         self.ksize = ksize
         self.sigma = sigma
@@ -164,7 +201,6 @@ class GaborTreatment(AbstractPreTreatment):
         self.ktype = ktype
         self.cpuNumber = max(multiprocessing.cpu_count()-2, 1)
         self.pool = ThreadPool(processes=self.cpuNumber)
-        self.performance = performance
         self.buildFilters()
        
     def getGaborKernel(self, theta): 
@@ -342,7 +378,58 @@ class cropTreatment(AbstractPreTreatment):
         else: 
             raise ValueError("Incorrect size for the region of interest when cropping.")    
 
+class LaplacianTreatment(AbstractPreTreatment):
 
+    def __init__(self, ddepth=cv2.CV_8U, kernelSize=3, scale=1, delta=0):
+        super(LaplacianTreatment, self).__init__()  
+        self.ddepth=ddepth
+        self.kernelSize=kernelSize
+        self.scale=scale
+        self.delta=delta
+    
+    def compute(self, img):
+        img= cv2.GaussianBlur( img, (9,9), sigmaX=0, sigmaY=0)
+        result = cv2.Laplacian( numpy.uint8(img), ddepth=self.ddepth, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
+        result = cv2.convertScaleAbs( result)
+        result=result*6
+#        result[result<50]=0
+        return result
+    
+class SobelTreatment(AbstractPreTreatment):
+
+    def __init__(self, ddepth=cv2.CV_8U, dx=1, dy=1, kernelSize=7, scale=1, delta=0):
+        super(SobelTreatment, self).__init__()  
+        self.ddepth=ddepth
+        self.dx=dx
+        self.dy=dy
+        self.kernelSize=kernelSize
+        self.scale=scale
+        self.delta=delta
+    
+    def compute(self, img):
+        img= cv2.GaussianBlur( img, (9,9), sigmaX=0, sigmaY=0)
+        result = cv2.Sobel( numpy.uint8(img), ddepth=self.ddepth, dx=self.dx, dy=self.dy, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
+        result = cv2.convertScaleAbs( result)
+#        result[result<50]=0
+        return result
+
+class ThresholdTreatment(AbstractPreTreatment):
+    def __init__(self, threshold):
+        super(ThresholdTreatment, self).__init__()
+        self.threshold = threshold
+        
+    def compute(self, img):
+        img[img<self.threshold]=0
+        return img
+
+class erosionTreatment(AbstractPreTreatment):
+    def __init__(self, morphology=cv2.MORPH_RECT, size=(3, 3)):
+        super(erosionTreatment, self).__init__()
+        self.morphology=morphology
+        self.size=size
+        
+    def compute(self, img):
+        return cv2.erode(img, cv2.getStructuringElement( self.morphology, self.size ))
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
