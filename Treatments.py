@@ -126,11 +126,11 @@ class blobDetectionTreatment(AbstractTreatment):
 #        for vx, vy, x0, y0 in zip((numpy.atleast_2d(datavx).T)[bestLabels==0], (numpy.atleast_2d(datavy).T)[bestLabels==0], (numpy.atleast_2d(datax).T)[bestLabels==0], (numpy.atleast_2d(datay).T)[bestLabels==0]):
 #            cv2.line(img, (numpy.int(x0)+self.xoffset, numpy.int(y0)+self.yoffset), (numpy.int(x0)+self.xoffset+numpy.int(vx*20.), numpy.int(y0)+self.yoffset+numpy.int(vy*20.)), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 
-        for vx, vy, x0, y0 in zip(numpy.sin(dataa), -numpy.cos(dataa), (numpy.atleast_2d(datac[:, 0]).T), (numpy.atleast_2d(datac[:, 1]).T)):
-                        cv2.line(img, (numpy.int(x0)+self.xoffset, numpy.int(y0)+self.yoffset), (numpy.int(x0)+self.xoffset+numpy.int(vx*20.), numpy.int(y0)+self.yoffset+numpy.int(vy*20.)), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+#        for vx, vy, x0, y0 in zip(numpy.sin(dataa), -numpy.cos(dataa), (numpy.atleast_2d(datac[:, 0]).T), (numpy.atleast_2d(datac[:, 1]).T)):
+#                        cv2.line(img, (numpy.int(x0)+self.xoffset, numpy.int(y0)+self.yoffset), (numpy.int(x0)+self.xoffset+numpy.int(vx*20.), numpy.int(y0)+self.yoffset+numpy.int(vy*20.)), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 
-        cv2.drawContours(img, contours, -1, (255, 255, 255))
-        cv2.line(img, (mx0+self.xoffset, my0+self.yoffset), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+#        cv2.drawContours(img, contours, -1, (255, 255, 255))
+        cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 #        cv2.line(img, (mx1+self.xoffset, my1+self.yoffset), (mx1+self.xoffset+mvx1, my1+self.yoffset+mvy1), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 #        cv2.line(img, (mx2+self.xoffset, my2+self.yoffset), (mx2+self.xoffset+mvx2, my2+self.yoffset+mvy2), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
         return img#self.normalizeData(data)
@@ -142,11 +142,6 @@ class AponeurosisDetector(AbstractTreatment):
         self.method = method
         self.xoffset = offset[0]
         self.yoffset = offset[1]
-        
-    def normalizeData(self, data):
-        edata = data.copy()
-        ndata = (edata - numpy.mean(edata,0))/numpy.std(edata,0)
-        return ndata
     
     def compute(self, imgPre, img):
         contours, hierarchy = cv2.findContours(imgPre.copy(), mode=self.mode, method=self.method)
@@ -162,23 +157,35 @@ class AponeurosisDetector(AbstractTreatment):
                 dataa[i]=angle
                 #cv2.line(img, (x0+self.xoffset, y0+self.yoffset), (x0+self.xoffset+vx*20., y0+self.yoffset+vy*20.), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
             i = i + 1
-            
-        goodLines = numpy.argsort(datas[:, 1])
-        largest=goodLines[len(goodLines)-1]
+          
+        goodLines = numpy.argsort((datas[:, 1]))#*datas[:, 1])/datas[:, 0])  
+        for value in goodLines[::-1]:
+            if(datac[value, 1]<=imgPre.shape[1]/4):
+                largest = value
+                break
+#        largest=goodLines[len(goodLines)-1]
         dataa = numpy.radians(dataa)
         x0=datac[largest, 0]+self.xoffset
-        y0=datac[largest, 1]+self.yoffset
-        x1 = numpy.uint16(x0+numpy.sin(dataa[largest])*100.0)
-        y1 = numpy.uint16(y0-numpy.cos(dataa[largest])*100.0)
+        y0=datac[largest, 1]+self.yoffset+datas[largest, 0]
+        x1 = numpy.uint16(x0-numpy.sin(dataa[largest])*1000.0)
+        y1 = numpy.uint16(y0+numpy.cos(dataa[largest])*1000.0)
+        x2= numpy.uint16(x0+numpy.sin(dataa[largest])*1000.0)
+        y2= numpy.uint16(y0-numpy.cos(dataa[largest])*1000.0)
 #        cv2.drawContours(img, contours, -1, (255, 255, 255))
-        cv2.line(img, (numpy.uint16(x0), numpy.uint16(y0)), (x1, y1), (255, 255, 255), 2)
+        cv2.line(img, (numpy.uint16(x1), numpy.uint16(y1)), (x2, y2), (255, 255, 255), 2)
 #        cv2.ellipse(img, (datac[largest], datas[largest], dataao[largest]), (255, 255, 255), 2)
 
-        largest=goodLines[len(goodLines)-2]
+        for value in goodLines[::-1]:
+            if(datac[value, 1]>imgPre.shape[1]/4):
+                largest = value
+                break
+#        largest=goodLines[len(goodLines)-2]
         x0=datac[largest, 0]+self.xoffset
-        y0=datac[largest, 1]+self.yoffset
-        x1 = numpy.uint16(x0+numpy.sin(dataa[largest])*100.0)
-        y1 = numpy.uint16(y0-numpy.cos(dataa[largest])*100.0)
+        y0=datac[largest, 1]+self.yoffset+datas[largest, 0]
+        x1 = numpy.uint16(x0-numpy.sin(dataa[largest])*1000.0)
+        y1 = numpy.uint16(y0+numpy.cos(dataa[largest])*1000.0)
+        x2= numpy.uint16(x0+numpy.sin(dataa[largest])*1000.0)
+        y2= numpy.uint16(y0-numpy.cos(dataa[largest])*1000.0)
 #        cv2.drawContours(img, contours, -1, (255, 255, 255))
-        cv2.line(img, (numpy.uint16(x0), numpy.uint16(y0)), (x1, y1), (255, 255, 255), 2)
+        cv2.line(img, (numpy.uint16(x1), numpy.uint16(y1)), (x2, y2), (255, 255, 255), 2)
         return img

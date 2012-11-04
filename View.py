@@ -9,7 +9,7 @@
 
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
-import PreTreatments, Treatments #import Applier, CannyTreatment, GaborTreatment
+import PreTreatments #import Applier, CannyTreatment, GaborTreatment
 from threading import Thread
 
 class Window(QtGui.QMainWindow):
@@ -105,18 +105,17 @@ class Window(QtGui.QMainWindow):
         controlLayout = QtGui.QHBoxLayout()
         self.playButton = QtGui.QPushButton('play')
         self.playButton.resize(50, 50)
-        self.timeSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
+#        self.timeSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
         controlLayout.addWidget(self.playButton)
-        controlLayout.addWidget(self.timeSlider)
+#        controlLayout.addWidget(self.timeSlider)
         self.playButton.clicked.connect(self.toggleProcessVideo)
-        self.timeSlider.valueChanged.connect(self.jumpToFrame)
+#        self.timeSlider.valueChanged.connect(self.jumpToFrame)
         
 #        preTreatmentLayout = QtGui.QHBoxLayout()
         preTreatmentComboBox = QtGui.QComboBox()
-        preTreatmentComboBox.addItem('Muscles:Gabor+Sobel')
-        preTreatmentComboBox.addItem('Aponeurosis:Sobel+Gabor')
+        preTreatmentComboBox.addItem('Canny+Gabor')
         preTreatmentComboBox.currentIndexChanged.connect(self.chooseTreatment)
-        self.chooseTreatment(1)
+        self.chooseTreatment(0)
         controlLayout.addWidget(preTreatmentComboBox)
         
         mainLayout.addWidget(videoWidget)
@@ -136,11 +135,10 @@ class Window(QtGui.QMainWindow):
 #            self.source.play()
     
     def toggleProcessVideo(self):
-        """Pause and play the video processing"""
         self.filterApplied.toggle()
-#        self.filterApplied.run()
-        if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
-                self.filterApplied.start(QtCore.QThread.HighestPriority)
+        self.filterApplied.run()
+#        if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
+#                self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
     def frameChanged(self):
@@ -162,7 +160,7 @@ class Window(QtGui.QMainWindow):
 #        if (not(self.videoItem.present(frame))):
             self.surface.stop()
 #            self.videoItem.stop()
-        self.timeSlider.setValue(self.source.currentPositionRatio()*self.timeSlider.maximum())
+#        self.timeSlider.setValue(self.source.currentPositionRatio()*self.timeSlider.maximum())
 
     def jumpToFrame(self, value):
         """ Jump to a position in the movie. 
@@ -187,28 +185,14 @@ class Window(QtGui.QMainWindow):
         self.source.play()
         
     def chooseTreatment(self, index):
-        """Add the filters to be applied."""
         self.filterApplied = PreTreatments.Applier(self.source)
         if(index == 0):
-#            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
-            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment([[140, 270], [50, 565]])
+            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([50, 500],[90, 565]))
             self.filterApplied = self.filterApplied + PreTreatments.ReduceSizeTreatment()
-#            self.filterApplied = self.filterApplied + PreTreatments.LaplacianTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment()
-#            self.filterApplied = self.filterApplied + PreTreatments.CannyTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.SobelTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(20.0)
-            self.filterApplied = self.filterApplied + PreTreatments.ThresholdTreatment(230)
+            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment(performance=True)
+#            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(3.0)
+            self.filterApplied = self.filterApplied + PreTreatments.CannyTreatment()
+            self.filterApplied = self.filterApplied + PreTreatments.blobDetectionTreatment()
             self.filterApplied = self.filterApplied + PreTreatments.IncreaseSizeTreatment()
-            self.filterApplied = self.filterApplied + Treatments.blobDetectionTreatment(offset = [50, 140])
-        elif(index == 1):
-            self.filterApplied = self.filterApplied + PreTreatments.cropTreatment(([90, 330],[50, 565]))
-            self.filterApplied = self.filterApplied + PreTreatments.ReduceSizeTreatment()
-#            self.filterApplied = self.filterApplied + PreTreatments.GaborTreatment()
-            self.filterApplied = self.filterApplied + PreTreatments.SobelTreatment(dx=0)
-            self.filterApplied = self.filterApplied + PreTreatments.changeContrastTreatment(20.0)
-            self.filterApplied = self.filterApplied + PreTreatments.ThresholdTreatment(230)
-            self.filterApplied = self.filterApplied + PreTreatments.erosionTreatment(size=(14, 1))
-            self.filterApplied = self.filterApplied + PreTreatments.IncreaseSizeTreatment()
-            self.filterApplied = self.filterApplied + Treatments.AponeurosisDetector(offset = [50, 90])
+        
 

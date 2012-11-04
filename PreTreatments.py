@@ -17,38 +17,13 @@ import math, time
 from imageConverter import ImageConverter
 from threading import Thread
 import threading 
-from Treatments import AbstractTreatment
-
-class Mixer(QtCore.QObject):
-    def __init__(self):
-        super(Mixer, self).__init__()
-        self.applierToMix=None
-        
-    def __add__(self, applier):
-        if(isinstance(applier, Applier)):
-            self.applierToMix.append(Applier)
-            return self
-        
-    def __sub__(self, applier):
-        if(isinstance(applier, Applier)):
-            self.filtersToPreApply.reverse()
-            self.filtersToPreApply.remove(applier)
-            self.filtersToPreApply.reverse()
-            return self
-        
-    def empty(self):
-        self.applierToMix = []
-        
-#    def mix(self):
-#        for a in self.applierToMix:
-#            a.frameComputed.connect()
-        
+from Treatments import AbstractTreatment        
         
 class Applier(QtCore.QThread):
     """This is the class which apply all the filters. For the preTreatment and the treatments."""
     frameComputed = QtCore.pyqtSignal()
     
-    def __init__(self, src=None):
+    def __init__(self, src=None, nrChannel=1):
         """Constructor of the class.
         
         Kwargs:
@@ -58,8 +33,9 @@ class Applier(QtCore.QThread):
              TypeError: if the type of the source is neither a Movie nor None.
         """
         super(Applier, self).__init__()
-        self.filtersToPreApply = []
-        self.filtersToApply = []
+        self.nrChannel=nrChannel
+        self.filtersToPreApply = [ [] for i in range(nrChannel)]
+        self.filtersToApply = [[] for i in range(nrChannel)]
         self.processedVideo = []
         self.lastComputedFrame = None
         self.wait=True
@@ -80,25 +56,25 @@ class Applier(QtCore.QThread):
         else:
             raise TypeError("Src must be none or a Movie!")
         
-    def __add__(self, other):
+    def add(self, other, channel=0):
         if(isinstance(other, AbstractPreTreatment)):
-            self.filtersToPreApply.append(other)
+            self.filtersToPreApply[channel].append(other)
             return self
         elif(isinstance(other, AbstractTreatment)):
-            self.filtersToApply.append(other)
+            self.filtersToApply[channel].append(other)
             return self
         else:
             raise TypeError("Object send to the applier has to be a pretreatment.")
     
-    def __sub__(self, other):
+    def sub(self, other, channel=0):
         if(isinstance(other, AbstractPreTreatment)):
-            self.filtersToPreApply.reverse()
-            self.filtersToPreApply.remove(other)
-            self.filtersToPreApply.reverse()
+            self.filtersToPreApply[channel].reverse()
+            self.filtersToPreApply[channel].remove(other)
+            self.filtersToPreApply[channel].reverse()
         elif(isinstance(other, AbstractTreatment)):
-            self.filtersToApply.reverse()
-            self.filtersToApply.remove(other)
-            self.filtersToApply.reverse()
+            self.filtersToApply[channel].reverse()
+            self.filtersToApply[channel].remove(other)
+            self.filtersToApply[channel].reverse()
             return self
         else:
             raise TypeError("Object send to the applier has to be a pretreatment.")
@@ -107,11 +83,16 @@ class Applier(QtCore.QThread):
         self.filterToPreApply = []
         
     def apply(self, img):
-        imgPre = img
-        for preTreatment in self.filtersToPreApply:
-            imgPre = preTreatment.compute(imgPre)
-        for treatment in self.filtersToApply:
-            img = treatment.compute(imgPre, img)
+        imgToMix=[img for i in range(self.nrChannel)]
+        for channel in range(self.nrChannel):
+            imgPre = imgToMix[channel]
+            for preTreatment in self.filtersToPreApply[channel]:
+                imgPre = preTreatment.compute(imgPre)
+            for treatment in self.filtersToApply[channel]:
+                imgToMix[channel] = treatment.compute(imgPre, imgToMix[channel])
+        for imgProcessed in imgToMix:
+            img = numpy.maximum(img, imgProcessed)
+#        img=imgPre
         return img
     
     def applyNext(self):
@@ -429,7 +410,8 @@ class erosionTreatment(AbstractPreTreatment):
         self.size=size
         
     def compute(self, img):
-        return cv2.erode(img, cv2.getStructuringElement( self.morphology, self.size ))
+        elem = cv2.getStructuringElement( self.morphology, self.size )
+        return cv2.erode(img, elem)#cv2.dilate(cv2.erode(img, elem), elem)
     
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
