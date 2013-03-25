@@ -9,7 +9,7 @@
 
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
-import PreTreatments, Treatments, numpy #import Applier, CannyTreatment, GaborTreatment
+import PreTreatments, Treatments #import Applier, CannyTreatment, GaborTreatment
 
 class Window(QtGui.QMainWindow):
     """ This is the class which contains all the GUI."""
@@ -26,6 +26,7 @@ class Window(QtGui.QMainWindow):
 
     def initUI(self):
         """ Initialize the main windows of the application. """
+        self.OutputFile = None
         self.resize(640, 480)
         self.centerWindow
         self.setWindowTitle('Line')
@@ -98,12 +99,15 @@ class Window(QtGui.QMainWindow):
         mainLayout = QtGui.QVBoxLayout(centralWidget)
         self.videoWidget = VideoWidget()
         self.surface = self.videoWidget.videoSurface()
+        self.videoWidget.setStringStartPosition((self.videoWidget.size().width()*0.9, self.videoWidget.size().height()))
 #        scene = QtGui.QGraphicsScene(self)
 #        graphicsView = QtGui.QGraphicsView(scene)
 #        self.videoItem = VideoItem(scene)
 #        scene.addItem(self.videoItem)
         
-        controlLayout = QtGui.QHBoxLayout()
+        self.controlLayout = QtGui.QVBoxLayout()
+        self.basicControlLayout = QtGui.QHBoxLayout()
+        self.controlLayout.addLayout(self.basicControlLayout)
         self.playButton = QtGui.QPushButton('play')
         self.playButton.resize(50, 50)
 #        self.timeSlider = QtGui.QSlider(QtCore.Qt.Horizontal)
@@ -111,28 +115,144 @@ class Window(QtGui.QMainWindow):
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
         self.progressBar.setMinimum(0)
         self.progressBar.setMaximum(100)
-        controlLayout.addWidget(self.playButton)
-        controlLayout.addWidget(self.progressBar)
+        self.basicControlLayout.addWidget(self.playButton)
+        self.basicControlLayout.addWidget(self.progressBar)
         self.playButton.clicked.connect(self.toggleProcessVideo)
         self.progressBar.valueChanged.connect(self.jumpToFrame)
         
 #        preTreatmentLayout = QtGui.QHBoxLayout()
-        self.preTreatmentComboBox = QtGui.QComboBox()
-        self.preTreatmentComboBox.addItem('Muscles:Gabor+Sobel')
-        self.preTreatmentComboBox.addItem('Aponeurosis:Sobel+Gabor')
-#        self.preTreatmentComboBox.currentIndexChanged[int].connect(self.chooseTreatment)
+        self.treatmentComboBox = QtGui.QComboBox()
+        self.treatmentComboBox.addItem('Fit ellipsoïde')
+        self.treatmentComboBox.addItem('Radon transform')
+        self.treatmentComboBox.addItem('Lucas-Kanade')
+        self.treatmentComboBox.addItem('Seam Carving')
+        self.outputLabel = QtGui.QLabel('Sauver les résultats :')
+        self.outputCheckBox = QtGui.QCheckBox()
+        self.methodOptionLayout= QtGui.QHBoxLayout()
+        self.controlLayout.addLayout(self.methodOptionLayout)
+        self.treatmentComboBox.currentIndexChanged.connect(self.loadCorrectInterface)
+        self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)
+        self.createEllipsoidMethodInterface()
+        self.createRadonMethodInterface()
+        self.createLKMethodInterface()
+        self.createSCMethodInterface()
+#        self.treatmentComboBox.currentIndexChanged[int].connect(self.chooseTreatment)
 #        self.chooseTreatment(0)
-        controlLayout.addWidget(self.preTreatmentComboBox)
+        self.basicControlLayout.addWidget(self.treatmentComboBox)
+        self.basicControlLayout.addWidget(self.outputLabel)
+        self.basicControlLayout.addWidget(self.outputCheckBox)
         
         mainLayout.addWidget(self.videoWidget)
 #        mainLayout.addWidget(graphicsView)
-        mainLayout.insertLayout(1, controlLayout)
+        mainLayout.insertLayout(1, self.controlLayout)
 #        mainLayout.insertLayout(2, preTreatmentLayout)
         self.setCentralWidget(centralWidget)
+        self.treatmentComboBox.currentIndexChanged.emit(0)
+    
+    def createEllipsoidMethodInterface(self):
+        self.ellipsoidOptionWidget = QtGui.QGroupBox("Contrôles spécifiques à la méthode:")
+        self.ellipsoidOptionWidget.hide()
+        self.controlLayout.addWidget(self.ellipsoidOptionWidget)
+        self.ellipsoidOptionLayout = QtGui.QHBoxLayout()
+        self.ellipsoidOptionWidget.setLayout(self.ellipsoidOptionLayout)
+        self.ellipsoidSkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
+        self.ellipsoidSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.ellipsoidSkipFrameSpinBox = QtGui.QSpinBox()
+        self.ellipsoidSkipFrameSpinBox.setMinimum(0)
+        self.ellipsoidSkipFrameSpinBox.setMaximum(5)
+        self.ellipsoidOptionLayout.addWidget(self.ellipsoidSkipFrameLabel)
+        self.ellipsoidOptionLayout.addWidget(self.ellipsoidSkipFrameSpinBox)
+        self.ellipsoidOptionLayout.addStretch()
+
         
+    def createRadonMethodInterface(self):
+        self.radonOptionWidget = QtGui.QGroupBox("Contrôles spécifiques à la méthode:")
+        self.radonOptionWidget.hide()
+        self.controlLayout.addWidget(self.radonOptionWidget)
+        self.radonOptionLayout = QtGui.QHBoxLayout()
+        self.radonOptionWidget.setLayout(self.radonOptionLayout)
+        self.multipleRadonLabel = QtGui.QLabel("Prendre plus d'échantillons:")
+        self.multipleRadonLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.multipleRadonCheckBox = QtGui.QCheckBox()
+        self.radonSkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
+        self.radonSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.radonSkipFrameSpinBox = QtGui.QSpinBox()
+        self.radonSkipFrameSpinBox.setMinimum(0)
+        self.radonSkipFrameSpinBox.setMaximum(24)
+        self.radonOptionLayout.addWidget(self.multipleRadonLabel)
+        self.radonOptionLayout.addWidget(self.multipleRadonCheckBox)
+        self.radonOptionLayout.addWidget(self.radonSkipFrameLabel)
+        self.radonOptionLayout.addWidget(self.radonSkipFrameSpinBox)
+        self.radonOptionLayout.addStretch()
+        
+    def createLKMethodInterface(self):
+        self.LKOptionWidget = QtGui.QGroupBox("Contrôles spécifiques à la méthode:")
+        self.LKOptionWidget.hide()
+        self.controlLayout.addWidget(self.LKOptionWidget)
+        self.LKOptionLayout = QtGui.QHBoxLayout()
+        self.LKOptionWidget.setLayout(self.LKOptionLayout)
+        self.LKSkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
+        self.LKSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.LKSkipFrameSpinBox = QtGui.QSpinBox()
+        self.LKSkipFrameSpinBox.setMinimum(0)
+        self.LKSkipFrameSpinBox.setMaximum(5)
+        self.LKOptionLayout.addWidget(self.LKSkipFrameLabel)
+        self.LKOptionLayout.addWidget(self.LKSkipFrameSpinBox)
+        self.LKOptionLayout.addStretch()
+    
+    def createSCMethodInterface(self):
+        self.SCOptionWidget = QtGui.QGroupBox("Contrôles spécifiques à la méthode:")
+        self.SCOptionWidget.hide()
+        self.controlLayout.addWidget(self.SCOptionWidget)
+        self.SCOptionLayout = QtGui.QHBoxLayout()
+        self.SCOptionWidget.setLayout(self.SCOptionLayout)
+        self.SCSkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
+        self.SCSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
+        self.SCSkipFrameSpinBox = QtGui.QSpinBox()
+        self.SCSkipFrameSpinBox.setMinimum(0)
+        self.SCSkipFrameSpinBox.setMaximum(5)
+        self.SCOptionLayout.addWidget(self.SCSkipFrameLabel)
+        self.SCOptionLayout.addWidget(self.SCSkipFrameSpinBox)
+        self.SCOptionLayout.addStretch()
+        
+    def loadCorrectInterface(self):
+        self.hideAllInterface()
+        if(self.treatmentComboBox.currentIndex()==0):
+            self.loadEllipsoidTransformInterface()
+        if(self.treatmentComboBox.currentIndex()==1):
+            self.loadRadonTransformInterface()
+        if(self.treatmentComboBox.currentIndex()==2):
+            self.loadLKTransformInterface()
+        if(self.treatmentComboBox.currentIndex()==3):
+            self.loadSCTransformInterface()
+       
+    def hideAllInterface(self):
+        for i in range(self.controlLayout.count()):
+            possibleWidget = self.controlLayout.itemAt(i)
+            if(possibleWidget.widget()):
+                possibleWidget.widget().hide()
+    
+    def loadEllipsoidTransformInterface(self):
+        self.ellipsoidOptionWidget.show()
+        
+    def loadRadonTransformInterface(self):
+        self.radonOptionWidget.show()
+    
+    def loadLKTransformInterface(self):
+        self.LKOptionWidget.show()
+    
+    def loadSCTransformInterface(self):
+        self.SCOptionWidget.show()
+        
+    def chooseOutputFile(self):  
+        if(self.outputCheckBox.isChecked()):
+            fileName = QtCore.QString(QtGui.QFileDialog.getSaveFileName(self, "Ouvrir le fichier de sortie", QtCore.QDir.homePath(), 'Text files (*.txt)'))
+            if (not (fileName.isEmpty())):
+                self.OutputFile = open(str(fileName), 'w', 0)
+             
     def openFile(self):
         """ Show a dialog where there user can pick a file. """
-        fileName = QtCore.QString(QtGui.QFileDialog.getOpenFileName(self, "Open Movie", QtCore.QDir.homePath()))
+        fileName = QtCore.QString(QtGui.QFileDialog.getOpenFileName(self, "ouvrir la vidéo", QtCore.QDir.homePath()))
         if (not (fileName.isEmpty())):
             self.surface.stop()
 #            self.videoItem.stop()
@@ -153,7 +273,7 @@ class Window(QtGui.QMainWindow):
             self.filterApplied.toggle()
             self.filterApplied.run()
             if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
-                    self.preTreatmentComboBox.setEnabled(False)
+                    self.treatmentComboBox.setEnabled(False)
                     self.playButton.setText("Pause")
                     self.filterApplied.start(QtCore.QThread.HighestPriority)
             
@@ -177,6 +297,8 @@ class Window(QtGui.QMainWindow):
 #        if (not(self.videoItem.present(frame))):
             self.surface.stop()
 #            self.videoItem.stop()
+        angle = self.filterApplied.getLastComputedAngle()
+        self.videoWidget.setString(str(round(angle, 2))+ "°")
         self.progressBar.setValue(self.source.currentPositionRatio()*self.progressBar.maximum())
 
     def jumpToFrame(self, value):
@@ -204,121 +326,67 @@ class Window(QtGui.QMainWindow):
     def getsurfacePosition(self):
         p=QtGui.QCursor.pos()
         p=self.videoWidget.mapFromGlobal(p)
-        if(self.savedPoint == None):
-            self.savedPoint = p
+        if(self.videoWidget.getPointNumbers() == 0):
+            self.videoWidget.appendPoint(p)
         else:
-            self.videoWidget.appendLine(self.savedPoint, p)
-            self.savedPoint = None
+            self.videoWidget.appendLine(self.videoWidget.popLastPoint(), p)
         
-        if(self.videoWidget.getLineNumbers() >=2):
+        if(self.videoWidget.getLineNumbers() >=self.lineNumber):
             self.videoWidget.clicked.disconnect(self.getsurfacePosition)
-            self.chooseTreatment(self.preTreatmentComboBox.currentIndex())
+            self.chooseTreatment(self.treatmentComboBox.currentIndex())
+            self.videoWidget.PointsToDraw = False
+            self.videoWidget.LinesToDraw = False
             self.toggleProcessVideo()
             
     def launchTutorial(self):
-        if(self.preTreatmentComboBox.currentIndex() == 0):
+        if(self.treatmentComboBox.currentIndex() == 0):
             self.tutorial1()
-        if(self.preTreatmentComboBox.currentIndex() == 1):
+        if(self.treatmentComboBox.currentIndex() == 1):
             self.tutorial1()
+        if(self.treatmentComboBox.currentIndex() == 2):
+            self.tutorialmuscle()
+        if(self.treatmentComboBox.currentIndex() == 3):
+            self.chooseTreatment(self.treatmentComboBox.currentIndex())
+            self.toggleProcessVideo()
             
     def tutorial1(self):
         QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
-                          'La méthode choisie nécessite des informations de la part de l\'utilisateur.', 
+                          'La méthode choisie nécessite 2 informations de la part de l\'utilisateur.', 
                           QtGui.QMessageBox.Ok, self).show()
-        self.savedPoint = None
+        self.lineNumber = 2
         self.videoWidget.clicked.connect(self.getsurfacePosition)
         
-        
+    def tutorialmuscle(self):
+        QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
+                          'La méthode choisie nécessite 3 informations de la part de l\'utilisateur.', 
+                          QtGui.QMessageBox.Ok, self).show()
+        self.lineNumber = 3
+        self.videoWidget.clicked.connect(self.getsurfacePosition)
+                
     def chooseTreatment(self, index):
         """Add the filters to be applied."""
         if(index == 0):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, 3)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([90, 330],[50, 565])), 0)
+            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
             l = self.videoWidget.getLines()
-            oldminx = 100000
-            oldmaxx = 0
-            oldminy = 100000
-            oldmaxy = 0
-            for line in l:
-                newminx = min(line[0].x(), line[1].x())
-                oldminx = min(newminx, oldminx)
-                newmaxx = max(line[0].x(), line[1].x())
-                oldmaxx = max(newmaxx, oldmaxx)
-                newminy = min(line[0].y(), line[1].y())
-                oldminy = min(newminy, oldminy)
-                newmaxy = max(line[0].y(), line[1].y())
-                oldmaxy = max(newmaxy, oldmaxy)
-            sortedLines = []
-            for line in l:
-                sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
-            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([oldminx, oldminy], [oldmaxx, oldmaxy])), 0)#[[140, 270], [50, 565]]), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.ReduceSizeTreatment(), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.LaplacianTreatment(), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.CannyTreatment(), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.SobelTreatment(dx=1, dy=1, kernelSize=7, scale=1, delta=0), 0)
-##            self.filterApplied = self.filterApplied .add(PreTreatments.changeContrastTreatment(7.0), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.ThresholdTreatment(-1), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.dilationTreatment(size=(2, 2)), 0)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.CannyTreatment(), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.IncreaseSizeTreatment(), 0)
-            self.filterApplied = self.filterApplied.add(Treatments.blobDetectionTreatment(offset = [sortedLines[0][0].x(), sortedLines[0][0].y()]), 0)
-            
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([sortedLines[0][0].x(), sortedLines[0][0].y()-30], [sortedLines[0][1].x(), sortedLines[0][1].y()+30])), 1)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.ReduceSizeTreatment(), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0), 1)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.CannyTreatment(), 1)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.IncreaseSizeTreatment(), 1)
-##            self.filterApplied = self.filterApplied.add(Treatments.aponeurosisHough(offset = [sortedLines[0][0].x(), sortedLines[0][0].y()-30], angle = numpy.degrees(numpy.arctan(numpy.float(l[0][1].y()-l[0][0].y())/numpy.float(l[0][1].x()-l[0][0].x())))), 1)
-#            
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([sortedLines[1][0].x(), sortedLines[1][0].y()-30], [sortedLines[1][1].x(), sortedLines[1][1].y()+30])), 2)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.rotationTreatment(angle = numpy.degrees(numpy.arctan(numpy.float(l[1][1].y()-l[1][0].y())/numpy.float(l[1][1].x()-l[1][0].x())))), 2)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.ReduceSizeTreatment(), 2)
-#            a = numpy.arctan(numpy.float(l[1][1].y()-l[1][0].y())/numpy.float(l[1][1].x()-l[1][0].x()))
-#            self.filterApplied = self.filterApplied.add(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 7, gamma = 0.02, psi = 0, angleToProcess=[a]), 2)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.CannyTreatment(), 2)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.IncreaseSizeTreatment(), 2)
-##            self.filterApplied = self.filterApplied.add(PreTreatments.ThresholdTreatment(100), 2)
-#            self.filterApplied = self.filterApplied.add(Treatments.aponeurosisHough(offset = [l[1][0].x(), l[1][0].y()-30], angle = a), 2)
-
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([90, 330],[50, 565])), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([sortedLines[1][0].x(), sortedLines[1][0].y()-30], [sortedLines[1][1].x(), sortedLines[1][1].y()+30])), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment(([oldminx, oldminy-20], [oldmaxx, oldmaxy+20])), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.ReduceSizeTreatment(), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.SobelTreatment(dx=0, dy=1, kernelSize=7, scale=1, delta=0), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.changeContrastTreatment(20.0), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.ThresholdTreatment(-1), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.erosionTreatment(size=(35, 1)), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.erosionTreatment(size=(14, 1)), 1)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.erosionTreatment(size=(7, 1)), 1)
-            self.filterApplied = self.filterApplied.add(PreTreatments.IncreaseSizeTreatment(), 1)
-            a = numpy.arctan(numpy.float(l[1][1].y()-l[1][0].y())/numpy.float(l[1][1].x()-l[1][0].x()))
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisDetector(offset = [l[0][0].x(), l[0][0].y()-20], angle=a), 1)#[50, 90]), 1)
+            self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
+            self.filterApplied = self.filterApplied.add(Treatments.blobDetectionTreatment(lines=l), 0)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
         if(index == 1):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, 1)
+            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.radonSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
             l = self.videoWidget.getLines()
-            oldminx = 100000
-            oldmaxx = 0
-            oldminy = 100000
-            oldmaxy = 0
-            for line in l:
-                newminx = min(line[0].x(), line[1].x())
-                oldminx = min(newminx, oldminx)
-                newmaxx = max(line[0].x(), line[1].x())
-                oldmaxx = max(newmaxx, oldmaxx)
-                newminy = min(line[0].y(), line[1].y())
-                oldminy = min(newminy, oldminy)
-                newmaxy = max(line[0].y(), line[1].y())
-                oldmaxy = max(newmaxy, oldmaxy)
-            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment([[140, 270], [50, 565]]), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.cropTreatment([[140, 350], [50, 565]]), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.LaplacianTreatment(), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.DOHTreatment(), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.CannyTreatment(L2gradient=False), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.SobelTreatment(dx=1, dy=1, kernelSize=7, scale=1, delta=0), 0)
-            self.filterApplied = self.filterApplied.add(PreTreatments.ThresholdTreatment(-1), 0)
-#            self.filterApplied = self.filterApplied.add(PreTreatments.DilationTreatment(size=(2, 2)), 0)
-            self.filterApplied = self.filterApplied.add(Treatments.testRadon(offset = [50, 140]))
-            
+            self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
+            self.filterApplied = self.filterApplied.add(Treatments.testRadon(lines=l, manyCircles=self.multipleRadonCheckBox), 0)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
+        if(index == 2):
+            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.radonSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
+            l = self.videoWidget.getLines()
+            self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
+            self.filterApplied = self.filterApplied.add(Treatments.MuscleTracker(lines=l[0:2], fiber=l[2]), 0)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
+        if(index == 3):
+            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=1, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.JunctionComputation)
+            self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
+            self.filterApplied = self.filterApplied.add(Treatments.seamCarving(), 0)

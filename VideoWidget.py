@@ -186,6 +186,7 @@ class VideoWidget(QtGui.QWidget):
     """The VideoWidget class implement the actual videoWidget embedding the VideoWidgetSurface."""
     surface = None
     clicked = QtCore.pyqtSignal()
+    clicking = QtCore.pyqtSignal()
     def __init__(self, parent=None):
         """Constructs the video Widget. 
         
@@ -204,9 +205,14 @@ class VideoWidget(QtGui.QWidget):
         self.setPalette(palette);
         self.setSizePolicy(QtGui.QSizePolicy.MinimumExpanding, QtGui.QSizePolicy.MinimumExpanding)
         self.surface = VideoWidgetSurface(self)
-        self.LinesToDraw = False
+        self.LinesToDraw = True
         self.Lines = []
+        self.PointsToDraw = True
+        self.Points = []
         self.lastPoint = None
+        self.stringsToDraw = False
+        self.stringDrawn = []
+        self.stringStartPosition = QtCore.QPoint(0, 0)
         self.mouseClick = False
           
     def videoSurface(self):
@@ -231,21 +237,67 @@ class VideoWidget(QtGui.QWidget):
     def mousePressEvent (self, e):
         self.lastPoint = e.pos()
         self.mouseClick = True
+        self.clicking.emit()
     
     def appendLine(self, begin, end):
         if(isinstance(begin, QtCore.QPoint) and isinstance(end, QtCore.QPoint)):
             self.Lines.append((begin, end))
             self.repaint()
      
+    def appendPoint(self, point):
+        if(isinstance(point, QtCore.QPoint)):
+            self.Points.append(point)
+            self.repaint()
+            
     def getLineNumbers(self):
         return len(self.Lines)
+    
+    def getPointNumbers(self):
+        return len(self.Points)
                    
     def getLines(self):
         return self.Lines
     
+    def getPoints(self):
+        return self.Points
+    
+    def getString(self):
+        return str(self.stringDrawn)
+    
+    def setString(self, string):
+        self.stringsToDraw = True;
+        self.stringDrawn = QtCore.QString(string)
+        
+    def getStringStartPosition(self):
+        return (self.stringStartPosition.x(), self.stringStartPosition.y())
+    
+    def setStringStartPosition(self, position):
+        self.stringStartPosition = QtCore.QPoint(position[0], position[1])
+    
     def removeLastLine(self):
         self.Lines.pop()  
-        self.repaint()     
+        self.repaint() 
+        
+    def popLastLine(self):
+        l = self.Lines.pop()  
+        self.repaint() 
+        return l
+    
+    def stopDrawingString(self):
+        self.stringDrawn = False
+ 
+    def startDrawingString(self):
+        self.stringDrawn = True
+               
+    def removeLastPoint(self):
+        self.Points.pop()  
+        self.repaint() 
+          
+    def popLastPoint(self):
+        p = self.Points.pop()  
+        self.repaint() 
+        return p
+        
     def paintEvent(self, event): 
         """Slot called when the widget receives a paint event.
         
@@ -253,6 +305,7 @@ class VideoWidget(QtGui.QWidget):
             event: The received event.
         """
         painter= QtGui.QPainter(self)
+        painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
         if(self.surface.isActive()):
             videoRect = self.surface.videoRect()
             if (not (videoRect.contains(event.rect()))):
@@ -265,14 +318,24 @@ class VideoWidget(QtGui.QWidget):
         else: 
             painter.fillRect(event.rect(), self.palette().background())
         brush = QtGui.QBrush()
-        brush.setColor(QtGui.QColor(0, 200, 0, 128))
+        brush.setColor(QtGui.QColor(255, 0, 0, 200))
         pen = QtGui.QPen(QtGui.QColor.green)
         pen.setWidth(3)
         pen.setCapStyle(QtCore.Qt.RoundCap)
+        pen.setColor(QtGui.QColor(255, 0, 0, 200))
         painter.setBrush(brush)
         painter.setPen(pen)
-        for l in self.Lines:
-            painter.drawLine(l[0], l[1])
+        if(self.PointsToDraw):
+            for p in self.Points:
+                painter.drawPoint(p)
+        if(self.LinesToDraw):
+            for l in self.Lines:
+                painter.drawLine(l[0], l[1])
+        font = QtGui.QFont()
+        font.setPointSize(20)
+        painter.setFont(font)
+        if(self.stringsToDraw):
+            painter.drawText(self.stringStartPosition, self.stringDrawn)
 
     def resizeEvent(self, event):
         """Slot called when the widget is resized.
@@ -407,6 +470,23 @@ class Movie(QtCore.QObject):
         self.frame = QtMultimedia.QVideoFrame(self.imageBuffer)
         self.frameChanged.emit()
         
+    def readNCFrame(self, number):
+        """Load the next frame.
+        Raise: 
+            Exception: The file cannot be read because the codec is not supported or the video is compressed.
+        """
+        position = self.source.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
+        self.source.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, position+number)
+        error, image = self.source.read()
+        if(error==0):
+            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
+        newImage = numpy.ravel(image)
+        newImage.tostring()
+        self.rawBuffer=image
+        self.imageBuffer = QtGui.QImage(newImage, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)
+        self.frame = QtMultimedia.QVideoFrame(self.imageBuffer)
+        self.frameChanged.emit()
+
     def currentPositionRatio(self):
         """Returns the position in the video.
         
