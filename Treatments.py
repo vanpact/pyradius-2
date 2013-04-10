@@ -8,6 +8,7 @@ import cv2, numpy
 import skimage.transform
 import PreTreatments
 from PyQt4 import QtCore
+import gc, sys, debugsp
 #import cython
 #import pyximport; pyximport.install() 
 
@@ -50,11 +51,13 @@ class blobDetectionTreatment(AbstractTreatment):
         self.sortedLines = []
         for line in self.lines:
             self.sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
-        self.xoffset = self.lines[0][0].x()
-        self.yoffset =  self.lines[0][0].y()
+        self.xoffset = self.limitx[0]
+        self.yoffset =  self.limity[0]
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([oldminx, oldminy], [oldmaxx, oldmaxy])))
-        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
+        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 8, gamma = 0.02, psi = 0))
         self.filtersToPreApply.append(PreTreatments.SobelTreatment(dx=1, dy=1, kernelSize=7, scale=1, delta=0))
+#        self.filtersToPreApply.append(PreTreatments.LaplacianTreatment(kernelSize=7))
+#        self.filtersToPreApply.append(PreTreatments.CannyTreatment())
         self.filtersToPreApply.append(PreTreatments.ThresholdTreatment(-1))
         
         leftpoint0 = numpy.argsort(numpy.asarray([lines[0][0].x(), lines[0][1].x()]))[0]
@@ -72,16 +75,17 @@ class blobDetectionTreatment(AbstractTreatment):
     def compute(self, img):
         imgPre=numpy.copy(img)
         if(self.previousAngle!=None):
-            self.filtersToPreApply[1].angleToProcess = [self.previousAngle-5, self.previousAngle, self.previousAngle+5]
+            self.filtersToPreApply[1].angleToProcess = [self.previousAngle-5, self.previousAngle-2, self.previousAngle, self.previousAngle+2, self.previousAngle+5]
         for pretreatments in self.filtersToPreApply:
             imgPre = pretreatments.compute(imgPre)
  
-        contours = cv2.findContours(imgPre.copy(), mode=self.mode, method=self.method)[0]
+        contours = cv2.findContours(imgPre, mode=self.mode, method=self.method)[0]
         datac = numpy.zeros((len(contours), 2), dtype=numpy.float32)
         datas = numpy.ones((len(contours), 2), dtype=numpy.float32)
         dataa = numpy.zeros((len(contours), 1), dtype=numpy.float32)
         datal = numpy.zeros((len(contours), 4), dtype=numpy.float32)
         i=0
+        imgToPrint = numpy.copy(img)
         for c in contours:
             if(len(c)>4):
                 center, size, angle = cv2.fitEllipse(c)
@@ -89,12 +93,13 @@ class blobDetectionTreatment(AbstractTreatment):
                 datas[i]=size
                 dataa[i]=angle
                 datal[i] = numpy.squeeze(cv2.fitLine(c, distType = cv2.cv.CV_DIST_HUBER, param = 0, reps = 1, aeps = 1))
-                #cv2.line(img, (x0+self.xoffset, y0+self.yoffset), (x0+self.xoffset+vx*20., y0+self.yoffset+vy*20.), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+#                cv2.drawContours(imgToPrint, c, -1, (255, 255, 255), 2, offset=(self.xoffset, self.yoffset))
+#                cv2.line(img, (int(datal[i][2]+self.xoffset), int(datal[i][3]+self.yoffset)), (int(datal[i][2]+self.xoffset+datal[i][0]*20.0), int(datal[i][3]+self.yoffset+datal[i][1]*20.0)), cv2.cv.Scalar(255, 0, 0), 1, cv2.CV_AA, 0)
             i = i + 1
-        datasm = numpy.mean(datas[numpy.all([datas[:, 0]>0], 0)], 0)
+        datasm = numpy.mean(datas[numpy.all([datas[:, 0]>0, datas[:, 0]<2], 0)], 0)
         checkAngle=None
         if(self.previousAngle != None):
-            checkAngle = ((numpy.abs(dataa[:]-numpy.degrees(self.previousAngle))<10))
+            checkAngle = ((numpy.abs(dataa[:]-numpy.degrees(self.previousAngle))<2))
         else:
             checkAngle = numpy.asarray(dataa, numpy.bool)
             checkAngle.fill(True)
@@ -105,10 +110,16 @@ class blobDetectionTreatment(AbstractTreatment):
         datas=datas[toKeep]
         mx0 = (self.limitx[1]-self.limitx[0])/2
         my0 = (self.limity[1]-self.limity[0])/2
-        newAngle=numpy.float(numpy.median(dataa))
+#        newAngle=numpy.float(numpy.median(dataa))
         angle = []
         for values in datal[toKeep]:
             angle.append(numpy.arctan2(values[1], values[0])+numpy.pi/2)   
+        i=0
+        for value in angle:
+            angle[i] = value%(numpy.pi*2.0)
+            if(angle[i]>=numpy.pi):
+                angle[i] = value-numpy.pi
+            i = i+1
         newAngle = numpy.float(numpy.median(angle))
 #        if(self.previousAngle!=None):
 #            if(not numpy.isnan(newAngle)):
@@ -124,6 +135,8 @@ class blobDetectionTreatment(AbstractTreatment):
         mvx0 = numpy.int(self.previousAngleSin*5000.0)
         mvy0 = numpy.int(-self.previousAngleCos*5000.0)
         
+        for values in datal[toKeep]:
+            cv2.line(img, (int(values[2]+self.xoffset), int(values[3]+self.yoffset)), (int(values[2]+self.xoffset+values[0]*50.0), int(values[3]+self.yoffset+values[1]*50.0)), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
 #        for vx, vy, x0, y0 in zip((numpy.atleast_2d(datavx).T)[bestLabels==0], (numpy.atleast_2d(datavy).T)[bestLabels==0], (numpy.atleast_2d(datax).T)[bestLabels==0], (numpy.atleast_2d(datay).T)[bestLabels==0]):
 #            cv2.line(img, (numpy.int(x0)+self.xoffset, numpy.int(y0)+self.yoffset), (numpy.int(x0)+self.xoffset+numpy.int(vx*20.), numpy.int(y0)+self.yoffset+numpy.int(vy*20.)), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
 
@@ -132,12 +145,24 @@ class blobDetectionTreatment(AbstractTreatment):
         cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.previousAngle))[:6], org=(numpy.uint32(img.shape[0]*0.75), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
         for value in range(toKeep.shape[0]):
             if(toKeep[value]):
-                cv2.drawContours(img, contours[value], -1, (255, 255, 255), 2, offset=(self.xoffset, self.yoffset))
+                cv2.drawContours(img, contours[value], -1, (128, 128, 128), 1, offset=(self.xoffset, self.yoffset))
 #            else:
 #                cv2.drawContours(img, contours[value], -1, (128, 128, 128), 2, offset=(self.xoffset, self.yoffset))
         cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
 #        cv2.line(img, (mx1+self.xoffset, my1+self.yoffset), (mx1+self.xoffset+mvx1, my1+self.yoffset+mvy1), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
-#        cv2.line(img, (mx2+self.xoffset, my2+self.yoffset), (mx2+self.xoffset+mvx2, my2+self.yoffset+mvy2), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)
+#        cv2.line(img, (mx2+self.xoffset, my2+self.yoffset), (mx2+self.xoffset+mvx2, my2+self.yoffset+mvy2), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)  
+        del(datac)
+        del(datas)
+        del(dataa)
+        del(datal)
+        del(angle)
+        del(datasm)
+        del(newAngle)
+        del(contours)
+        del(toKeep)
+        del(imgPre)
+        del(checkAngle)
+        gc.collect()
         return (img, self.previousAngle)#self.normalizeData(data)
     
 class AponeurosisDetector(AbstractTreatment):
@@ -248,24 +273,37 @@ class AponeurosisDetector(AbstractTreatment):
     #        cv2.ellipse(img, ((datac[largest][0]+self.xoffset,datac[largest][1]+self.yoffset), datas[largest], -dataa[largest]+90), (255, 255, 255), 2)
         return {img, self.angle}
 
-class AponeurosisTracker(AbstractTreatment):
+class AponeurosisTracker3(AbstractTreatment):
     
-    def __init__(self, lines=None):
+    def __init__(self, line=None):
         super(AponeurosisTracker, self).__init__()
-        self.lines = lines
+        self.line = line
         self.prevImg = None
-        self.sortedLines = (QtCore.QPoint(min(lines[0].x(), lines[1].x()), min(lines[0].y(), lines[1].y())),QtCore.QPoint(max(lines[0].x(), lines[1].x()), max(lines[0].y(), lines[1].y())))
-        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.sortedLines[0].x(), self.sortedLines[0].y()-30], [self.sortedLines[1].x(), self.sortedLines[1].y()+30])))
-        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))#, angleToProcess = [numpy.pi/2.0]))
-        self.xoffset = self.sortedLines[0].x()#self.lines[0][0].x()
-        self.yoffset =  self.sortedLines[0].y()-30#self.lines[0][0].y()
+        self.sortedLines = [(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))]
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.sortedLines[0][0], self.sortedLines[0][1]-30], [self.sortedLines[1][0], self.sortedLines[1][1]+30])))
+#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))#, angleToProcess = [numpy.pi/2.0]))
+        self.xoffset = self.sortedLines[0][0]#self.line[0][0].x()
+        self.yoffset =  self.sortedLines[0][1]-30#self.line[0][0].y()
         self.prevPts = []
-        for percentage in numpy.arange(0, 1.0, 0.05):
-            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset-10)))
-            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset)))
-            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset+10)))
+        for percentage in numpy.arange(0.10, 0.92, 0.02):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset)))
+        for percentage in numpy.arange(0.20, 0.82, 0.02):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset-10)))
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset+10)))
         self.prevPts = numpy.asarray(self.prevPts)
-        self.prevImg = None
+
+        
+#        leftpoint0 = numpy.argsort(numpy.asarray([line[0][0].x(), line[0][1].x()]))[0]
+#        leftpoint1 = numpy.argsort(numpy.asarray([line[1][0].x(), line[1][1].x()]))[0]
+#        slope0 = numpy.float(line[0][1].y()-line[0][0].y())/numpy.float(line[0][1].x()-line[0][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
+#        slope1 = numpy.float(line[1][1].y()-line[1][0].y())/numpy.float(line[1][1].x()-line[1][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
+#        offset0=(line[0][leftpoint0].y()-self.sortedLines[0][1])
+#        offset1=(line[1][leftpoint1].y()-self.sortedLines[0][1])
+#        
+#        self.prevPts = []
+#        self.pts = [(self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+10), (self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+50), (self.line[0][1].x()-self.sortedLines[0][0]-10, self.line[0][1].y()-self.sortedLines[0][1]+50), (self.lines[0][1].x()-self.sortedLines[0][0]-10, self.lines[0][1].y()-self.sortedLines[0][1]+10)]
+#        self.mask0 = None
+#        self.mask1 = None
         
     def compute(self, img):
         imgPre = numpy.copy(img.astype(numpy.uint8)) 
@@ -273,17 +311,218 @@ class AponeurosisTracker(AbstractTreatment):
         for pretreatments in self.filtersToPreApply:
             imgPre = pretreatments.compute(imgPre)
         if(self.prevImg == None): 
-            self.prevImg = numpy.copy(imgPre)
-            self.prevPyramid = cv2.buildOpticalFlowPyramid(img = imgPre, winSize = (21, 21), maxLevel = 3)[1]
-        pyramid = cv2.buildOpticalFlowPyramid(imgPre, (21, 21), 3)[1]
-        nextPts = cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = self.prevPts)[0]
+            self.prevImg = imgPre
+        nextPts = cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = self.prevPts, winSize  = (20, 20), maxLevel = 5, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001))[0]
         line = cv2.fitLine(nextPts, distType = cv2.cv.CV_DIST_HUBER, param = 0, reps = 1, aeps = 1)
         cv2.line(img, (self.xoffset+line[2]-line[0]*1000.0,self.yoffset+line[3]-line[1]*1000.0), (self.xoffset+line[2]+line[0]*1000.0, self.yoffset+line[3]+line[1]*1000.0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)                   
-        self.prevPyramid = pyramid
+        del(self.prevImg)
+        del(self.prevPts)
         self.prevImg = imgPre
         self.prevPts = nextPts
+        minx = self.line[0].x()
+        maxx = self.line[1].x()
+        miny = -line[2]*line[1]+line[3]+self.yoffset
+        maxy = ((self.sortedLines[1][0])-self.xoffset-line[2])*line[1]+self.yoffset+line[3]
+        i=0
+        imgPreToPrint = numpy.copy(imgPre)
+        for point in self.prevPts:
+            i=i+1
+            cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+        self.prevPts = []
+        for percentage in numpy.arange(0.10, 0.92, 0.02):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((miny+(maxy-miny)*percentage)-self.yoffset)))
+        for percentage in numpy.arange(0.20, 0.82, 0.02):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((miny+(maxy-miny)*percentage)-self.yoffset-10)))
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((miny+(maxy-miny)*percentage)-self.yoffset+10)))
+        self.prevPts = numpy.asarray(self.prevPts)
+        i=0
+        imgPreToPrint = numpy.copy(imgPre)
+        for point in self.prevPts:
+            i=i+1
+            cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
         angle = numpy.arctan2(line[1], line[0])+numpy.pi/2
 #        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        del(imgPre)
+        del(nextPts)
+        del(line)
+        return (img, angle)
+
+class AponeurosisTracker(AbstractTreatment):
+    
+    def __init__(self, line=None):
+        super(AponeurosisTracker, self).__init__()
+        self.line = line
+        self.prevImg = None
+        self.sortedLines = [(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))]
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.sortedLines[0][0], self.sortedLines[0][1]-30], [self.sortedLines[1][0], self.sortedLines[1][1]+30])))
+#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))#, angleToProcess = [numpy.pi/2.0]))
+        self.xoffset = self.sortedLines[0][0]#self.line[0][0].x()
+        self.yoffset =  self.sortedLines[0][1]-30#self.line[0][0].y()
+        self.prevPts = []
+        for percentage in numpy.arange(0.10, 0.91, 0.02):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset)))
+        for percentage in numpy.arange(0.20, 0.81, 0.03):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset-4)))
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset+4)))
+        for percentage in numpy.arange(0.30, 0.71, 0.04):
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset-10)))
+            self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset+10)))
+        self.prevPts = numpy.asarray(self.prevPts)
+
+        
+#        leftpoint0 = numpy.argsort(numpy.asarray([line[0][0].x(), line[0][1].x()]))[0]
+#        leftpoint1 = numpy.argsort(numpy.asarray([line[1][0].x(), line[1][1].x()]))[0]
+#        slope0 = numpy.float(line[0][1].y()-line[0][0].y())/numpy.float(line[0][1].x()-line[0][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
+#        slope1 = numpy.float(line[1][1].y()-line[1][0].y())/numpy.float(line[1][1].x()-line[1][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
+#        offset0=(line[0][leftpoint0].y()-self.sortedLines[0][1])
+#        offset1=(line[1][leftpoint1].y()-self.sortedLines[0][1])
+#        
+#        self.prevPts = []
+#        self.pts = [(self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+10), (self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+50), (self.line[0][1].x()-self.sortedLines[0][0]-10, self.line[0][1].y()-self.sortedLines[0][1]+50), (self.lines[0][1].x()-self.sortedLines[0][0]-10, self.lines[0][1].y()-self.sortedLines[0][1]+10)]
+#        self.mask0 = None
+#        self.mask1 = None
+        
+    def compute(self, img):
+        imgPre = numpy.copy(img.astype(numpy.uint8)) 
+
+        for pretreatments in self.filtersToPreApply:
+            imgPre = pretreatments.compute(imgPre)
+        if(self.prevImg == None): 
+            self.prevImg = imgPre
+        nextPts = cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = self.prevPts, winSize  = (20, 20), maxLevel = 5, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001), minEigThreshold= 0)[0]
+        line = cv2.fitLine(nextPts, distType = cv2.cv.CV_DIST_HUBER, param = 0, reps = 1, aeps = 1)
+        cv2.line(img, (self.xoffset+line[2]-line[0]*1000.0,self.yoffset+line[3]-line[1]*1000.0), (self.xoffset+line[2]+line[0]*1000.0, self.yoffset+line[3]+line[1]*1000.0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)                   
+        del(self.prevImg)
+        del(self.prevPts)
+        self.prevImg = imgPre
+        self.prevPts = nextPts
+        i=0
+        imgPreToPrint = numpy.copy(imgPre)
+        for point in self.prevPts:
+            i=i+1
+            cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+        angle = numpy.arctan2(line[1], line[0])+numpy.pi/2
+#        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        del(imgPre)
+        del(nextPts)
+        del(line)
+        return (img, angle)
+    
+class AponeurosisTracker2(AbstractTreatment):
+    
+    def __init__(self, line=None):
+        super(AponeurosisTracker, self).__init__()
+        self.line = line
+        self.prevImg = None
+        self.sortedLine = [(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))]
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.sortedLine[0][0], self.sortedLine[0][1]-30], [self.sortedLine[1][0], self.sortedLine[1][1]+30])))
+#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))#, angleToProcess = [numpy.pi/2.0]))
+        self.xoffset = self.sortedLine[0][0]#self.lines[0][0].x()
+        self.yoffset =  self.sortedLine[0][1]-30#self.lines[0][0].y()
+#        self.prevPts = []
+#        for percentage in numpy.arange(0.05, 1.0, 0.05):
+#            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset-10)))
+#            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset)))
+#            self.prevPts.append((numpy.float32((self.lines[0].x()+(self.lines[1].x()-self.lines[0].x())*percentage)-self.xoffset), numpy.float32((self.lines[0].y()+(self.lines[1].y()-self.lines[0].y())*percentage)-self.yoffset+10)))
+#        self.prevPts = numpy.asarray(self.prevPts)
+
+        self.mx0 = self.sortedLine[0][0]
+        self.my0 = self.sortedLine[0][1]
+        self.mvx = self.sortedLine[1][0] - self.sortedLine[0][0]
+        self.mvy = self.sortedLine[1][1] - self.sortedLine[0][1]
+        
+        leftpoint0 = numpy.argsort(numpy.asarray([line[0][0].x(), line[0][1].x()]))[0]
+        leftpoint1 = numpy.argsort(numpy.asarray([line[1][0].x(), line[1][1].x()]))[0]
+        slope0 = numpy.float(line[0][1].y()-line[0][0].y())/numpy.float(line[0][1].x()-line[0][0].x())*(self.sortedLine[1][0]-self.sortedLine[0][0])
+        slope1 = numpy.float(line[1][1].y()-line[1][0].y())/numpy.float(line[1][1].x()-line[1][0].x())*(self.sortedLine[1][0]-self.sortedLine[0][0])
+        offset0=(line[0][leftpoint0].y()-self.sortedLine[0][1])
+        offset1=(line[1][leftpoint1].y()-self.sortedLine[0][1])
+        
+        self.prevPts = []
+        self.pts = [(self.line[0].x()-self.sortedLine[0][0]+10, self.line[0].y()-self.sortedLine[0][1]+10), (self.line[0].x()-self.sortedLine[0][0]+10, self.line[0].y()-self.sortedLine[0][1]+50), (self.line[1].x()-self.sortedLine[0][0]-10, self.line[1].y()-self.sortedLine[0][1]+50), (self.line[1].x()-self.sortedLine[0][0]-10, self.line[1].y()-self.sortedLine[0][1]+10)]
+        self.mask = None
+        
+    def compute(self, img):
+        imgPre = numpy.copy(img.astype(numpy.uint8)) 
+
+        for pretreatments in self.filtersToPreApply:
+            imgPre = pretreatments.compute(imgPre)
+        
+        if(self.prevImg == None): 
+            self.prevImg = numpy.copy(imgPre)
+            self.mask0 = numpy.zeros_like(imgPre)
+            cv2.fillPoly(self.mask, [numpy.asarray(self.pts0)], color=(255, 255, 255))
+            self.prevPts = cv2.goodFeaturesToTrack(imgPre, 50, 0.01, 5, mask=self.mask)
+            
+        angle = []
+        nextPts = cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = numpy.asarray(self.line, dtype=numpy.float32), winSize  = (100, 100), maxLevel = 5, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001))[0]        
+
+        self.vecLength = [] 
+        self.vecAngle = []
+        for prevPoint, nextPoint in zip(numpy.squeeze(self.prevPts), numpy.squeeze(nextPts)):
+                self.vecLength.append(numpy.sqrt(numpy.square(nextPoint[0]-prevPoint[0])+numpy.square(nextPoint[1]-prevPoint[1])))
+                self.vecAngle.append(numpy.arctan2(nextPoint[1]-prevPoint[1], nextPoint[0]-prevPoint[0]))
+#                cv2.circle(imgPreToPrint, (nextPoint[0], nextPoint[1]), 3, (200, 200, 200))
+                
+        i=0
+        for value in self.vecAngle[0]:
+            self.vecAngle[0][i] = (value+numpy.pi/2.0)
+            i = i+1
+            
+        meanY=0
+        meanX=0
+        for mag, angle in zip(self.vecLength[0], self.vecAngle[0]):
+            meanX = meanX + numpy.sin(angle)*mag
+            meanY = meanY + numpy.cos(angle)*mag
+        meanY = meanY/len(self.vecLength[0])
+        meanX = meanX/len(self.vecLength[0])
+        
+        yVal = numpy.sin(self.angle)*self.length + meanY
+        xVal = numpy.cos(self.angle)*self.length + meanX
+        self.mx0 = self.mx0 + meanX
+        self.my0 = self.my0 + meanY
+        
+        sumAngle = numpy.arctan2(yVal, xVal)
+        self.length = numpy.sqrt(numpy.square(xVal)+ numpy.square(yVal))
+        
+        if(sumAngle<0):
+            sumAngle = sumAngle+numpy.pi*2.0
+        sumAngle = sumAngle%(numpy.pi*2.0)
+        if(sumAngle>=numpy.pi):
+            sumAngle = sumAngle-numpy.pi
+        self.prevImg = imgPre
+        self.prevPts = []
+        self.prevPts.append(cv2.goodFeaturesToTrack(imgPre, 50, 0.01, 5, mask=self.mask0))
+        self.angle = sumAngle
+        
+        mx0=(self.line[0]-self.limitx[0])/2
+        my0=(self.limity[1]-self.limity[0])/2
+        mvx0 = numpy.int(numpy.sin(self.angle)*5000.0)
+        mvy0 = numpy.int(-numpy.cos(self.angle)*5000.0)
+#        self.angle = numpy.median(value)+self.angle
+        cv2.line(img, (int(mx0+self.xoffset-mvx0), int(my0+self.yoffset-mvy0)), (int(mx0+self.xoffset+mvx0), int(my0+self.yoffset+mvy0)), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
+        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        return (img, self.angle)
+    
+        line = cv2.fitLine(nextPts, distType = cv2.cv.CV_DIST_HUBER, param = 0, reps = 1, aeps = 1)
+        cv2.line(img, (self.xoffset+line[2]-line[0]*1000.0,self.yoffset+line[3]-line[1]*1000.0), (self.xoffset+line[2]+line[0]*1000.0, self.yoffset+line[3]+line[1]*1000.0), cv2.cv.Scalar(255, 0, 0), 3, cv2.CV_AA, 0)                   
+        del(self.prevPyramid)
+        del(self.prevImg)
+        del(self.prevPts)
+
+        self.prevImg = imgPre
+        self.prevPts = nextPts
+        i=0
+        imgPreToPrint = numpy.copy(imgPre)
+        for point in self.prevPts:
+            i=i+1
+            cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+        angle = numpy.arctan2(line[1], line[0])+numpy.pi/2
+#        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        del(imgPre)
+
+        del(nextPts)
+        del(line)
         return (img, angle)
     
 class MuscleTracker(AbstractTreatment):
@@ -310,10 +549,10 @@ class MuscleTracker(AbstractTreatment):
         self.sortedLines = []
         for line in self.lines:
             self.sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
-        self.xoffset = self.lines[0][0].x()
-        self.yoffset =  self.lines[0][0].y()-30
+        self.xoffset = self.limitx[0]
+        self.yoffset =  self.limity[0]
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([oldminx, oldminy], [oldmaxx, oldmaxy])))
-        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
+#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
                                       
         self.fiber = fiber
         self.prevImg = None
@@ -328,26 +567,26 @@ class MuscleTracker(AbstractTreatment):
         leftpoint1 = numpy.argsort(numpy.asarray([lines[1][0].x(), lines[1][1].x()]))[0]
         slope0 = numpy.float(lines[0][1].y()-lines[0][0].y())/numpy.float(lines[0][1].x()-lines[0][0].x())*(oldmaxx-oldminx)
         slope1 = numpy.float(lines[1][1].y()-lines[1][0].y())/numpy.float(lines[1][1].x()-lines[1][0].x())*(oldmaxx-oldminx)
-        offset0=(lines[0][leftpoint0].y()-oldminy)
-        offset1=(lines[1][leftpoint1].y()-oldminy)
+        self.offset0=(lines[0][leftpoint0].y()-oldminy)
+        self.offset1=(lines[1][leftpoint1].y()-oldminy)
         
         self.prevPts = []
-        for percentagex in numpy.arange(-1.0, 1.0, 0.10):
+        for percentagex in numpy.arange(-1.00, 1.1, 0.2):
             x0 = (oldmaxx-oldminx)*percentagex
-            y0 = slope0*percentagex+offset0
+            y0 = slope0*percentagex+self.offset0
             goodSlope = (slope1-fiberSlope)/(oldmaxx-oldminx)
-            goodOffset= offset1-offset0
+            goodOffset= self.offset1-self.offset0
             intersectx = -goodOffset/goodSlope + (oldmaxx-oldminx)*percentagex
-            intersecty = slope1*intersectx/(oldmaxx-oldminx)+offset1
+            intersecty = slope1*intersectx/(oldmaxx-oldminx)+self.offset1
             x1 = intersectx 
-            y1 = slope1*x1/(oldmaxx-oldminx)+offset1
+            y1 = slope1*x1/(oldmaxx-oldminx)+self.offset1
 #            y1 = slope1*percentagex+offset1
-            x = numpy.uint((percentagex+1.0)*2)
+            x = numpy.uint((percentagex+1.000001)*5.0)
             self.prevPts.append([])
-            for percentagey in numpy.arange(0.10, 1.0, 0.10):
+            for percentagey in numpy.arange(0.20, 1.0, 0.20):
                 xToAdd = numpy.int((x0+(x1-x0)*percentagey))
                 yToAdd = numpy.int((y0+(y1-y0)*percentagey))
-                if(xToAdd<(oldmaxx-oldminx) and yToAdd<(oldmaxy-oldminy) and xToAdd>=0 and yToAdd>=0):
+                if(xToAdd<(oldmaxx-oldminx)-20 and yToAdd<(oldmaxy-oldminy)-20 and xToAdd>=20 and yToAdd>=20):
                     self.prevPts[x].append((xToAdd, yToAdd))
         self.prevPts = numpy.asarray(self.prevPts)
 
@@ -359,11 +598,12 @@ class MuscleTracker(AbstractTreatment):
         for pretreatments in self.filtersToPreApply:
             imgPre = pretreatments.compute(imgPre)
 #        imgPre = cv2.GaussianBlur( imgPre, (9, 9), sigmaX=1.0, sigmaY=1.0)
-        i=0
-        imgPreToPrint = numpy.copy(imgPre)
-        for line in self.prevPts:
-            for point in line:
-                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+#        i=0
+#        imgPreToPrint = numpy.copy(imgPre)
+#        for line in self.prevPts:
+#            i=i+1
+#            for point in line:
+#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
         if(self.prevImg == None): 
             self.prevImg = numpy.copy(imgPre)
             self.prevPyramid = cv2.buildOpticalFlowPyramid(img = imgPre, winSize = (21, 21), maxLevel = 3)[1]
@@ -372,13 +612,17 @@ class MuscleTracker(AbstractTreatment):
         angle = []
         for line in self.prevPts:
             if(numpy.asarray(line).shape[0]>1):
-                nextPts.append([])
-                nextPts[len(nextPts)-1].append(cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = numpy.asarray(line, dtype=numpy.float32), winSize=(10, 10))[0])
-                linefitted = cv2.fitLine(nextPts[len(nextPts)-1][len(nextPts[len(nextPts)-1])-1], distType = cv2.cv.CV_DIST_HUBER, param = 0, reps = 1, aeps = 1)
+                nextPts.append(cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = numpy.asarray(line, dtype=numpy.float32), winSize  = (100, 100), maxLevel = 5, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001))[0])
+                linefitted = cv2.fitLine(nextPts[len(nextPts)-1], distType = cv2.cv.CV_DIST_L2, param = 0, reps = 1, aeps = 1)
                 angle.append(numpy.arctan2(linefitted[1], linefitted[0])+numpy.pi/2)                   
         self.prevPyramid = pyramid
         self.prevImg = imgPre
-        self.prevPts = numpy.squeeze(numpy.asarray(nextPts))
+        self.prevPts = numpy.asarray(nextPts)
+#        i=0
+#        for line in self.prevPts:
+#            i=i+1
+#            for point in line:
+#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
         i=0
         for value in angle:
             angle[i] = value%(numpy.pi*2.0)
@@ -389,15 +633,186 @@ class MuscleTracker(AbstractTreatment):
 #        finalValueSin = numpy.sin(finalValue)*numpy.cos(self.angle)+numpy.sin(self.angle)*numpy.cos(finalValue)
 #        finalValueCos = numpy.cos(finalValue)*numpy.cos(self.angle)-numpy.sin(finalValue)*numpy.sin(self.angle)
 #        self.angle = numpy.arctan2(finalValueSin, finalValueCos)
+        mx0=0#(self.limitx[1]-self.limitx[0])/2
+        my0=self.offset0#(self.limity[1]-self.limity[0])/2
+        mvx0 = numpy.int(numpy.sin(self.angle)*5000.0)
+        mvy0 = numpy.int(-numpy.cos(self.angle)*5000.0)
+#        self.angle = numpy.median(value)+self.angle
+        cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
+        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        return (img, self.angle)
+
+class MuscleTracker2(AbstractTreatment):
+    
+    def __init__(self, lines=None, fiber=None):
+        super(MuscleTracker2, self).__init__()
+        self.previousAngle = None
+        self.lines = lines
+        oldminx = 100000
+        oldmaxx = 0
+        oldminy = 100000
+        oldmaxy = 0
+        for line in self.lines:
+            newminx = min(line[0].x(), line[1].x())
+            oldminx = min(newminx, oldminx)
+            newmaxx = max(line[0].x(), line[1].x())
+            oldmaxx = max(newmaxx, oldmaxx)
+            newminy = min(line[0].y(), line[1].y())
+            oldminy = min(newminy, oldminy)
+            newmaxy = max(line[0].y(), line[1].y())
+            oldmaxy = max(newmaxy, oldmaxy)
+        self.limitx = [oldminx, oldmaxx]
+        self.limity = [oldminy, oldmaxy]
+        
+        self.xoffset = self.limitx[0]
+        self.yoffset =  self.limity[0]-15
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([oldminx, oldminy-15], [oldmaxx, oldmaxy+15])))
+#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
+                                      
+        self.prevImg = None
+        leftpointfiber = numpy.argsort(numpy.asarray([fiber[0].x(), fiber[1].x()]))[0]
+        distXFiber = fiber[1-leftpointfiber].x()-fiber[leftpointfiber].x()
+        distYFiber = fiber[1-leftpointfiber].y()-fiber[leftpointfiber].y()
+        self.angle = numpy.pi-numpy.arctan2(distXFiber, distYFiber)
+        fiberSlope = numpy.float(fiber[1].y()-fiber[0].y())/numpy.float(fiber[1].x()-fiber[0].x())*(oldmaxx-oldminx)
+        offsetFiber=(fiber[leftpointfiber].y()-oldminy)
+        
+        upperAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[0]
+        lowerAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[1]
+        leftpoint0 = numpy.argsort(numpy.asarray([lines[0][0].x(), lines[0][1].x()]))[0]
+        leftpoint1 = numpy.argsort(numpy.asarray([lines[1][0].x(), lines[1][1].x()]))[0]
+        slope0 = numpy.float(lines[0][1].y()-lines[0][0].y())/numpy.float(lines[0][1].x()-lines[0][0].x())*(oldmaxx-oldminx)
+        slope1 = numpy.float(lines[1][1].y()-lines[1][0].y())/numpy.float(lines[1][1].x()-lines[1][0].x())*(oldmaxx-oldminx)
+        offset0=(lines[0][leftpoint0].y()-oldminy)
+        offset1=(lines[1][leftpoint1].y()-oldminy)
+        
+        self.length=numpy.sqrt(distXFiber^2 + distYFiber^2)
+        x0 = 0
+        y0 = offset0
+        goodSlope = (slope1-fiberSlope)/(oldmaxx-oldminx)
+        goodOffset= offset1-offset0
+        intersectx = -goodOffset/goodSlope
+        intersecty = slope1*intersectx/(oldmaxx-oldminx)+offset1
+        x1 = intersectx 
+        y1 = slope1*x1/(oldmaxx-oldminx)+offset1
+        fiberBegining = (x0, y0)
+        fiberEnd = (numpy.int(x0+(x1-x0)), numpy.int(y0+(y1-y0)))
+        self.length = numpy.sqrt(numpy.square((fiberEnd[0]-fiberBegining[0])) + numpy.square((fiberEnd[1]-fiberBegining[1])))
+    
+        self.prevPts = []
+        self.pts0 = [(self.lines[0][0].x()-self.limitx[0]+20, self.lines[0][0].y()-self.limity[0]+5), (self.lines[0][0].x()-self.limitx[0]+20, self.lines[0][0].y()-self.limity[0]+25), (self.lines[0][1].x()-self.limitx[0]-20, self.lines[0][1].y()-self.limity[0]+25), (self.lines[0][1].x()-self.limitx[0]-20, self.lines[0][1].y()-self.limity[0]+5)]
+        self.pts1 = [(self.lines[1][0].x()-self.limitx[0]+20, self.lines[1][0].y()-self.limity[0]+5), (self.lines[1][0].x()-self.limitx[0]+20, self.lines[1][0].y()-self.limity[0]+25), (self.lines[1][1].x()-self.limitx[0]-20, self.lines[1][1].y()-self.limity[0]+25), (self.lines[1][1].x()-self.limitx[0]-20, self.lines[1][1].y()-self.limity[0]+5)]
+        self.mask0 = None
+        self.mask1 = None
+        self.prevImg = None
+        
+    def compute(self, img):
+        imgPre = numpy.copy(img.astype(numpy.uint8)) 
+        for pretreatments in self.filtersToPreApply:
+            imgPre = pretreatments.compute(imgPre)
+#        imgPre = cv2.GaussianBlur( imgPre, (9, 9), sigmaX=1.0, sigmaY=1.0)
+#        i=0
+#        imgPreToPrint = numpy.copy(imgPre)
+#        for line in self.prevPts:
+#            i=i+1
+#            for point in line:
+#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+        if(self.prevImg == None): 
+            self.prevImg = numpy.copy(imgPre)
+            self.mask0 = numpy.zeros_like(imgPre)
+            self.mask1 = numpy.zeros_like(imgPre)
+            cv2.fillPoly(self.mask0, [numpy.asarray(self.pts0)], color=(255, 255, 255))
+            cv2.fillPoly(self.mask1, [numpy.asarray(self.pts1)], color=(255, 255, 255))
+            self.prevPts.append(cv2.goodFeaturesToTrack(imgPre, 100, 0.01, 5, mask=self.mask0))
+            self.prevPts.append(cv2.goodFeaturesToTrack(imgPre, 100, 0.01, 5, mask=self.mask1))
+        nextPts = []
+        angle = []
+        imgPreToPrint = numpy.copy(imgPre)
+        for line in self.prevPts:
+            for point in line:
+                point=numpy.squeeze(point)
+                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+        for line in self.prevPts:
+            if(numpy.asarray(line).shape[0]>1):
+                nextPts.append(cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = numpy.asarray(line, dtype=numpy.float32), winSize  = (100, 100), maxLevel = 5, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001))[0])
+#                linefitted = cv2.fitLine(nextPts[len(nextPts)-1], distType = cv2.cv.CV_DIST_WELSCH, param = 0, reps = 1, aeps = 1)
+#                angle.append(numpy.arctan2(linefitted[1], linefitted[0])+numpy.pi/2)
+        self.vecLength = [] 
+        self.vecAngle = []    
+        i=0              
+        for prevLine, nextLine in zip(self.prevPts, nextPts):
+            self.vecLength.append([])
+            self.vecAngle.append([])
+#            movement = numpy.squeeze(numpy.array((prevLine, nextLine)))
+            for prevPoint, nextPoint in zip(numpy.squeeze(prevLine), numpy.squeeze(nextLine)):
+                self.vecLength[i].append(numpy.sqrt(numpy.square(nextPoint[0]-prevPoint[0])+numpy.square(nextPoint[1]-prevPoint[1])))
+                self.vecAngle[i].append(numpy.arctan2(nextPoint[1]-prevPoint[1], nextPoint[0]-prevPoint[0]))
+                cv2.circle(imgPreToPrint, (nextPoint[0], nextPoint[1]), 3, (200, 200, 200))
+                a=1
+            i=i+1
+#        for line in nextPts:
+#            for point in line:
+#                point = numpy.squeeze(point)
+#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (128, 128, 128))
+        self.vecAngle[0] = [(value+numpy.pi/2.0) for value in self.vecAngle[0]]
+        self.vecAngle[1] = [(value+numpy.pi/2.0) for value in self.vecAngle[1]]
+        
+        meanY0=0
+        meanX0=0
+        meanY1=0
+        meanX1=0
+        for mag, angle in zip(self.vecLength[0], self.vecAngle[0]):
+            meanX0 = meanX0 + numpy.sin(angle)*mag
+            meanY0 = meanY0 + numpy.cos(angle)*mag
+        for mag, angle in zip(self.vecLength[1], self.vecAngle[1]):
+            meanX1 = meanX1 + numpy.sin(angle)*mag
+            meanY1 = meanY1 + numpy.cos(angle)*mag
+        meanY0 = meanY0/len(self.vecLength[0])
+        meanX0 = meanX0/len(self.vecLength[0])
+        meanY1 = meanY1/len(self.vecLength[1])
+        meanX1 = meanX1/len(self.vecLength[1])
+        
+        yVal = numpy.sin(self.angle)*self.length - meanY0 + meanY1
+        xVal = numpy.cos(self.angle)*self.length - meanX0 + meanX1
+        sumAngle = numpy.arctan2(yVal, xVal)
+        self.length = numpy.sqrt(numpy.square(xVal)+ numpy.square(yVal))
+#        if(sumLength!=0):
+#            sumAngle = numpy.arcsin(meanLength0*numpy.sin(sumAngle)/sumLength)
+#
+#        sinSumAngle = numpy.sin(self.angle)*numpy.cos(sumAngle)+numpy.sin(sumAngle)*numpy.cos(self.angle)
+#        cosSumAngle = numpy.cos(self.angle)*numpy.cos(sumAngle)-numpy.sin(self.angle)*numpy.sin(sumAngle)
+#        sumAngle = numpy.arctan2(sinSumAngle, cosSumAngle)
+#        sumLength = numpy.sqrt(numpy.square(mx0)+ numpy.square(sumLength) + 2*mx0*sumLength*numpy.cos(sumAngle))
+#        if(sumLength!=0):
+#            sumAngle = numpy.arcsin(mx0*numpy.sin(sumAngle)/sumLength)
+        if(sumAngle<0):
+            sumAngle = sumAngle+numpy.pi*2.0
+        sumAngle = sumAngle%(numpy.pi*2.0)
+        if(sumAngle>=numpy.pi):
+            sumAngle = sumAngle-numpy.pi
+        self.prevImg = imgPre
+        self.prevPts = []
+        self.prevPts.append(cv2.goodFeaturesToTrack(imgPre, 100, 0.01, 5, mask=self.mask0))
+        self.prevPts.append(cv2.goodFeaturesToTrack(imgPre, 100, 0.01, 5, mask=self.mask1))
+        self.angle = sumAngle
+#        i=0
+#        for line in self.prevPts:
+#            i=i+1
+#            for point in line:
+#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
+#        self.angle = numpy.median(angle)
+#        finalValueSin = numpy.sin(finalValue)*numpy.cos(self.angle)+numpy.sin(self.angle)*numpy.cos(finalValue)
+#        finalValueCos = numpy.cos(finalValue)*numpy.cos(self.angle)-numpy.sin(finalValue)*numpy.sin(self.angle)
+#        self.angle = numpy.arctan2(finalValueSin, finalValueCos)
         mx0=(self.limitx[1]-self.limitx[0])/2
         my0=(self.limity[1]-self.limity[0])/2
         mvx0 = numpy.int(numpy.sin(self.angle)*5000.0)
         mvy0 = numpy.int(-numpy.cos(self.angle)*5000.0)
 #        self.angle = numpy.median(value)+self.angle
-        cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
-#        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
+        cv2.line(img, (int(mx0+self.xoffset-mvx0), int(my0+self.yoffset-mvy0)), (int(mx0+self.xoffset+mvx0), int(my0+self.yoffset+mvy0)), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
+        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
         return (img, self.angle)
-        
+    
 class LineFitTreatment(AbstractTreatment):
     def __init__(self, offset = [0, 0], mode = cv2.cv.CV_RETR_LIST, method=cv2.cv.CV_CHAIN_APPROX_NONE):
         self.mode = mode
@@ -473,13 +888,15 @@ class testRadon(AbstractTreatment):
             self.oldminy = min(newminy, self.oldminy)
             newmaxy = max(line[0].y(), line[1].y())
             self.oldmaxy = max(newmaxy, self.oldmaxy)
-        self.sortedLines = []
-        leftpoint0 = numpy.argsort(numpy.asarray([lines[0][0].x(), lines[0][1].x()]))[0]
-        leftpoint1 = numpy.argsort(numpy.asarray([lines[1][0].x(), lines[1][1].x()]))[0]
-        slope0 = numpy.float(lines[0][1].y()-lines[0][0].y())/numpy.float(lines[0][1].x()-lines[0][0].x())*(self.oldmaxx-self.oldminx)
-        slope1 = numpy.float(lines[1][1].y()-lines[1][0].y())/numpy.float(lines[1][1].x()-lines[1][0].x())*(self.oldmaxx-self.oldminx)
-        offset0=(lines[0][leftpoint0].y()-self.oldminy)
-        offset1=(lines[1][leftpoint1].y()-self.oldminy)
+            
+        highestLine = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[0]
+        lowestLine = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[1]
+        leftpoint0 = numpy.argsort(numpy.asarray([lines[highestLine][0].x(), lines[highestLine][1].x()]))[0]
+        leftpoint1 = numpy.argsort(numpy.asarray([lines[lowestLine][0].x(), lines[lowestLine][1].x()]))[0]
+        slope0 = numpy.float(lines[highestLine][1].y()-lines[highestLine][0].y())/numpy.float(lines[highestLine][1].x()-lines[highestLine][0].x())*(self.oldmaxx-self.oldminx)
+        slope1 = numpy.float(lines[lowestLine][1].y()-lines[lowestLine][0].y())/numpy.float(lines[lowestLine][1].x()-lines[lowestLine][0].x())*(self.oldmaxx-self.oldminx)
+        offset0=(lines[highestLine][leftpoint0].y()-self.oldminy)
+        offset1=(lines[lowestLine][leftpoint1].y()-self.oldminy)
         self.limit0x0 = slope0/4.0+offset0
         self.limit0x1 = slope0/2.0+offset0
         self.limit0x2 = 3.0*slope0/4.0+offset0
@@ -490,10 +907,13 @@ class testRadon(AbstractTreatment):
         if(manyCircles==True):
             self.circlesLimits.append((numpy.int(((self.oldmaxx-self.oldminx)/4.0)), numpy.int(self.limit0x0+numpy.abs(self.limit0x0-self.limit1x0)/2.0), numpy.int(numpy.abs(self.limit0x0-self.limit1x0)/2.0)))
             self.circlesLimits.append((numpy.int((3.0*(self.oldmaxx-self.oldminx)/4.0)), numpy.int(self.limit0x2+numpy.abs(self.limit0x2-self.limit1x2)/2.02), numpy.int(numpy.abs(self.limit0x2-self.limit1x2)/2.0)))
-        for line in self.lines:
-            self.sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
+        
+#        self.sortedLines = []
+#        for line in self.lines:
+#            self.sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
         self.xoffset = self.oldminx
         self.yoffset =  self.oldminy
+        
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.oldminx, self.oldminy], [self.oldmaxx, self.oldmaxy])))
         self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
         self.filtersToPreApply.append(PreTreatments.SobelTreatment(dx=1, dy=1, kernelSize=7, scale=1, delta=0))
@@ -539,6 +959,7 @@ class testRadon(AbstractTreatment):
         cv2.line(img, (numpy.int((self.oldmaxx-self.oldminx)/2.0)+self.oldminx-mvx0, numpy.int((self.oldmaxy-self.oldminy)/2.0)+self.oldminy-mvy0), (numpy.int((self.oldmaxx-self.oldminx)/2.0)+self.oldminx+mvx0, numpy.int((self.oldmaxy-self.oldminy)/2.0)+self.oldminy+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
         strAngle = numpy.pi/2.0+(numpy.arctan2(numpy.cos(self.angle), numpy.sin(self.angle)))
         self.angle = numpy.degrees(self.angle)
+        cv2.putText(img, "angle = " + numpy.str(numpy.degrees(strAngle))[:6], org=(numpy.uint32(img.shape[0]*0.75), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
 #        cv2.putText(img, "angle = " + numpy.str(strAngle)[:6], org=(numpy.uint32(img.shape[0]*0.75), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
         return (img, strAngle)
         
@@ -623,15 +1044,15 @@ This module has all methods to realize the junction detection on ultrasound imag
 
 
 class seamCarving(AbstractTreatment):
-    def __init__(self, a=5, b=40, hide=False, ref=False):
+    def __init__(self, a=5, b=40, hide=False):
         super(seamCarving, self).__init__()
         self.a = a
         self.b = b
         self.hide = hide
-        self.ref=ref 
-        self.xoffset = 50
-        self.yoffset = 90
-        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.xoffset, self.yoffset],[565, 505])))
+        self.xoffset = 25
+        self.yoffset = 45
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.xoffset, self.yoffset],[286, 250])))
+        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
         
     def compute(self, img):
         """
@@ -672,11 +1093,7 @@ class seamCarving(AbstractTreatment):
         
         #Show the hiding thickness in black
         if self.hide == True :
-            img_fin = self.drawSeamsBlack(img_fin, coord1, self.a, self.b)
-       
-        #Reference point
-        if self.ref == True :
-            img_fin[128:132,128:132] = [50,100,150]   
+            img_fin = self.drawSeamsBlack(img_fin, coord1, self.a, self.b) 
         
         return img_fin, 0#self.drawPointRed(img_fin, junct), junct
     

@@ -21,6 +21,7 @@ from Treatments import AbstractTreatment
 import PostTreatments
 import cython
 import pyximport; pyximport.install() 
+import gc, sys, debugsp
 
 class computationType:     
     pennationAngleComputation = 0;
@@ -29,57 +30,70 @@ class computationType:
 class Applier(QtCore.QThread):
     """This is the class which apply all the filters. For the preTreatment and the treatments."""
     frameComputed = QtCore.pyqtSignal()
-    __single = None
-    def __init__(self):
-        """Constructor of the class.
+    frameToSend = None
+#    def __init__(self):
+#        """Constructor of the class.
+#        
+#        Kwargs:
+#            src: the video source on which the filters will be applied.
+#        
+#         Raises:
+#             TypeError: if the type of the source is neither a Movie nor None.
+#        """
+#
+#        super(Applier, self).__init__()
+#        self.nrChannel=None
+##        Applier.__single.filtersToPreApply = None
+##        Applier.__single.filtersToPreApply = None
+#        self.filtersToApply = None
+#        self.filtersToApply = None
+#        self.processedVideo = None
+#        self.lastComputedFrame = None
+#        self.wait=True
+#        self.src = None
+#        self.angleFinal=0
+#        self.nrSkipFrame = 0
+#        self.computationType = computationType.pennationAngleComputation
+#        self.writeResults=False
+#        self.writeFile='output.txt'
         
-        Kwargs:
-            src: the video source on which the filters will be applied.
-        
-         Raises:
-             TypeError: if the type of the source is neither a Movie nor None.
-        """
-        if(Applier.__single is None):
-            super(Applier, self).__init__()
-            Applier.__single = self 
-        Applier.__single.nrChannel=None
-#        Applier.__single.filtersToPreApply = None
-#        Applier.__single.filtersToPreApply = None
-        Applier.__single.filtersToApply = None
-        Applier.__single.filtersToApply = None
-        Applier.__single.processedVideo = None
-        Applier.__single.lastComputedFrame = None
-        Applier.__single.wait=True
-        Applier.__single.src = None
-        Applier.__single.angleFinal=0
-        Applier.__single.nrSkipFrame = 0
-        Applier.__single.computationType = computationType.pennationAngleComputation
-        Applier.__single.writeResults=False
-        Applier.__single.writeFile='output.txt'
-        
-    @staticmethod
-    def getInstance(src=None, nrChannel=1, nrSkipFrame=0, computType = computationType.pennationAngleComputation):
-        if(Applier.__single is None):
-            Applier.__single = Applier()
+#    @staticmethod
+    def __init__(self, src=None, nrChannel=1, nrSkipFrame=0, computType = computationType.pennationAngleComputation):
 #            Applier.__single = Applier.__single
-        Applier.__single.nrChannel=nrChannel
+        super(Applier, self).__init__()
+        self.nrChannel=nrChannel
 #        Applier.__single.filtersToPreApply = []
 #        Applier.__single.filtersToPreApply = [ [] for i in range(nrChannel)]
-        Applier.__single.filtersToApply = []
-        Applier.__single.filtersToApply = [[] for i in range(nrChannel)]
-        Applier.__single.processedVideo = []
-        Applier.__single.lastComputedFrame = None
-        Applier.__single.wait=True
-        Applier.__single.angleFinal=0
-        Applier.__single.nrSkipFrame=nrSkipFrame
-        Applier.__single.computationType = computType
-        Applier.__single.writeResults=False
-        Applier.__single.writeFile='output.txt'
-        if(isinstance(src, Movie)):
-            Applier.__single.src = src
-        elif src is not None:
-            raise TypeError("Src must be None or a Movie!") 
-        return Applier.__single
+        self.filtersToApply = []
+        self.filtersToApply = [[] for i in range(nrChannel)]
+        self.processedVideo = []
+        self.lastComputedFrame = None
+        self.wait=True
+        self.angleFinal=0
+        self.nrSkipFrame=nrSkipFrame
+        self.computationType = computType
+        self.writeResults=False
+        self.writeFile='output.txt'
+        self.src = None
+        self.setSource(src)
+    
+    def setParameters(self, src=None, nrChannel=1, nrSkipFrame=0, computType = computationType.pennationAngleComputation):
+        del(self.filtersToApply)
+        del(self.processedVideo)
+        self.nrChannel=nrChannel
+        self.filtersToApply = []
+        self.filtersToApply = [[] for i in range(nrChannel)]
+        self.processedVideo = []
+        self.setSource(src)
+        self.nrSkipFrame=nrSkipFrame
+        self.computationType = computType
+        
+    def __del__(self):
+        del(self.filtersToApply)
+        del(self.processedVideo)
+        if(self.src is not None):
+            del(self.src)
+        del(self.writeFile)
         
     def toggle(self):
         """Toggle the applier state. if wait is true, the applier will pause the processing of the video."""
@@ -97,8 +111,10 @@ class Applier(QtCore.QThread):
         if(isinstance(src, Movie)):
             self.wait=True
             self.processedVideo = []
+            if(self.src is not None):
+                del(self.src)
             self.src = src
-        else:
+        elif src is not None:
             raise TypeError("Src must be none or a Movie!")
         
     def add(self, other, channel=0):
@@ -130,7 +146,8 @@ class Applier(QtCore.QThread):
                 imgToMix[channel], angle[channel] = treatment.compute(imgToMix[channel])
         for imgProcessed in imgToMix:
             img = numpy.maximum(img, imgProcessed)
-            
+            del(imgProcessed)
+        del(imgToMix)
         if(self.computationType == computationType.pennationAngleComputation):
             self.angleFinal = PostTreatments.computeAngle(angle[1:3], angle[0])
         if(self.writeResult):
@@ -138,29 +155,32 @@ class Applier(QtCore.QThread):
 #        if(self.computationType==computationType.JunctionComputation):
 #            self.AngleFinal = PostTreatments.computeAngle(angle[1:3], angle[0])
 #        img=imgPre
+        gc.collect()
         return img
     
     def setComputationType(self, type):
         self.computationType = type
             
     def applyNext(self):
-        self.src.readNCFrame(self.nrSkipFrame)
-        ndimg = self.src.rawBuffer
-        ndimg = self.apply(ndimg)
-        self.lastComputedFrame=ndimg
+        self.src.readNCFrame(self.nrSkipFrame+1)
+        if(self.src.rawBuffer is not None):
+            ndimg = self.apply(self.src.rawBuffer)
+            del(self.lastComputedFrame)
+            self.lastComputedFrame=ndimg
+            del(ndimg)
 #        self.processedVideo.append(ndimg)
-        self.frameComputed.emit()
-        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
-    
+            self.frameComputed.emit()
+#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
+        
     def applyOne(self):
-        self.src.readNCFrame(self.nrSkipFrame)
+        self.src.readNCFrame(self.nrSkipFrame+1)
         ndimg = self.src.rawBuffer
-        if(len(ndimg.shape)>2):
-            ndimg = ndimg[:, :, 0]*0.299+ndimg[:, :, 1]*0.587+ndimg[:, :, 2]*0.114
+        del(self.lastComputedFrame)
         self.lastComputedFrame=ndimg
+        del(ndimg)
 #        self.processedVideo.append(ndimg)
         self.frameComputed.emit()
-        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
+#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
         
     def applyAll(self):
         frameNb = self.src.getFrameNumber()
@@ -168,14 +188,16 @@ class Applier(QtCore.QThread):
             self.applyNext()
             while(self.wait):
                 self.msleep(50)
+        a=1
     
     def run(self):
         self.applyAll()
-        
+
     def getLastComputedFrame(self):
-        frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame).copy()#self.processedVideo[-1]).copy()
-        return QtMultimedia.QVideoFrame(frameToSend)
-    
+        self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)#self.processedVideo[-1]).copy()
+        return QtMultimedia.QVideoFrame(self.frameToSend)
+
+
     def getLastComputedAngle(self):
         return self.angleFinal
     
@@ -229,6 +251,26 @@ class CannyTreatment(AbstractPreTreatment):
             raise ValueError("The image must have 2 dimension(gray scale).")
         return edges
 
+class GaborTreatment(AbstractPreTreatment):
+    '''
+    classdocs
+    '''
+    
+    def __init__(self, kernelSize = (7, 7), Sigma = (1.0, 1.0)):
+        '''
+        Constructor
+        '''
+        super(GaborTreatment, self).__init__()
+        self.kernelSize = kernelSize
+        self.sigmaX = Sigma[0]
+        self.sigmaY = Sigma[1]
+        
+    def compute(self, img):
+        if(len(img.shape)==2):
+            return cv2.GaussianBlur( img, self.kernelSize, sigmaX=self.sigmaX, sigmaY=self.sigmaY)
+        else:
+            raise ValueError("The image must have 2 dimension(gray scale).")
+    
         
 class GaborTreatment(AbstractPreTreatment):
     filters = []
@@ -242,8 +284,9 @@ class GaborTreatment(AbstractPreTreatment):
         self.gamma = gamma
         self.psi = psi
         self.ktype = ktype
-        self.cpuNumber = 1#max(multiprocessing.cpu_count()-2, 1)
-        self.pool = ThreadPool(processes=self.cpuNumber)
+        self.cpuNumber = max(multiprocessing.cpu_count()-2, 1)
+        if(self.cpuNumber>1):
+            self.pool = ThreadPool(processes=self.cpuNumber)
         self.buildFilters()
        
     def getGaborKernel(self, theta): 
@@ -298,8 +341,8 @@ class GaborTreatment(AbstractPreTreatment):
     
     def process(self, img):
         accum = numpy.zeros_like(img)
-        angle = numpy.zeros_like(img,dtype=numpy.float32)
-        for kern, params in self.filters:
+#        angle = numpy.zeros_like(img,dtype=numpy.float32)
+        for kern, _ in self.filters:
 #            fimg = numpy.zeros_like(img, img.dtype)
 #            kern = numpy.ones(kern.shape, kern.dtype)
 #            cv2.cv.Filter2D(cv2.cv.fromarray(img), cv2.cv.fromarray(fimg), cv2.cv.fromarray(kern))
@@ -313,16 +356,18 @@ class GaborTreatment(AbstractPreTreatment):
 #            else:
 #                raise ValueError("The image must have 2 or 3 dimension.")
             numpy.maximum(accum, fimg, accum)
+            del(fimg)
 #            angle[numpy.equal(fimg,accum)] = params['theta']
+        del(img)
         return accum
 
     def processThreaded(self, img):
         accum = numpy.zeros_like(img)
 #        angle = numpy.zeros_like(img,dtype=numpy.float32)
         accumLock = multiprocessing.Lock()
-        idx=None
+#        idx=None
         def f(filt):
-            kern, params = filt
+            kern, _ = filt
 #            fimg = numpy.zeros_like(img, img.dtype)
 #            if(len(img.shape)>2):
 #                for d in range(0, img.shape[2]):
@@ -341,6 +386,10 @@ class GaborTreatment(AbstractPreTreatment):
 #                elif(len(img.shape)==2):
                 idx = numpy.argmax(numpy.dstack((accum, fimg)),axis=2)
                 accum[idx==1]=fimg[idx==1]
+                del idx
+            del fimg
+            del kern
+            del filt
 #            angle[idx==1]=numpy.sin(params['theta'])*100
 #                else:
 #                    raise ValueError("The image must have 2 or 3 dimension.")
@@ -352,9 +401,9 @@ class GaborTreatment(AbstractPreTreatment):
     def compute(self, img):
         if(len(img.shape)==2):
             if(self.cpuNumber>1):
-                img = self.processThreaded(numpy.copy(img))
+                img = self.processThreaded(img)
             else:
-                img = self.process(numpy.copy(img))
+                img = self.process(img)
         else:
             raise ValueError("The image must have 2 dimension(gray scale).")
         return img
@@ -406,7 +455,7 @@ class cropTreatment(AbstractPreTreatment):
     
     def compute(self, img):
         if(self.roi is not None and self.roi[0][0]>=0 and self.roi[0][1]>=0 and self.roi[0][0]<self.roi[1][0] and self.roi[0][1]<self.roi[1][1] and self.roi[1][0]<img.shape[0] and self.roi[1][1]<img.shape[1]):
-            return img[self.roi[0][1]:self.roi[1][1],self.roi[0][0]:self.roi[1][0]].copy()
+            return img[self.roi[0][1]:self.roi[1][1],self.roi[0][0]:self.roi[1][0]]
         else: 
             raise ValueError("Incorrect size for the region of interest when cropping.")    
 
@@ -436,7 +485,7 @@ class LaplacianTreatment(AbstractPreTreatment):
         self.delta=delta
     
     def compute(self, img):
-        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
+#        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
         result = cv2.Laplacian( numpy.uint8(img), ddepth=cv2.CV_32F, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
 #        result = -result
         result[result<0]=0
@@ -457,7 +506,9 @@ class SobelTreatment(AbstractPreTreatment):
 #        img= cv2.GaussianBlur( img, (31,31), sigmaX=1.0, sigmaY=1.0)
         result = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=self.dx, dy=self.dy, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         result[result<0] = 0
+#        result = numpy.abs(result)
         result = result - numpy.min(result)
+        del(img)
         return numpy.uint8((result/numpy.max(result))*255.0)
 #        result = cv2.convertScaleAbs( result)
 #        result[result<50]=0
@@ -515,10 +566,10 @@ class ThresholdTreatment(AbstractPreTreatment):
         self.threshold = threshold
         
     def compute(self, img):
-        if(self.threshold<0):
-            self.threshold=numpy.median(img[img>numpy.max(numpy.min(img), 0)])
         if(self.threshold<-1):
-            self.threshold=numpy.median(img[img>=numpy.max(self.threshold, 0)])
+            self.threshold=numpy.mean(img[img>=numpy.max(self.threshold, 0)])
+        elif(self.threshold<0):
+            self.threshold=numpy.mean(img[img>numpy.max(numpy.min(img), 0)])
         img[img<self.threshold]=0
         img[img>=self.threshold]=255
         return img
@@ -689,3 +740,4 @@ class ThinningTreatment(AbstractTreatment):
             prev = numpy.copy(img)
     
         return img.astype(numpy.uint8)*255
+

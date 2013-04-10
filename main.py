@@ -22,6 +22,7 @@ def main():
     """
     app = QtGui.QApplication(sys.argv)
     v = Window()
+    v.finishedWork.connect(app.quit)
     v.show()
     sys.exit(app.exec_())
     return 0

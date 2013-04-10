@@ -7,7 +7,8 @@ Created on Oct 12, 2012
 @author: yvesremi
 '''
 from PyQt4 import QtGui
-import sys, numpy, cv2
+import numpy, cv2
+import gc, sys, debugsp
 
 class ImageConverter(object):
     '''
@@ -50,14 +51,14 @@ class ImageConverter(object):
     @staticmethod
     def ndarrayToQimage(ndimg, form=QtGui.QImage.Format_RGB888):
         if(isinstance(ndimg, numpy.ndarray)):
-            ndimg = numpy.uint8(ndimg)
-            if(len(ndimg.shape)==2):#Grayscale images
-                ndimg = cv2.cvtColor(ndimg, cv2.cv.CV_GRAY2RGB)
+            ndimg1 = numpy.asarray(ndimg, numpy.uint8)
+            if(len(ndimg1.shape)==2):#Grayscale images
+                ndimg1 = numpy.dstack((ndimg1, numpy.copy(ndimg1), numpy.copy(ndimg1)))#cv2.cvtColor(ndimg1, cv2.cv.CV_GRAY2RGB)
 #                ndimg = numpy.resize(ndimg,(ndimg.shape[0], ndimg.shape[1], 3))
-            shape=ndimg.shape
-            ndimg = numpy.ravel(ndimg)
-            ndimg.tostring()
-            return QtGui.QImage(ndimg, shape[1], shape[0], shape[1]*shape[2], form)
+            shape=ndimg1.shape
+            ndimg3 = numpy.ravel(ndimg1)
+            ndimg3.tostring()
+            return QtGui.QImage(ndimg3.data, shape[1], shape[0], form)
         else:
             raise TypeError('Argument 1 must be a numpy.ndarray') 
             return None

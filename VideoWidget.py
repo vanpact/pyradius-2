@@ -51,16 +51,14 @@
  """
  
 from PyQt4 import QtMultimedia, QtGui, QtCore
-import cv2, numpy
+import cv2, numpy, ffvideo
+from ffvideo import VideoStream
+import gc, sys, debugsp
+
 
 class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     """ VideoWidgetSurface is a class used for the video presentation in a QWidget."""
-    widget = None
-    imageFormat = None
-    targetRect = None
-    imageSize = None
-    sourceRect = None
-    currentFrame = None
+
     
     def __init__(self, parent=None):
         """Constructs the video surface. 
@@ -68,6 +66,12 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
         Args:
             parent: A QWidget object representing the parent.
         """
+        self.widget = None
+        self.imageFormat = None
+        self.targetRect = None
+        self.imageSize = None
+        self.sourceRect = None
+        self.currentFrame = None
         if parent is None:
             super(VideoWidgetSurface, self).__init__()
         else: 
@@ -117,7 +121,9 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
             self.stop()
             return False
         else: 
+            del(self.currentFrame)
             self.currentFrame = frame
+            del(frame)
             self.widget.repaint(self.targetRect)
             return True
         
@@ -181,10 +187,12 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
         painter.drawImage(self.targetRect, image, self.sourceRect)
         painter.setTransform(oldTransform)
         self.currentFrame.unmap()
+        del(oldTransform)
+        del(image)
+        del(painter)
             
 class VideoWidget(QtGui.QWidget):
     """The VideoWidget class implement the actual videoWidget embedding the VideoWidgetSurface."""
-    surface = None
     clicked = QtCore.pyqtSignal()
     clicking = QtCore.pyqtSignal()
     def __init__(self, parent=None):
@@ -297,7 +305,10 @@ class VideoWidget(QtGui.QWidget):
         p = self.Points.pop()  
         self.repaint() 
         return p
-        
+    
+    def resetShapes(self):
+        self.Points = []
+        self.Lines = []
     def paintEvent(self, event): 
         """Slot called when the widget receives a paint event.
         
@@ -314,7 +325,10 @@ class VideoWidget(QtGui.QWidget):
                 brush = self.palette().background()
                 for rect in region.rects():
                     painter.fillRect(rect, brush)
+                    del(rect)
+                del(region)
             self.surface.paint(painter)
+            del(videoRect)
         else: 
             painter.fillRect(event.rect(), self.palette().background())
         brush = QtGui.QBrush()
@@ -336,6 +350,8 @@ class VideoWidget(QtGui.QWidget):
         painter.setFont(font)
         if(self.stringsToDraw):
             painter.drawText(self.stringStartPosition, self.stringDrawn)
+        del(painter)
+        del(event)
 
     def resizeEvent(self, event):
         """Slot called when the widget is resized.
@@ -348,15 +364,9 @@ class VideoWidget(QtGui.QWidget):
 
 class Movie(QtCore.QObject):
     """This class represent the video data stream"""
-    timer = None
-    frame = None
-    source = None
-    imageBuffer = None
-    rawBuffer = None
-    isPlaying = False
-    frameRate = 0
-    frameNumber = 0
+
     frameChanged = QtCore.pyqtSignal()
+    endOfVideo = QtCore.pyqtSignal()
     
     def __init__(self, fileName=None):
         """Initialize the video stream and open the video file if a fileName is provided.
@@ -364,10 +374,28 @@ class Movie(QtCore.QObject):
         Args: 
             filename: a string containing the name of the file to be opened.
         """
+        self.rawBuffer=None
+        self.source=None
         super(Movie, self).__init__()
         if(fileName is not None):
             self.setMovie(fileName)
+        self.timer = None
+        self.frame = None
+        #    source = None
+        #    imageBuffer = None
+        #    rawBuffer = None
+        self.isPlaying = False
+        self.frameRate = 0
+        self.frameNumber = 0
     
+    def reset(self):
+        self.rawBuffer=None
+        self.source=None
+        self.timer = None
+        self.frame = None
+        self.isPlaying = False
+        self.frameRate = 0
+        self.frameNumber = 0
     def setMovie(self, fileName):
         """Open a video file.
         
@@ -378,20 +406,20 @@ class Movie(QtCore.QObject):
             TypeError: The fileName is not a string.
         """
         if(isinstance(fileName, basestring)):
-            self.source = cv2.VideoCapture(str(fileName))
+            self.source = VideoStream(str(fileName))
         else: 
             raise TypeError('fileName must be a string')
         
-        self.frameRate = self.source.get(cv2.cv.CV_CAP_PROP_FPS)
-        self.frameNumber = self.source.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT)
-        if(self.frameRate==0):
-            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 1)
-            timeMax = float(self.source.get(cv2.cv.CV_CAP_PROP_POS_MSEC))/1000.0
-            if(self.frameNumber >= 1 and timeMax >= 1):
-                self.frameRate = float(self.frameNumber)/float(timeMax)
-            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 0)
-        if(self.frameRate==0):
-            self.frameRate = 25#Take a probable value
+        self.frameRate = self.source.framerate
+        self.frameNumber = self.source.duration*1000/self.source.framerate
+#        if(self.frameRate==0):
+#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 1)
+#            timeMax = float(self.source.get(cv2.cv.CV_CAP_PROP_POS_MSEC))/1000.0
+#            if(self.frameNumber >= 1 and timeMax >= 1):
+#                self.frameRate = float(self.frameNumber)/float(timeMax)
+#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 0)
+#        if(self.frameRate==0):
+#            self.frameRate = 25#Take a probable value
         self.timer = QtCore.QTimer()
         self.timer.setInterval(1000.0/self.frameRate)
         self.timer.setSingleShot(False)
@@ -414,28 +442,28 @@ class Movie(QtCore.QObject):
         """
         self.readNextFrame()
         
-    def currentImage(self):
-        """Returns a QImage representing the image in the current frame.
-        
-        Returns: 
-            A QtGui.QImage representing the current frame.
-        """
-        return self.imageBuffer
+#    def currentImage(self):
+#        """Returns a QImage representing the image in the current frame.
+#        
+#        Returns: 
+#            A QtGui.QImage representing the current frame.
+#        """
+#        return self.imageBuffer
     
-    def currentFrame(self):
-        """Returns the current frame.
-        
-        Returns: 
-            A QtMultimedia.QVideoFrame representing the current frame."""
-        return self.frame
+#    def currentFrame(self):
+#        """Returns the current frame.
+#        
+#        Returns: 
+#            A QtMultimedia.QVideoFrame representing the current frame."""
+#        return self.frame
     
-    def currentNdarrayFrame(self):
-        """Returns a NdArray representing the image in the current frame.
-        
-        Returns: 
-            A QtGui.QImage representing the current frame.
-        """
-        return self.rawBuffer
+#    def currentNdarrayFrame(self):
+#        """Returns a NdArray representing the image in the current frame.
+#        
+#        Returns: 
+#            A QtGui.QImage representing the current frame.
+#        """
+#        return self.rawBuffer
     
     def toggleState(self):
         """Toggle between playing and pausing the video."""
@@ -450,24 +478,35 @@ class Movie(QtCore.QObject):
         Args: 
             position: a value between 0 and 1 corresponding to the position in the video. 0 is the beginning and 1 is the end.
         """
-        currentPosition = self.source.get(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO)
-        step = (position-currentPosition)*float(self.frameNumber)
-        if(step>1.0 or step<-1.0):
-            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, position)
+        if(position>1.0):
+            position = 1.0
+        elif(position<0.001):
+            position = 0.001
+        frame = self.source.get_frame_at_sec(position*self.source.duration).ndarray
+        return frame
     
     def readNextFrame(self):
         """Load the next frame.
         Raise: 
             Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
-        error, image = self.source.read()
-        if(error==0):
-            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
-        newImage = numpy.ravel(image)
-        newImage.tostring()
-        self.rawBuffer=image
-        self.imageBuffer = QtGui.QImage(newImage, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)
-        self.frame = QtMultimedia.QVideoFrame(self.imageBuffer)
+        try:
+            self.rawBuffer = self.source.next().ndarray()
+        except ffvideo.NoMoreData:
+            self.isPlaying = False
+            self.pause()
+            self.rawBuffer = None
+            self.endOfVideo.emit()
+#        if(error==0):
+#            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
+#        imSize = image.shape
+#        self.rawBuffer=numpy.copy(image)
+#        image = numpy.ravel(image)
+#        image.tostring()
+#        image = QtGui.QImage(image, imSize[1], imSize[0], imSize[1]*3, QtGui.QImage.Format_RGB888)
+#        self.frame = QtMultimedia.QVideoFrame(image)
+#        del(imSize)
+#        del(image)
         self.frameChanged.emit()
         
     def readNCFrame(self, number):
@@ -475,16 +514,26 @@ class Movie(QtCore.QObject):
         Raise: 
             Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
-        position = self.source.get(cv2.cv.CV_CAP_PROP_POS_FRAMES)
-        self.source.set(cv2.cv.CV_CAP_PROP_POS_FRAMES, position+number)
-        error, image = self.source.read()
-        if(error==0):
-            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
-        newImage = numpy.ravel(image)
-        newImage.tostring()
-        self.rawBuffer=image
-        self.imageBuffer = QtGui.QImage(newImage, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)
-        self.frame = QtMultimedia.QVideoFrame(self.imageBuffer)
+        position = self.source.current().frameno
+        try:
+                self.rawBuffer = self.source.get_frame_no(position+number).ndarray()
+        except ffvideo.NoMoreData:
+            self.isPlaying = False
+            self.pause()
+            self.endOfVideo.emit()
+        if(self.source.current().frameno>=self.source.duration*self.source.framerate):
+            self.isPlaying = False
+            self.pause()
+            self.endOfVideo.emit()
+#        error, image = self.source.read()
+#        if(error==0):
+#            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
+#        image = numpy.ravel(image)
+#        image.tostring()
+#        self.rawBuffer=image
+#        image = QtGui.QImage(image, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)
+#        self.frame = QtMultimedia.QVideoFrame(image)
+#        del(image)
         self.frameChanged.emit()
 
     def currentPositionRatio(self):
@@ -493,7 +542,10 @@ class Movie(QtCore.QObject):
         Returns:
             a value between 0 and 1 representing the position in the video. 0 is the beginning and 1 is the end.
         """
-        return self.source.get(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO)
+        if(self.source is not None and self.source.current() is not None):
+            return self.source.current().timestamp/self.source.duration
+        else:
+            return 1.0
     
     def getFrameNumber(self):
         """Returns the number of frame in the video.
@@ -501,6 +553,6 @@ class Movie(QtCore.QObject):
         Returns:
             an integer representing the number of frame in the video.
         """
-        return int(self.source.get(cv2.cv.CV_CAP_PROP_FRAME_COUNT))
+        return int(self.source.duration*self.source.framerate)
         
     

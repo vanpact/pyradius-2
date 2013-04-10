@@ -10,14 +10,12 @@
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
 import PreTreatments, Treatments #import Applier, CannyTreatment, GaborTreatment
+import gc, sys, debugsp
 
 class Window(QtGui.QMainWindow):
+    finishedWork = QtCore.pyqtSignal()
     """ This is the class which contains all the GUI."""
-    surface = None
-    source = Movie()
 #    timeSlider = None
-    filterApplied = None
-    playButton = None
     
     def __init__(self):
         """ Create the view object."""
@@ -33,13 +31,16 @@ class Window(QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('Images/Icon.png')) 
         QtCore.QTextCodec.setCodecForCStrings(QtCore.QTextCodec.codecForName('UTF-8'))
         
+        self.firstTimePlayed = True
         self.createMenuBar()
         self.createLayout()
+        self.source = None
+        self.lines = []
 #        self.source = movie()
 #        QtCore.QObject.connect(self.source, QtCore.SIGNAL('frameChanged'), self.frameChanged)
 #        self.source.frameChanged.connect(self.frameChanged)
-        self.filterApplied = PreTreatments.Applier.getInstance()
-        self.filterApplied.frameComputed.connect(self.frameChanged)
+#        self.filterApplied = PreTreatments.Applier()
+#        self.filterApplied.frameComputed.connect(self.frameChanged)
         self.statusBar().showMessage('Ready')
         
     def centerWindow(self):
@@ -117,8 +118,9 @@ class Window(QtGui.QMainWindow):
         self.progressBar.setMaximum(100)
         self.basicControlLayout.addWidget(self.playButton)
         self.basicControlLayout.addWidget(self.progressBar)
+        self.playButton.setEnabled(False)
         self.playButton.clicked.connect(self.toggleProcessVideo)
-        self.progressBar.valueChanged.connect(self.jumpToFrame)
+#        self.progressBar.valueChanged.connect(self.jumpToFrame)
         
 #        preTreatmentLayout = QtGui.QHBoxLayout()
         self.treatmentComboBox = QtGui.QComboBox()
@@ -159,7 +161,7 @@ class Window(QtGui.QMainWindow):
         self.ellipsoidSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
         self.ellipsoidSkipFrameSpinBox = QtGui.QSpinBox()
         self.ellipsoidSkipFrameSpinBox.setMinimum(0)
-        self.ellipsoidSkipFrameSpinBox.setMaximum(5)
+        self.ellipsoidSkipFrameSpinBox.setMaximum(25)
         self.ellipsoidOptionLayout.addWidget(self.ellipsoidSkipFrameLabel)
         self.ellipsoidOptionLayout.addWidget(self.ellipsoidSkipFrameSpinBox)
         self.ellipsoidOptionLayout.addStretch()
@@ -178,7 +180,7 @@ class Window(QtGui.QMainWindow):
         self.radonSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
         self.radonSkipFrameSpinBox = QtGui.QSpinBox()
         self.radonSkipFrameSpinBox.setMinimum(0)
-        self.radonSkipFrameSpinBox.setMaximum(24)
+        self.radonSkipFrameSpinBox.setMaximum(25)
         self.radonOptionLayout.addWidget(self.multipleRadonLabel)
         self.radonOptionLayout.addWidget(self.multipleRadonCheckBox)
         self.radonOptionLayout.addWidget(self.radonSkipFrameLabel)
@@ -195,7 +197,7 @@ class Window(QtGui.QMainWindow):
         self.LKSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
         self.LKSkipFrameSpinBox = QtGui.QSpinBox()
         self.LKSkipFrameSpinBox.setMinimum(0)
-        self.LKSkipFrameSpinBox.setMaximum(5)
+        self.LKSkipFrameSpinBox.setMaximum(25)
         self.LKOptionLayout.addWidget(self.LKSkipFrameLabel)
         self.LKOptionLayout.addWidget(self.LKSkipFrameSpinBox)
         self.LKOptionLayout.addStretch()
@@ -210,7 +212,7 @@ class Window(QtGui.QMainWindow):
         self.SCSkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
         self.SCSkipFrameSpinBox = QtGui.QSpinBox()
         self.SCSkipFrameSpinBox.setMinimum(0)
-        self.SCSkipFrameSpinBox.setMaximum(5)
+        self.SCSkipFrameSpinBox.setMaximum(25)
         self.SCOptionLayout.addWidget(self.SCSkipFrameLabel)
         self.SCOptionLayout.addWidget(self.SCSkipFrameSpinBox)
         self.SCOptionLayout.addStretch()
@@ -256,25 +258,55 @@ class Window(QtGui.QMainWindow):
         if (not (fileName.isEmpty())):
             self.surface.stop()
 #            self.videoItem.stop()
+            self.resetMovie()
             self.source.setMovie(str(fileName))
+            self.source.endOfVideo.connect(self.finishVideo)
+            self.filterApplied = PreTreatments.Applier()
+            self.filterApplied.frameComputed.connect(self.frameChanged)
             self.filterApplied.setSource(self.source)
             self.firstTimePlayed = True;
+            self.playButton.setEnabled(False)
+            self.toggleProcessVideo()
 #            self.source.play()
-    
+
+    def resetMovie(self):
+        if(self.source is not None):
+            self.videoWidget.clicked.disconnect(self.getsurfacePosition)
+            self.source.reset()
+        else:
+            self.source = Movie()
+    def finishVideo(self):
+        self.treatmentComboBox.setEnabled(True)
+        self.playButton.setEnabled(False)
+        self.surface.stop()
+        del(self.filterApplied.src)
+        self.filterApplied.src=None
+        del(self.filterApplied.frameToSend)
+        del(self.source)
+        self.source = Movie()
+        self.firstTimePlayed = True;
+        box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Fin du Traitement', 
+                          'Le traitement est terminé!', 
+                          QtGui.QMessageBox.Ok, self)
+        box.finished.connect(self.finishedWork.emit)
+        box.show()
+        
+        
     def toggleProcessVideo(self):
         """Pause and play the video processing"""
-        if(self.filterApplied.wait):
-            self.playButton.setText("Play")
         if(self.firstTimePlayed):
             self.firstTimePlayed = False
             self.filterApplied.applyOne()
             self.launchTutorial()
         else:
+            self.playButton.setEnabled(True)
             self.filterApplied.toggle()
-            self.filterApplied.run()
+            if(self.filterApplied.wait):
+                self.playButton.setText("Play")
             if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
                     self.treatmentComboBox.setEnabled(False)
                     self.playButton.setText("Pause")
+#                    self.filterApplied.run()
                     self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
@@ -282,6 +314,8 @@ class Window(QtGui.QMainWindow):
         """ Update the view when the frame has changed. """
 #        frame = self.source.currentFrame()
         frame = self.filterApplied.getLastComputedFrame()
+        angle = self.filterApplied.getLastComputedAngle()
+        self.videoWidget.setString(str(round(angle, 2))+ "°")
         if (not(frame.isValid())):
             QtGui.QMessageBox(QtGui.QMessageBox.Critical, 'Error', 'Frame not valid!', QtGui.QMessageBox.Ok, self).show()
             return False;
@@ -297,9 +331,9 @@ class Window(QtGui.QMainWindow):
 #        if (not(self.videoItem.present(frame))):
             self.surface.stop()
 #            self.videoItem.stop()
-        angle = self.filterApplied.getLastComputedAngle()
-        self.videoWidget.setString(str(round(angle, 2))+ "°")
-        self.progressBar.setValue(self.source.currentPositionRatio()*self.progressBar.maximum())
+        self.progressBar.setValue(int(self.source.currentPositionRatio()*self.progressBar.maximum()))
+        del(frame)
+        del(angle)
 
     def jumpToFrame(self, value):
         """ Jump to a position in the movie. 
@@ -329,16 +363,30 @@ class Window(QtGui.QMainWindow):
         if(self.videoWidget.getPointNumbers() == 0):
             self.videoWidget.appendPoint(p)
         else:
-            self.videoWidget.appendLine(self.videoWidget.popLastPoint(), p)
+            p1 = self.videoWidget.popLastPoint()
+            self.lines.append((p1, p))
+            self.videoWidget.appendLine(p1, p)
         
         if(self.videoWidget.getLineNumbers() >=self.lineNumber):
             self.videoWidget.clicked.disconnect(self.getsurfacePosition)
             self.chooseTreatment(self.treatmentComboBox.currentIndex())
-            self.videoWidget.PointsToDraw = False
-            self.videoWidget.LinesToDraw = False
+            self.videoWidget.resetShapes()
             self.toggleProcessVideo()
             
     def launchTutorial(self):
+        self.treatmentComboBox.currentIndexChanged.connect(self.changeTutorial)
+        if(self.treatmentComboBox.currentIndex() == 0):
+            self.tutorial1()
+        if(self.treatmentComboBox.currentIndex() == 1):
+            self.tutorial1()
+        if(self.treatmentComboBox.currentIndex() == 2):
+            self.tutorialmuscle()
+        if(self.treatmentComboBox.currentIndex() == 3):
+            self.chooseTreatment(self.treatmentComboBox.currentIndex())
+            self.toggleProcessVideo()
+    
+    def changeTutorial(self):
+        self.videoWidget.clicked.disconnect(self.getsurfacePosition)
         if(self.treatmentComboBox.currentIndex() == 0):
             self.tutorial1()
         if(self.treatmentComboBox.currentIndex() == 1):
@@ -366,27 +414,27 @@ class Window(QtGui.QMainWindow):
     def chooseTreatment(self, index):
         """Add the filters to be applied."""
         if(index == 0):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
+            self.filterApplied.setParameters(self.source, nrChannel=3, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
             l = self.videoWidget.getLines()
             self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
             self.filterApplied = self.filterApplied.add(Treatments.blobDetectionTreatment(lines=l), 0)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[1]), 2)
         if(index == 1):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.radonSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
+            self.filterApplied.setParameters(self.source, nrChannel=3, nrSkipFrame = self.radonSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
             l = self.videoWidget.getLines()
             self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
             self.filterApplied = self.filterApplied.add(Treatments.testRadon(lines=l, manyCircles=self.multipleRadonCheckBox), 0)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[1]), 2)
         if(index == 2):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=3, nrSkipFrame = self.radonSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
+            self.filterApplied.setParameters(self.source, nrChannel=3, nrSkipFrame = self.LKSkipFrameSpinBox.value(), computType = PreTreatments.computationType.pennationAngleComputation)
             l = self.videoWidget.getLines()
             self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
-            self.filterApplied = self.filterApplied.add(Treatments.MuscleTracker(lines=l[0:2], fiber=l[2]), 0)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[0]), 1)
-            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(lines=l[1]), 2)
+            self.filterApplied = self.filterApplied.add(Treatments.MuscleTracker2(lines=l[0:2], fiber=l[2]), 0)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[0]), 1)
+            self.filterApplied = self.filterApplied.add(Treatments.AponeurosisTracker(line=l[1]), 2)
         if(index == 3):
-            self.filterApplied = PreTreatments.Applier.getInstance(self.source, nrChannel=1, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.JunctionComputation)
+            self.filterApplied.setParameters(self.source, nrChannel=1, nrSkipFrame = self.ellipsoidSkipFrameSpinBox.value(), computType = PreTreatments.computationType.JunctionComputation)
             self.filterApplied.setWriteResults(self.outputCheckBox.isChecked(), self.OutputFile)
             self.filterApplied = self.filterApplied.add(Treatments.seamCarving(), 0)
