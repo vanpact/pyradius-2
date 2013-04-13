@@ -406,7 +406,7 @@ class AponeurosisTracker(AbstractTreatment):
         del(imgPre)
         del(nextPts)
         del(line)
-        return (img, angle)
+        return img, angle
     
 class AponeurosisTracker2(AbstractTreatment):
     
@@ -640,7 +640,7 @@ class MuscleTracker(AbstractTreatment):
 #        self.angle = numpy.median(value)+self.angle
         cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
         cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
-        return (img, self.angle)
+        return img, self.angle
 
 class MuscleTracker2(AbstractTreatment):
     
@@ -676,15 +676,17 @@ class MuscleTracker2(AbstractTreatment):
         self.angle = numpy.pi-numpy.arctan2(distXFiber, distYFiber)
         fiberSlope = numpy.float(fiber[1].y()-fiber[0].y())/numpy.float(fiber[1].x()-fiber[0].x())*(oldmaxx-oldminx)
         offsetFiber=(fiber[leftpointfiber].y()-oldminy)
-        
-        upperAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[0]
-        lowerAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[1]
-        leftpoint0 = numpy.argsort(numpy.asarray([lines[0][0].x(), lines[0][1].x()]))[0]
-        leftpoint1 = numpy.argsort(numpy.asarray([lines[1][0].x(), lines[1][1].x()]))[0]
-        slope0 = numpy.float(lines[0][1].y()-lines[0][0].y())/numpy.float(lines[0][1].x()-lines[0][0].x())*(oldmaxx-oldminx)
-        slope1 = numpy.float(lines[1][1].y()-lines[1][0].y())/numpy.float(lines[1][1].x()-lines[1][0].x())*(oldmaxx-oldminx)
-        offset0=(lines[0][leftpoint0].y()-oldminy)
-        offset1=(lines[1][leftpoint1].y()-oldminy)
+
+        self.upperAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[0]
+        self.lowerAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[1]
+        self.leftpointUpper = numpy.argsort(numpy.asarray([lines[self.upperAponeurosis][0].x(), lines[self.upperAponeurosis][1].x()]))[0]
+        self.leftpointLower = numpy.argsort(numpy.asarray([lines[self.lowerAponeurosis][0].x(), lines[self.lowerAponeurosis][1].x()]))[0]
+        self.rightpointUpper = numpy.argsort(numpy.asarray([lines[self.upperAponeurosis][0].x(), lines[self.upperAponeurosis][1].x()]))[1]
+        self.rightpointLower = numpy.argsort(numpy.asarray([lines[self.lowerAponeurosis][0].x(), lines[self.lowerAponeurosis][1].x()]))[1]
+        slope0 = numpy.float(lines[self.upperAponeurosis][self.rightpointUpper].y()-lines[self.upperAponeurosis][self.leftpointUpper].y())/numpy.float(lines[self.upperAponeurosis][self.rightpointUpper].x()-lines[self.upperAponeurosis][self.leftpointUpper].x())*(oldmaxx-oldminx)
+        slope1 = numpy.float(lines[self.lowerAponeurosis][self.rightpointLower].y()-lines[self.lowerAponeurosis][self.leftpointLower].y())/numpy.float(lines[self.lowerAponeurosis][self.rightpointLower].x()-lines[self.lowerAponeurosis][self.leftpointLower].x())*(oldmaxx-oldminx)
+        offset0=(lines[self.upperAponeurosis][self.leftpointUpper].y()-oldminy)
+        offset1=(lines[self.lowerAponeurosis][self.leftpointLower].y()-oldminy)
         
         self.length=numpy.sqrt(distXFiber^2 + distYFiber^2)
         x0 = 0
@@ -700,8 +702,8 @@ class MuscleTracker2(AbstractTreatment):
         self.length = numpy.sqrt(numpy.square((fiberEnd[0]-fiberBegining[0])) + numpy.square((fiberEnd[1]-fiberBegining[1])))
     
         self.prevPts = []
-        self.pts0 = [(self.lines[0][0].x()-self.limitx[0]+20, self.lines[0][0].y()-self.limity[0]+5), (self.lines[0][0].x()-self.limitx[0]+20, self.lines[0][0].y()-self.limity[0]+25), (self.lines[0][1].x()-self.limitx[0]-20, self.lines[0][1].y()-self.limity[0]+25), (self.lines[0][1].x()-self.limitx[0]-20, self.lines[0][1].y()-self.limity[0]+5)]
-        self.pts1 = [(self.lines[1][0].x()-self.limitx[0]+20, self.lines[1][0].y()-self.limity[0]+5), (self.lines[1][0].x()-self.limitx[0]+20, self.lines[1][0].y()-self.limity[0]+25), (self.lines[1][1].x()-self.limitx[0]-20, self.lines[1][1].y()-self.limity[0]+25), (self.lines[1][1].x()-self.limitx[0]-20, self.lines[1][1].y()-self.limity[0]+5)]
+        self.pts0 = [(self.lines[self.upperAponeurosis][self.leftpointUpper].x()-self.limitx[0]+20, self.lines[self.upperAponeurosis][self.leftpointUpper].y()-self.limity[0]+5), (self.lines[self.upperAponeurosis][self.leftpointUpper].x()-self.limitx[0]+20, self.lines[self.upperAponeurosis][self.leftpointUpper].y()-self.limity[0]+25), (self.lines[self.upperAponeurosis][self.rightpointUpper].x()-self.limitx[0]-20, self.lines[self.upperAponeurosis][self.rightpointUpper].y()-self.limity[0]+25), (self.lines[self.upperAponeurosis][self.rightpointUpper].x()-self.limitx[0]-20, self.lines[self.upperAponeurosis][self.rightpointUpper].y()-self.limity[0]+5)]
+        self.pts1 = [(self.lines[self.lowerAponeurosis][self.leftpointLower].x()-self.limitx[0]+20, self.lines[self.lowerAponeurosis][self.leftpointLower].y()-self.limity[0]+5), (self.lines[self.lowerAponeurosis][self.leftpointLower].x()-self.limitx[0]+20, self.lines[self.lowerAponeurosis][self.leftpointLower].y()-self.limity[0]+25), (self.lines[self.lowerAponeurosis][self.rightpointLower].x()-self.limitx[0]-20, self.lines[self.lowerAponeurosis][self.rightpointLower].y()-self.limity[0]+25), (self.lines[self.lowerAponeurosis][self.rightpointLower].x()-self.limitx[0]-20, self.lines[self.lowerAponeurosis][self.rightpointLower].y()-self.limity[0]+5)]
         self.mask0 = None
         self.mask1 = None
         self.prevImg = None
@@ -811,7 +813,7 @@ class MuscleTracker2(AbstractTreatment):
 #        self.angle = numpy.median(value)+self.angle
         cv2.line(img, (int(mx0+self.xoffset-mvx0), int(my0+self.yoffset-mvy0)), (int(mx0+self.xoffset+mvx0), int(my0+self.yoffset+mvy0)), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
         cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
-        return (img, self.angle)
+        return img, self.angle
     
 class LineFitTreatment(AbstractTreatment):
     def __init__(self, offset = [0, 0], mode = cv2.cv.CV_RETR_LIST, method=cv2.cv.CV_CHAIN_APPROX_NONE):
@@ -1044,14 +1046,17 @@ This module has all methods to realize the junction detection on ultrasound imag
 
 
 class seamCarving(AbstractTreatment):
-    def __init__(self, a=5, b=40, hide=False):
+    def __init__(self, limits, AponeurosisThickness=45, hide=False):
         super(seamCarving, self).__init__()
-        self.a = a
-        self.b = b
+        self.thickness = AponeurosisThickness
         self.hide = hide
-        self.xoffset = 25
-        self.yoffset = 45
-        self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.xoffset, self.yoffset],[286, 250])))
+        left= min(limits[0].x(), limits[1].x())
+        right = max(limits[0].x(), limits[1].x())
+        top = min(limits[0].y(), limits[1].y())
+        bottom = max(limits[0].y(), limits[1].y())
+        self.xoffset = left
+        self.yoffset = top
+        self.filtersToPreApply.append(PreTreatments.cropTreatment(([left, top],[right, bottom])))
         self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
         
     def compute(self, img):
@@ -1078,7 +1083,7 @@ class seamCarving(AbstractTreatment):
         img_score = self.makeSeams(img_copy)
         coord1 = self.findSeams(img_score, img_score.shape[0], img_score.shape[1])
         
-        img_seams2 = self.drawSeamsBlack(img_copy, coord1, self.a, self.b)
+        img_seams2 = self.drawSeamsBlack(img_copy, coord1)
         img_score2 = self.makeSeams(img_seams2)
         coord2 = self.findSeams(img_score2, img_score2.shape[0], img_score2.shape[1])
         
@@ -1091,11 +1096,11 @@ class seamCarving(AbstractTreatment):
         img_fin = self.drawSeamsBlue(img_orig,coord1)
         img_fin = self.drawSeamsBlue(img_fin, coord2)
         
-        #Show the hiding thickness in black
-        if self.hide == True :
-            img_fin = self.drawSeamsBlack(img_fin, coord1, self.a, self.b) 
+#         #Show the hiding thickness in black
+#         if self.hide == True :
+#             img_fin = self.drawSeamsBlack(img_fin, coord1) 
         
-        return img_fin, 0#self.drawPointRed(img_fin, junct), junct
+        return self.drawPointRed(img_fin, junct), {'JunctionX':junct[0], 'JunctionY':junct[1]}#self.drawPointRed(img_fin, junct), junct
     
 
 
@@ -1125,7 +1130,7 @@ class seamCarving(AbstractTreatment):
         #Image inversee completement
         #img_rev = - img[:,-1::-1] 
         
-        img_new = numpy.ones(img.shape)
+#         img_new = numpy.ones(img.shape)
         img_new = img
         
         img_new[img_new[:,:] == 0] = 1
@@ -1208,12 +1213,12 @@ class seamCarving(AbstractTreatment):
         """
         
         for j in range(dimc-1):
-            if i <= dimr-2:
+            if i <= dimr-2 and i>0:
                 coord.append([i,j])
-                if img_score[i+1,j]<= img_score[i,j] and  img_score[i+1,j]<= img_score[i-1,j]:
-                    i = i+1
-                elif img_score[i,j]<= img_score[i+1,j] and  img_score[i,j]<= img_score[i-1,j]:
+                if img_score[i,j]<= img_score[i+1,j] and  img_score[i,j]<= img_score[i-1,j]:
                     i = i
+                elif img_score[i+1,j]<= img_score[i,j] and  img_score[i+1,j]<= img_score[i-1,j]:
+                    i = i+1
                 elif img_score[i-1,j]<= img_score[i,j] and  img_score[i-1,j]<= img_score[i+1,j]:
                     i = i-1
             elif i == dimr-1:
@@ -1244,24 +1249,24 @@ class seamCarving(AbstractTreatment):
         return img
         
         
-    def drawSeamsBlack(self, img, coord, a=5, b=40):
+    def drawSeamsBlack(self, img, coord):
         #images jpeg a=5 et b = 40
         """
         @param img: matrix of the image
         @param coord: array of the coordinates [x,y] of the seams
-        @param a: thickness of the hiding area below
-        @param b: thickness of the hiding area above
         
         Draw the image with some thickness in black following the first seam
         
         @return the image with the seams in black
         """
+        radius = int(self.thickness/2)
         for i in coord :
             x = i[0]
             y = i[1]
             
-            
-            img[x-a:x+b] = 0
+            minVal = numpy.max((x-radius, 0))
+            maxVal = numpy.min((x+radius, img.shape[0]))
+            img[minVal:maxVal, y] = 0
       
         return img
     

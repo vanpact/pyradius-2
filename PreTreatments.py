@@ -8,88 +8,51 @@
     .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
-from PyQt4 import QtCore, QtGui, QtMultimedia
-import cv2, numpy, sys
+from PyQt4 import QtCore, QtMultimedia
+import cv2, numpy
 from VideoWidget import Movie
 from multiprocessing.pool import ThreadPool
 import multiprocessing
-import math, time
+import math
 from imageConverter import ImageConverter
-from threading import Thread
-import threading 
 from Treatments import AbstractTreatment
-import PostTreatments
+import pandas
 import cython
 import pyximport; pyximport.install() 
-import gc, sys, debugsp
-
-class computationType:     
-    pennationAngleComputation = 0;
-    JunctionComputation = 1;
+import gc, os
     
 class Applier(QtCore.QThread):
     """This is the class which apply all the filters. For the preTreatment and the treatments."""
     frameComputed = QtCore.pyqtSignal()
+    endOfProcessing = QtCore.pyqtSignal()
     frameToSend = None
-#    def __init__(self):
-#        """Constructor of the class.
-#        
-#        Kwargs:
-#            src: the video source on which the filters will be applied.
-#        
-#         Raises:
-#             TypeError: if the type of the source is neither a Movie nor None.
-#        """
-#
-#        super(Applier, self).__init__()
-#        self.nrChannel=None
-##        Applier.__single.filtersToPreApply = None
-##        Applier.__single.filtersToPreApply = None
-#        self.filtersToApply = None
-#        self.filtersToApply = None
-#        self.processedVideo = None
-#        self.lastComputedFrame = None
-#        self.wait=True
-#        self.src = None
-#        self.angleFinal=0
-#        self.nrSkipFrame = 0
-#        self.computationType = computationType.pennationAngleComputation
-#        self.writeResults=False
-#        self.writeFile='output.txt'
-        
-#    @staticmethod
-    def __init__(self, src=None, nrChannel=1, nrSkipFrame=0, computType = computationType.pennationAngleComputation):
+    
+    def __init__(self, src=None, nrSkipFrame=0):
 #            Applier.__single = Applier.__single
         super(Applier, self).__init__()
-        self.nrChannel=nrChannel
 #        Applier.__single.filtersToPreApply = []
 #        Applier.__single.filtersToPreApply = [ [] for i in range(nrChannel)]
-        self.filtersToApply = []
-        self.filtersToApply = [[] for i in range(nrChannel)]
+        self.backToFirst=False
+        self.methodToApply = None
         self.processedVideo = []
         self.lastComputedFrame = None
         self.wait=True
         self.angleFinal=0
         self.nrSkipFrame=nrSkipFrame
-        self.computationType = computType
-        self.writeResults=False
+        self.infoGathered = []
         self.writeFile='output.txt'
         self.src = None
         self.setSource(src)
     
-    def setParameters(self, src=None, nrChannel=1, nrSkipFrame=0, computType = computationType.pennationAngleComputation):
-        del(self.filtersToApply)
+    def setParameters(self, src=None, nrSkipFrame=0):
         del(self.processedVideo)
-        self.nrChannel=nrChannel
-        self.filtersToApply = []
-        self.filtersToApply = [[] for i in range(nrChannel)]
         self.processedVideo = []
+        self.infoGathered = []
         self.setSource(src)
         self.nrSkipFrame=nrSkipFrame
-        self.computationType = computType
         
     def __del__(self):
-        del(self.filtersToApply)
+        del(self.methodToApply)
         del(self.processedVideo)
         if(self.src is not None):
             del(self.src)
@@ -99,71 +62,37 @@ class Applier(QtCore.QThread):
         """Toggle the applier state. if wait is true, the applier will pause the processing of the video."""
         self.wait = not self.wait
         
-    def setWriteResults(self, isWriting, fileObject):
-        if(isinstance(fileObject, file)):
-            self.writeResult = isWriting
-            self.writeFile = fileObject
-        else:
-            self.writeResult = False
-            self.writeFile = None
-        
+          
     def setSource(self, src=file):
         if(isinstance(src, Movie)):
             self.wait=True
             self.processedVideo = []
             if(self.src is not None):
+                self.src.endOfVideo.disconnect(self.finishedVideo)
                 del(self.src)
             self.src = src
+            self.src.endOfVideo.connect(self.finishedVideo)
         elif src is not None:
             raise TypeError("Src must be none or a Movie!")
         
-    def add(self, other, channel=0):
-        if(isinstance(other, AbstractTreatment)):
-            self.filtersToApply[channel].append(other)
-            return self
-        else:
-            raise TypeError("Object send to the applier has to be a pretreatment.")
-    
-    def sub(self, other, channel=0):
-        if(isinstance(other, AbstractTreatment)):
-            self.filtersToApply[channel].reverse()
-            self.filtersToApply[channel].remove(other)
-            self.filtersToApply[channel].reverse()
-            return self
-        else:
-            raise TypeError("Object send to the applier has to be a pretreatment.")
-        
-    def empty(self):
-        self.filterToPreApply = []
+    def setMethod(self, method):
+        self.methodToApply=method
         
     def apply(self, img):
-        if(len(img.shape)>2):
-            img = img[:, :, 0]*0.299+img[:, :, 1]*0.587+img[:, :, 2]*0.114
-        imgToMix=[numpy.copy(img) for _ in range(self.nrChannel)]
-        angle = [0 for _ in range(self.nrChannel)]
-        for channel in range(self.nrChannel):
-            for treatment in self.filtersToApply[channel]:
-                imgToMix[channel], angle[channel] = treatment.compute(imgToMix[channel])
-        for imgProcessed in imgToMix:
-            img = numpy.maximum(img, imgProcessed)
-            del(imgProcessed)
-        del(imgToMix)
-        if(self.computationType == computationType.pennationAngleComputation):
-            self.angleFinal = PostTreatments.computeAngle(angle[1:3], angle[0])
-        if(self.writeResult):
-            self.writeFile.write(str(self.angleFinal)+ '\n') 
-#        if(self.computationType==computationType.JunctionComputation):
-#            self.AngleFinal = PostTreatments.computeAngle(angle[1:3], angle[0])
-#        img=imgPre
+        img, info = self.methodToApply.compute(img)
+        info['Time'] = self.src.getEllapsedTime()
+        self.infoGathered.append(info)
         gc.collect()
         return img
-    
-    def setComputationType(self, type):
-        self.computationType = type
+
             
     def applyNext(self):
-        self.src.readNCFrame(self.nrSkipFrame+1)
-        if(self.src.rawBuffer is not None):
+        if(self.backToFirst==True):
+            self.backToFirst=False
+            self.src.readNCFrame(0)
+        else:
+            self.src.readNCFrame(self.nrSkipFrame+1)
+        if(self.src is not None and self.src.rawBuffer is not None):
             ndimg = self.apply(self.src.rawBuffer)
             del(self.lastComputedFrame)
             self.lastComputedFrame=ndimg
@@ -173,7 +102,8 @@ class Applier(QtCore.QThread):
 #        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
         
     def applyOne(self):
-        self.src.readNCFrame(self.nrSkipFrame+1)
+        self.src.readNCFrame(0)
+        self.backToFirst=True
         ndimg = self.src.rawBuffer
         del(self.lastComputedFrame)
         self.lastComputedFrame=ndimg
@@ -184,22 +114,32 @@ class Applier(QtCore.QThread):
         
     def applyAll(self):
         frameNb = self.src.getFrameNumber()
+        self.finished=False
         for i in range(0, frameNb, self.nrSkipFrame+1):
-            self.applyNext()
+            if(not self.finished):
+                self.applyNext()
             while(self.wait):
                 self.msleep(50)
-        a=1
     
     def run(self):
         self.applyAll()
-
+        self.finished=True
+        self.endOfProcessing.emit()
+    
+    def finishedVideo(self):
+        self.finished=True
+        self.endOfProcessing.emit()
+        
     def getLastComputedFrame(self):
         self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)#self.processedVideo[-1]).copy()
         return QtMultimedia.QVideoFrame(self.frameToSend)
 
 
-    def getLastComputedAngle(self):
-        return self.angleFinal
+    def getLastInformation(self):
+        if(len(self.infoGathered)>0):
+            return self.infoGathered[-1]
+        else:
+            return None
     
     def saveResult(self, fileName):
         if(len(self.processedVideo)>0 and (fileName[-4:]=='.avi' or fileName[-4:]=='.AVI')):
@@ -208,7 +148,8 @@ class Applier(QtCore.QThread):
                 videoWriter.write(frame)
         else: 
             raise ValueError("You have to use the applier on each frame you want to process and the file name has to finish by '.avi'.")
-            
+
+
 class AbstractPreTreatment(AbstractTreatment):
     
     def __init__(self):
@@ -251,7 +192,7 @@ class CannyTreatment(AbstractPreTreatment):
             raise ValueError("The image must have 2 dimension(gray scale).")
         return edges
 
-class GaborTreatment(AbstractPreTreatment):
+class GaussianBlurTreatment(AbstractPreTreatment):
     '''
     classdocs
     '''
@@ -293,10 +234,6 @@ class GaborTreatment(AbstractPreTreatment):
         sigma_x = self.sigma
         sigma_y = self.sigma/self.gamma
         nstds = 3
-        xmin=0 
-        xmax=0
-        ymin=0
-        ymax=0
         c = math.cos(theta)
         s = math.sin(theta)
         if( self.ksize > 0 ):
@@ -326,7 +263,6 @@ class GaborTreatment(AbstractPreTreatment):
         return kernel
     
     def buildFilters(self):
-        angles = 0
         if(self.angleToProcess==[]):
             self.angleToProcess = numpy.arange(0, numpy.pi, numpy.pi / 32)
         for theta in self.angleToProcess:
@@ -652,40 +588,17 @@ class SkeletonTreatment(AbstractTreatment):
                 tmp[numpy.where(elem==-1)] = -1
                 tmp[numpy.where(tmp>0)] = 1
                 if(numpy.all(elem == tmp) and tmp[1][1]!=1 or (not(numpy.all(elem == tmp)) and tmp[1][1]==1)):
-                    a=1
-                imgPre[y][x] = 255 if (numpy.all(elem == tmp)) else 0
+                    imgPre[y][x] = 255 if (numpy.all(elem == tmp)) else 0
         return imgPre
     
 class ThinningTreatment(AbstractTreatment):
     def __init__(self, size=(3, 3)):
         super(ThinningTreatment, self).__init__()
         self.size=size
-#        self.time1 = []
-#        self.time2 = []
-#        self.time3 = []
-#        self.time4 = []
-#        self.time5 = []
-#        self.time6 = []
-    def thinningIteration(self, img, iter):
-#        cdef int v2
-#        cdef int v3
-#        cdef int v4
-#        cdef int v5
-#        cdef int v6
-#        cdef int v7
-#        cdef int v8
-#        cdef int v9
-#        cdef int m1
-#        cdef int m2
-#        cdef int A
-#        cdef int B
+    def thinningIteration(self, img, itera):
         marker = numpy.zeros_like(img, dtype = numpy.uint8)
         for y in numpy.arange(1, img.shape[0]-2, 1):
             for x in numpy.arange(1, img.shape[1]-2, 1):
-#                t0= time.clock()
-#                tmp = numpy.copy(img[y-1:y+2, x-1:x+2])
-#                self.time6.append(time.clock()-t0)
-#                t0= time.clock()
                 v2 = img[y-1, x]
                 v3 = img[y-1, x+1]
                 v4 = img[y, x+1]
@@ -694,27 +607,15 @@ class ThinningTreatment(AbstractTreatment):
                 v7 = img[y+1, x-1]
                 v8 = img[y, x-1]
                 v9 = img[y-1, x-1]
-#                self.time1.append(time.clock()-t0)
-#                t0= time.clock()
                 B = v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9
-#                self.time2.append(time.clock()-t0)
-#                t0= time.clock()
                 if(B >= 2 and B <= 6):
-#                    self.time5.append(time.clock()-t0)
-                    if(iter == 0):
-#                        t0= time.clock()
+                    if(itera == 0):
                         m1 = (v2 * v4 * v6)
                         m2 = (v4 * v6 * v8)
-#                        self.time3.append(time.clock()-t0)
                     else :
-#                        t0= time.clock()
                         m1 = (v2 * v4 * v8)
                         m2 = (v2 * v6 * v8)
-#                        self.time3.append(time.clock()-t0)
-    #                m1 = (tmp[0][1] * tmp[1][2] * tmp[2][1]) if(iter == 0) else (tmp[0][1] * tmp[1][2] * tmp[1][0])
-    #                m2 = (tmp[1][2] * tmp[2][1] * tmp[1][0]) if(iter == 0) else (tmp[0][1] * tmp[2][1] * tmp[1][0])
                     if( m1 == 0 and m2 == 0):
-#                        t0= time.clock()
                         v2 = v2==0
                         v3 = v3==0
                         v4 = v4==0
@@ -724,7 +625,6 @@ class ThinningTreatment(AbstractTreatment):
                         v8 = v8==0
                         v9 = v9==0
                         A = (sum([(v2 and not v3), (v3 and not v4), (v4 and not v5), (v5 and not v6), (v6 and not v7), (v7 and not v8), (v8 and not v9), (v9 and not v2)]))
-#                        self.time4.append(time.clock()-t0)
                         if (A == 1): 
                             marker[y][x] = 1
         return numpy.logical_and(img, numpy.logical_not(marker)).astype(numpy.uint8)

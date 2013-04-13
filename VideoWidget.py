@@ -53,7 +53,7 @@
 from PyQt4 import QtMultimedia, QtGui, QtCore
 import cv2, numpy, ffvideo
 from ffvideo import VideoStream
-import gc, sys, debugsp
+import gc, sys
 
 
 class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
@@ -218,6 +218,8 @@ class VideoWidget(QtGui.QWidget):
         self.PointsToDraw = True
         self.Points = []
         self.lastPoint = None
+        self.Rect = []
+        self.RectToDraw = True
         self.stringsToDraw = False
         self.stringDrawn = []
         self.stringStartPosition = QtCore.QPoint(0, 0)
@@ -230,7 +232,29 @@ class VideoWidget(QtGui.QWidget):
             The VideoWidgetSurface embedded in the widget.
         """
         return self.surface
+    
+    def mapFromGlobalToVideo(self, pos):
+        pos = self.mapFromGlobal(pos)
+        return (pos.x()-self.surface.videoRect().left(), pos.y()-self.surface.videoRect().top())
         
+    def mapToVideo(self, pos):
+        if(isinstance(pos, list)):
+            result = []
+            for values in pos:
+                if(isinstance(values, tuple)):
+                    tempresult0 = QtCore.QPoint(values[0].x()-self.surface.videoRect().left(), values[0].y()-self.surface.videoRect().top())
+                    tempresult1 = QtCore.QPoint(values[1].x()-self.surface.videoRect().left(), values[1].y()-self.surface.videoRect().top())
+                    result.append((tempresult0, tempresult1))
+                elif(isinstance(values, QtCore.QPoint)):
+                    result.append(QtCore.QPoint(values.x()-self.surface.videoRect().left(), values.y()-self.surface.videoRect().top()))
+        elif(isinstance(pos, tuple)):
+            tempresult0 = QtCore.QPoint(pos[0].x()-self.surface.videoRect().left(), pos[0].y()-self.surface.videoRect().top())
+            tempresult1 = QtCore.QPoint(pos[1].x()-self.surface.videoRect().left(), pos[1].y()-self.surface.videoRect().top())
+            result = (tempresult0, tempresult1)
+        elif(isinstance(pos, QtCore.QPoint)):
+            result = QtCore.QPoint(pos.x()-self.surface.videoRect().left(), pos.y()-self.surface.videoRect().top())
+        return result
+    
     def sizeHint(self): 
         """Return the recommend size for the widget.
         
@@ -251,7 +275,12 @@ class VideoWidget(QtGui.QWidget):
         if(isinstance(begin, QtCore.QPoint) and isinstance(end, QtCore.QPoint)):
             self.Lines.append((begin, end))
             self.repaint()
-     
+    
+    def appendRect(self, begin, end):
+        if(isinstance(begin, QtCore.QPoint) and isinstance(end, QtCore.QPoint)):
+            self.Rect.append((begin, end))
+            self.repaint()
+            
     def appendPoint(self, point):
         if(isinstance(point, QtCore.QPoint)):
             self.Points.append(point)
@@ -269,6 +298,9 @@ class VideoWidget(QtGui.QWidget):
     def getPoints(self):
         return self.Points
     
+    def getRect(self):
+        return self.Rect
+    
     def getString(self):
         return str(self.stringDrawn)
     
@@ -285,11 +317,15 @@ class VideoWidget(QtGui.QWidget):
     def removeLastLine(self):
         self.Lines.pop()  
         self.repaint() 
+    
+    def removeLastRect(self):
+        self.Rect.pop()  
+        self.repaint() 
         
     def popLastLine(self):
-        l = self.Lines.pop()  
+        r = self.Rect.pop()  
         self.repaint() 
-        return l
+        return r
     
     def stopDrawingString(self):
         self.stringDrawn = False
@@ -309,6 +345,8 @@ class VideoWidget(QtGui.QWidget):
     def resetShapes(self):
         self.Points = []
         self.Lines = []
+        self.Rect = []
+        
     def paintEvent(self, event): 
         """Slot called when the widget receives a paint event.
         
@@ -332,19 +370,26 @@ class VideoWidget(QtGui.QWidget):
         else: 
             painter.fillRect(event.rect(), self.palette().background())
         brush = QtGui.QBrush()
-        brush.setColor(QtGui.QColor(255, 0, 0, 200))
+        brush.setColor(QtGui.QColor(255, 0, 0, 255))
         pen = QtGui.QPen(QtGui.QColor.green)
-        pen.setWidth(3)
+        pen.setWidth(5)
         pen.setCapStyle(QtCore.Qt.RoundCap)
-        pen.setColor(QtGui.QColor(255, 0, 0, 200))
+        pen.setColor(QtGui.QColor(255, 0, 0, 255))
         painter.setBrush(brush)
         painter.setPen(pen)
         if(self.PointsToDraw):
             for p in self.Points:
                 painter.drawPoint(p)
         if(self.LinesToDraw):
+            pen.setWidth(3)
+            painter.setPen(pen)
             for l in self.Lines:
                 painter.drawLine(l[0], l[1])
+        if(self.RectToDraw):
+            pen.setWidth(3)
+            painter.setPen(pen)
+            for r in self.Rect:
+                painter.drawRect(QtCore.QRect(r[0], r[1]))
         font = QtGui.QFont()
         font.setPointSize(20)
         painter.setFont(font)
@@ -406,7 +451,8 @@ class Movie(QtCore.QObject):
             TypeError: The fileName is not a string.
         """
         if(isinstance(fileName, basestring)):
-            self.source = VideoStream(str(fileName))
+            self.fileName = unicode(fileName)
+            self.source = VideoStream(self.fileName)
         else: 
             raise TypeError('fileName must be a string')
         
@@ -424,6 +470,9 @@ class Movie(QtCore.QObject):
         self.timer.setInterval(1000.0/self.frameRate)
         self.timer.setSingleShot(False)
         self.timer.timeout.connect(self.frameMustChange)
+    
+    def resetMovie(self):
+        self.source = VideoStream(self.fileName)
         
     def play(self): 
         """Start to read the video stream."""
@@ -536,6 +585,7 @@ class Movie(QtCore.QObject):
 #        del(image)
         self.frameChanged.emit()
 
+        
     def currentPositionRatio(self):
         """Returns the position in the video.
         
@@ -554,5 +604,16 @@ class Movie(QtCore.QObject):
             an integer representing the number of frame in the video.
         """
         return int(self.source.duration*self.source.framerate)
+    
+    def getFrameSize(self):
+        return (self.source.frame_width, self.source.frame_height)
+    
+    def getEllapsedTime(self):
+        """Returns the number ellapsed time in the video.
+        
+        Returns:
+            an integer representing the number of frame in the video.
+        """
+        return self.source.current().timestamp
         
     
