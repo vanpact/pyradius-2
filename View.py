@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -9,9 +10,8 @@
 
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
-import PreTreatments, Treatments, TotalTreatments #import Applier, CannyTreatment, GaborTreatment
-from XlsWriter import XlsWriter
-import gc, sys, debugsp
+from Applier import Applier
+import TotalTreatments #import Applier, CannyTreatment, GaborTreatment
 
 
 class Window(QtGui.QMainWindow):
@@ -26,7 +26,6 @@ class Window(QtGui.QMainWindow):
 
     def initUI(self):
         """ Initialize the main windows of the application. """
-        self.OutputFile = None
         self.resize(640, 480)
         self.centerWindow()
         self.setWindowTitle('Line')
@@ -39,12 +38,15 @@ class Window(QtGui.QMainWindow):
         self.source = None
         self.lines = []
         self.rect= []
+        self.point = []
+        self.OutputFile=None
+        self.InputFile=None
 #        self.source = movie()
 #        QtCore.QObject.connect(self.source, QtCore.SIGNAL('frameChanged'), self.frameChanged)
 #        self.source.frameChanged.connect(self.frameChanged)
 #        self.filterApplied = PreTreatments.Applier()
 #        self.filterApplied.frameComputed.connect(self.frameChanged)
-        self.statusBar().showMessage('Ready')
+        self.statusBar().showMessage('Prêt')
         
     def centerWindow(self):
         """ Center the windows on the screen of the user. """
@@ -57,26 +59,28 @@ class Window(QtGui.QMainWindow):
         """ Create the Menu bar with its menu and add the actions to the menus. """
         menubar = self.menuBar()
         fileMenu = menubar.addMenu('&Fichiers')
-        fileMenu.addAction(self.createAction('&Exit', QtGui.qApp.quit, 'Ctrl+Q', 'Exit application'))
-        fileMenu.addAction(self.createAction('&Open', self.openFile, 'Ctrl+O', 'Open a movie'))
-        fileMenu.addAction(self.createAction('&Save Frame', self.captureImage, 'Ctrl+P', 'Save the current frame in the movie'))
+        fileMenu.addAction(self.createAction('&Fermer', QtGui.qApp.quit, 'Ctrl+Q', 'Quitte application'))
+        fileMenu.addAction(self.createAction('&Ouvrir', self.openFile, 'Ctrl+O', 'Ouvre un film'))
+        fileMenu.addAction(self.createAction('&Sauver image', self.captureImage, 'Ctrl+S', 'Sauvegarde l\'image présente à l\'écran'))
+        helpMenu = menubar.addMenu('Aide')
+        helpMenu.addAction(self.createAction('A propos', self.printAbout, 'Ctrl+?', 'A propos'))
+        helpMenu.addAction(self.createAction('A propos de Qt', self.printAboutQt, 'A propos de qt'))
+        
+    def printAbout(self):
+        QtGui.QMessageBox.about(self, 'A propos de Pyradius', 'TOFILL')
+        
+    def printAboutQt(self):
+        QtGui.QMessageBox.aboutQt(self, 'A propos de Qt')
         
     def createAction(self, name, funct, shortcut='', statusTip=''):
         """Create the actions used, for example, in the menu bar and return it.
         
-        Args: 
-            name: The name of the action.
-            funct: the function to be triggered by the action.
-        
-        Kwargs:
-            shortcut: the shortcut for the action.
-            statusTip: a tip which will appear when hovering the action.
-        
-        Returns: 
-            The QAction object
-        
-         Raises:
-             AttributeError: if there is the name or the function send is none.
+        :param name: The name of the action.
+        :param funct: The function to be triggered by the action.
+        :param shortcut: The shortcut for the action.
+        :param statusTip: A tip which will appear when hovering the action.
+        :return: The QAction object
+        :raise: AttributeError: if there is the name or the function send is none.
         """
         
         if name != None:
@@ -122,6 +126,7 @@ class Window(QtGui.QMainWindow):
         self.treatmentComboBox.currentIndexChanged.emit(0)
     
     def creatBasicControls(self):
+        """ Create the layout for the widgets controlling the video. """
         self.basicControlLayout = QtGui.QHBoxLayout()
         self.controlLayout.addLayout(self.basicControlLayout)
         
@@ -139,6 +144,7 @@ class Window(QtGui.QMainWindow):
         self.basicControlLayout.addWidget(self.progressBar)
         
     def createOptionControls(self):
+        """ Create the layout for the widgets common to all the treatments. """
         self.oLayout = QtGui.QHBoxLayout()
         self.controlLayout.addLayout(self.oLayout)
         
@@ -164,8 +170,8 @@ class Window(QtGui.QMainWindow):
         self.treatmentComboBox.addItem('Fit ellipsoïde')
         self.treatmentComboBox.addItem('Radon transform')
         self.treatmentComboBox.addItem('Seam Carving')
-        self.outputLabel = QtGui.QLabel('Sauver les résultats :')
-        self.outputCheckBox = QtGui.QCheckBox()
+#         self.outputLabel = QtGui.QLabel('Sauver les résultats :')
+#         self.outputCheckBox = QtGui.QCheckBox()
         
         self.SkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
         self.SkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
@@ -174,14 +180,14 @@ class Window(QtGui.QMainWindow):
         self.SkipFrameSpinBox.setMaximum(25)
         
         self.treatmentComboBox.currentIndexChanged.connect(self.loadCorrectInterface)
-        self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)
+#         self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)
         
         self.basicOptionLayout.addStretch()
         self.basicOptionLayout.addWidget(self.treatmentComboBox)
         self.basicOptionLayout.addWidget(self.SkipFrameLabel)
         self.basicOptionLayout.addWidget(self.SkipFrameSpinBox)
-        self.basicOptionLayout.addWidget(self.outputLabel)
-        self.basicOptionLayout.addWidget(self.outputCheckBox)
+#         self.basicOptionLayout.addWidget(self.outputLabel)
+#         self.basicOptionLayout.addWidget(self.outputCheckBox)
         self.basicOptionLayout.addStretch()
         
         self.createEllipsoidMethodInterface()
@@ -190,12 +196,18 @@ class Window(QtGui.QMainWindow):
         self.createSCMethodInterface()
         
     def createInfoInterface(self):
+        """ Create the layout for the labels displaying the extracted information. """
         self.infoInterfaceLayout = QtGui.QHBoxLayout()
         self.controlLayout.addLayout(self.infoInterfaceLayout)
         self.infoLabelList = []
         self.infoValueList = []
         
     def updateInfoInterface(self, infoNumber):
+        """ Update the layout containing the labels displaying the extracted information. 
+        
+        :param infoNumber: The number of info to display (=the number of labels needed).
+        :type infoNumber: int
+        """
         for value, label in zip(self.infoValueList, self.infoLabelList):
             del(value)
             del(label)
@@ -209,6 +221,11 @@ class Window(QtGui.QMainWindow):
             self.infoValueList[i].show()
     
     def updateInfo(self, info):
+        """ Update the labels containing the extracted information. 
+        
+        :param info: The new extracted information.
+        :type info: dictionary
+        """
         infoNumber = len(info)
         if(infoNumber!=len(self.infoValueList)):
             self.updateInfoInterface(infoNumber)
@@ -219,6 +236,7 @@ class Window(QtGui.QMainWindow):
 
             
     def createEllipsoidMethodInterface(self):
+        """ Create the layout for the widgets specific to the treatment which use ellipsoids. """
         self.ellipsoidOptionWidget = QtGui.QGroupBox()
         self.ellipsoidOptionWidget.hide()
         self.OptionLayout.addWidget(self.ellipsoidOptionWidget)
@@ -230,6 +248,7 @@ class Window(QtGui.QMainWindow):
 
         
     def createRadonMethodInterface(self):
+        """ Create the layout for the widgets specific to the treatment which use the Radon transform. """
         self.radonOptionWidget = QtGui.QGroupBox()
         self.radonOptionWidget.hide()
         self.OptionLayout.addWidget(self.radonOptionWidget)
@@ -245,6 +264,7 @@ class Window(QtGui.QMainWindow):
 #         self.radonOptionLayout.setContentsMargins(0, 0, 0, 0)
         
     def createLKMethodInterface(self):
+        """ Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm. """
         self.LKOptionWidget = QtGui.QGroupBox()
         self.LKOptionWidget.hide()
         self.OptionLayout.addWidget(self.LKOptionWidget)
@@ -255,6 +275,7 @@ class Window(QtGui.QMainWindow):
 #         self.LKOptionLayout.setContentsMargins(0, 0, 0, 0)
     
     def createSCMethodInterface(self):
+        """ Create the layout for the widgets specific to the treatment extraction the junction position. """
         self.SCOptionWidget = QtGui.QGroupBox()
         self.SCOptionWidget.hide()
         self.OptionLayout.addWidget(self.SCOptionWidget)
@@ -262,16 +283,9 @@ class Window(QtGui.QMainWindow):
         self.SCOptionWidget.setLayout(self.SCOptionLayout)
         self.SCOptionWidget.setContentsMargins(0, 0, 0, 0)
 #         self.SCOptionLayout.setContentsMargins(0, 0, 0, 0)
-        self.SCThicknessLabel = QtGui.QLabel("épaisseur moyenne d'une aponévrose")
-        self.SCThicknessSpinBox = QtGui.QSpinBox()
-        self.SCThicknessSpinBox.setMinimum(0)
-        self.SCThicknessSpinBox.setMaximum(200)
-        self.SCThicknessSpinBox.setValue(45)
-        self.SCOptionLayout.addWidget(self.SCThicknessLabel)
-        self.SCOptionLayout.addWidget(self.SCThicknessSpinBox)
-        self.SCOptionLayout.addStretch()
         
     def loadCorrectInterface(self):
+        """ Select the correct layout depending on the method chosen by the user. """
         self.hideAllInterface()
         self.basicOptionWidget.show()
         if(self.treatmentComboBox.currentIndex()==0):
@@ -284,31 +298,40 @@ class Window(QtGui.QMainWindow):
             self.loadSCTransformInterface()
        
     def hideAllInterface(self):
+        """ Hide all the layouts containing the treatment specific widgets. """
         for i in range(self.OptionLayout.count()):
             possibleWidget = self.OptionLayout.itemAt(i)
             if(possibleWidget.widget()):
                 possibleWidget.widget().hide()
     
     def loadEllipsoidTransformInterface(self):
+        """ Load the layout for the widgets specific to the treatment which use ellipsoids. """
         self.ellipsoidOptionWidget.show()
         
     def loadRadonTransformInterface(self):
+        """ Create the layout for the widgets specific to the treatment which use the Radon transform. """
         self.radonOptionWidget.show()
     
     def loadLKTransformInterface(self):
+        """ Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm. """
         self.LKOptionWidget.show()
     
     def loadSCTransformInterface(self):
+        """ Create the layout for the widgets specific to the treatment extraction the junction position. """
         self.SCOptionWidget.show()
         
     def chooseOutputFile(self):  
-        if(self.outputCheckBox.isChecked()):
-            fileName = QtCore.QString(QtGui.QFileDialog.getSaveFileName(self, "Ouvrir le fichier de sortie", QtCore.QDir.homePath(), 'Fichiers Excel (*.xls *.xlsx)'))
-            if (not (fileName.isEmpty())):
-                self.OutputFile = XlsWriter(unicode(fileName))
-        else:
-            self.openFile = None
-                
+        """ Show the dialog to let the user select the output file. """
+        
+        fileName = QtCore.QString(QtGui.QFileDialog.getSaveFileName(self, "Ouvrir le fichier de sortie", QtCore.QDir.homePath(), 'Fichiers Excel (*.xlsx *.xls);;Fichiers Texte (*.txt);;Fichiers CSV (*.csv)'))
+        if (not (fileName.isEmpty())):
+            self.OutputFile = (unicode(fileName))
+
+    def chooseInputFile(self):  
+        """ Show the dialog to let the user select the output file. """
+        fileName = QtCore.QString(QtGui.QFileDialog.getOpenFileName(self, "Ouvrir le fichier d'entrée", QtCore.QDir.homePath(), 'Fichiers Excel (*.xlsx *.xls);;Fichiers Texte (*.txt);;Fichiers CSV (*.csv)'))
+        if (not(fileName.isEmpty())):
+            self.InputFile = (unicode(fileName))           
 
              
     def openFile(self):
@@ -318,8 +341,8 @@ class Window(QtGui.QMainWindow):
             self.surface.stop()
 #            self.videoItem.stop()
             self.resetMovie()
-            self.source.setMovie(str(fileName))
-            self.filterApplied = PreTreatments.Applier()
+            self.source.setMovie(unicode(fileName))
+            self.filterApplied = Applier()
             self.filterApplied.frameComputed.connect(self.frameChanged)
             self.filterApplied.setSource(self.source)
             self.filterApplied.endOfProcessing.connect(self.finishVideo)
@@ -329,26 +352,57 @@ class Window(QtGui.QMainWindow):
 #            self.source.play()
 
     def resetMovie(self):
+        """ Reset the movie. """
         if(self.source is not None):
             self.videoWidget.clicked.disconnect(self.getsurfacePosition)
             self.source.reset()
         else:
             self.source = Movie()
     def finishVideo(self):
-        if(self.outputCheckBox.isChecked()):
-            self.OutputFile.write(padNewColumn=True)
+        self.statusBar().showMessage('Traitement terminé')
+        """ Close the video, ask the applier to write the output file if necessary and quit. """
+        box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Sauvegarde', 
+                  '<p><strong>Le traitement est terminé! Voulez vous sauver les résultats?</strong></p> \
+                  <p>Si vous sélectionnez oui, deux fenêtres de dialogue vont s\'ouvrir. \
+                  <ul><li>La première va permettre de choisir un fichier d\'entrée si vous voulez fusionner les résultats avec d\'autres résultats que vous possèdez déjà. Dans le cas où vous ne désirez pas fusionner de résultats, fermez cette fenêtre sans choisir de fichier.</li>\
+                  <li>La deuxième va permettre de choisir où les résultats seront sauvegardés.</li></ul></p>', 
+                  QtGui.QMessageBox.Yes|QtGui.QMessageBox.No, self)
         self.treatmentComboBox.setEnabled(True)
         self.playButton.setEnabled(False)
         self.surface.stop()
-        self.filterApplied.src=None
-        self.source = Movie()
-        self.firstTimePlayed = True;
-        box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Fin du Traitement', 
-                          'Le traitement est terminé!', 
-                          QtGui.QMessageBox.Ok, self)
+        ret = box.exec_()
+        if(ret==QtGui.QMessageBox.Yes):
+            self.savingProcedure()
+        box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Fin du traitement', 
+            'Travail terminé! Le programme va maintenant se fermer', 
+            QtGui.QMessageBox.Ok, self)
         box.finished.connect(self.finishedWork.emit)
+        box.buttonClicked.connect(self.finishedWork.emit)
+        self.statusBar().showMessage('Fermeture du programme')
         box.show()
         
+    def savingProcedure(self):
+        
+        cont=True
+        while(cont):
+            if(self.InputFile is None or not self.InputFile):
+                self.chooseInputFile()
+            if(self.OutputFile is None or not self.OutputFile):
+                self.chooseOutputFile()
+            if(self.OutputFile is None or not self.OutputFile):
+                box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Pas de fichier de sortie', 
+                  'Vous n\'avez pas sélectionné de fichier de sortie. Les resultats ne seront donc pas sauvegardés. Êtes vous sûr de votre choix?', 
+                  QtGui.QMessageBox.Yes|QtGui.QMessageBox.No, self)
+                ret = box.exec_()
+                if(ret==QtGui.QMessageBox.Yes):
+                    cont=False
+                else:
+                    continue
+            if(cont):
+                self.statusBar().showMessage('Sauvegarde en cours')
+                self.filterApplied.saveResult(self.InputFile, self.OutputFile)
+                cont=False
+                self.statusBar().showMessage('Sauvegarde terminée')
         
     def toggleProcessVideo(self):
         """Pause and play the video processing"""
@@ -364,10 +418,10 @@ class Window(QtGui.QMainWindow):
             if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
                     self.treatmentComboBox.setEnabled(False)
                     self.SkipFrameSpinBox.setEnabled(False)
-                    self.outputCheckBox.setEnabled(False)
+#                     self.outputCheckBox.setEnabled(False)
                     self.playButton.setText("Pause")
-                    self.filterApplied.run()
-#                     self.filterApplied.start(QtCore.QThread.HighestPriority)
+#                     self.filterApplied.run()
+                    self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
     def frameChanged(self):
@@ -377,8 +431,7 @@ class Window(QtGui.QMainWindow):
         info = self.filterApplied.getLastInformation()
         if(info is not None):
             self.updateInfo(info)
-            if(self.outputCheckBox.isChecked()):
-                self.OutputFile.addDatas(info)
+
         if (not(frame.isValid())):
             QtGui.QMessageBox(QtGui.QMessageBox.Critical, 'Error', 'Frame not valid!', QtGui.QMessageBox.Ok, self).show()
             return False;
@@ -394,16 +447,14 @@ class Window(QtGui.QMainWindow):
 #        if (not(self.videoItem.present(frame))):
             self.surface.stop()
 #            self.videoItem.stop()
-        self.progressBar.setValue(int(self.source.currentPositionRatio()*self.progressBar.maximum()))
+        self.progressBar.setValue((self.source.currentPositionRatio()*self.progressBar.maximum()))
         del(frame)
 
     def jumpToFrame(self, value):
         """ Jump to a position in the movie. 
         
-        Args: 
-            value: A value in the range of the slider.
-        Raises:
-             AttributeError: if value is to high or negative.
+        :param value: A value in the range of the slider.
+        :raise: AttributeError: if value is to high or negative.
         """
         ratio = float(value)/float(self.progressBar.maximum())
         if(ratio<=1.0 and ratio>=0.0):
@@ -414,35 +465,46 @@ class Window(QtGui.QMainWindow):
     def captureImage(self):
         """ Take a snapshot of the video and save it. """
 #        snapshot = self.source.currentImage()
-        snapshot = self.filterApplied.getLastComputedFrame()
-        fileName = QtGui.QFileDialog.getSaveFileName(self, "save an image", QtCore.QDir.homePath())
-        snapshot.save(fileName)
-        self.source.play()
+        snapshot = self.filterApplied.getLastComputedImage()
+        fileName = QtGui.QFileDialog.getSaveFileName(self, "save an image", QtCore.QDir.homePath(), 'Image (*.png *.PNG)')
+        snapshot.save(fileName, "png")
+#         self.source.play()
         
     def getsurfacePosition(self):
+        """Get the position of the cursor in the video and ask the surface to draw a shape if necessary."""
         p=QtGui.QCursor.pos()
         p=self.videoWidget.mapFromGlobal(p)
 #         p = self.videoWidget.mapToVideo(p)
-        if(self.videoWidget.getPointNumbers() == 0):
+        if(self.videoWidget.getPointNumbers() == 0 and not self.drawPoint):
             self.videoWidget.appendPoint(p)
-        elif(not self.drawRect):
+        elif(self.tuto1 or self.tutoMuscle):
             p1 = self.videoWidget.popLastPoint()
             self.lines.append((p1, p))
             self.videoWidget.appendLine(p1, p)
-        else:
+        elif(self.tutoJunction and self.drawRect):
             p1 = self.videoWidget.popLastPoint()
             self.rect.append((p1, p))
             self.videoWidget.appendRect(p1, p)     
+            self.drawPoint=True
+            self.drawRect=False
+        elif(self.tutoJunction and self.drawPoint):
+            self.videoWidget.appendPoint(p)
+            self.point.append(p)
                       
-        if((self.videoWidget.getLineNumbers() >=self.lineNumber and not self.drawRect) or (self.drawRect and len(self.rect)>=1)):
+        if((self.videoWidget.getLineNumbers() >=self.lineNumber and not self.tutoJunction) or (self.tutoJunction and len(self.rect)>=1 and len(self.point)>=1)):
             self.videoWidget.clicked.disconnect(self.getsurfacePosition)
             self.chooseTreatment(self.treatmentComboBox.currentIndex())
             self.videoWidget.resetShapes()
             self.toggleProcessVideo()
             
     def launchTutorial(self):
+        """Launch a tutorial specific to the selected treatment."""
         self.treatmentComboBox.currentIndexChanged.connect(self.changeTutorial)
         self.drawRect = False
+        self.drawPoint=False
+        self.tuto1 = False
+        self.tutoJunction = False
+        self.tutoMuscle = False
         self.lineNumber=0
         if(self.treatmentComboBox.currentIndex() == 0):
             self.tutorialmuscle()
@@ -456,12 +518,18 @@ class Window(QtGui.QMainWindow):
 #             self.toggleProcessVideo()
     
     def changeTutorial(self):
+        """Reset the shapes drawn on the surface and reload a new tutorial specific to the selected treatment."""
         self.videoWidget.clicked.disconnect(self.getsurfacePosition)
         self.drawRect = False
+        self.drawPoint=False
+        self.tuto1 = False
+        self.tutoMuscle = False
+        self.tutoJunction = False
         self.lineNumber=0
         self.videoWidget.resetShapes()
         self.lines = []
         self.rect = []
+        self.point = []
         if(self.treatmentComboBox.currentIndex() == 0):
             self.tutorialmuscle()
         if(self.treatmentComboBox.currentIndex() == 1):
@@ -474,10 +542,12 @@ class Window(QtGui.QMainWindow):
 #             self.toggleProcessVideo()
             
     def tutorialjunction(self):
+        """Launch the tutorial specific to the treatment to extract the junction position."""
         tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
-'<p>La méthode nécessite de connaitre la position des bords de l’échographie :\
-<ul><li>Sur la vidéo, cliquez sur un des coins de l’échographie au choix. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
-<li>Si un point rouge est apparu à l’endroit où vous avez cliquez, cliquez sur le coin diagonalement opposé de l’échographie. Un rectangle rouge devrait apparaitre à l’écran.</li></ul></p>\
+'<p>La méthode nécessite de connaitre la position de la région d\'intérêt et d\'avoir une première approximation pour la position de la jonction :\
+<ul><li>Sur la vidéo, cliquez sur un point désignant un coin de la zone d\'intéret rectangulaire. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
+<li>Si un point rouge est apparu à l’endroit où vous avez cliquez, cliquez sur le coin diagonalement opposé de la région d\'intéret. Un rectangle rouge devrait apparaitre à l’écran.</li>\
+<li>Cliquez à la position de la jonction.<\li></ul></p>\
 <p><strong>N’oubliez pas de modifier les options en bas de la fenêtre à votre convenance avant de placer les aponévroses.</strong></p>\
 ', QtGui.QMessageBox.Ok, self)
         tutoLayout = tuto.layout()
@@ -486,7 +556,7 @@ class Window(QtGui.QMainWindow):
         tutoLayout.addLayout(textMovieLayout, 0, 1)
         
         gifLabel = QtGui.QLabel()
-        gif = QtGui.QMovie("mouseSelectionJunction.gif", QtCore.QByteArray(), tuto)
+        gif = QtGui.QMovie("Images/mouseSelectionJunction.gif", QtCore.QByteArray(), tuto)
         gif.setCacheMode(QtGui.QMovie.CacheAll)
         gif.setSpeed(100)
         gifLabel.setMovie(gif)
@@ -497,9 +567,11 @@ class Window(QtGui.QMainWindow):
         gif.start()
         tuto.show()
         self.drawRect = True
+        self.tutoJunction = True
         self.videoWidget.clicked.connect(self.getsurfacePosition)
         
     def tutorial1(self):
+        """Launch the tutorial specific to the treatment to extract the pennation angle using the ellipsoids detection or the Radon transform. """
         tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
 '<p>La méthode nécessite d\'une position initiale pour les deux aponévroses:\
 <ul><li>Sur la vidéo, cliquez sur une extrémité au choix d’une des deux aponévroses. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
@@ -513,7 +585,7 @@ class Window(QtGui.QMainWindow):
         tutoLayout.addLayout(textMovieLayout, 0, 1)
         
         gifLabel = QtGui.QLabel()
-        gif = QtGui.QMovie("mouseSelection1.gif", QtCore.QByteArray(), tuto)
+        gif = QtGui.QMovie("Images/mouseSelection1.gif", QtCore.QByteArray(), tuto)
         gif.setCacheMode(QtGui.QMovie.CacheAll)
         gif.setSpeed(100)
         gifLabel.setMovie(gif)
@@ -524,9 +596,11 @@ class Window(QtGui.QMainWindow):
         gif.start()
         tuto.show()
         self.lineNumber = 2
+        self.tuto1 = True
         self.videoWidget.clicked.connect(self.getsurfacePosition)
         
     def tutorialmuscle(self):
+        """Launch the tutorial specific to the treatment to extract the pennation angle using the Lucas-Kanade algorithm. """
         tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
 '<p>La méthode nécessite une position initiale pour chacune des deux aponévroses et l\'orientation des fibres : \
 <ul><li>Sur la vidéo, cliquez sur une extrémité au choix d’une des deux aponévroses. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
@@ -541,7 +615,9 @@ class Window(QtGui.QMainWindow):
         tutoLayout.addLayout(textMovieLayout, 0, 1)
         
         gifLabel = QtGui.QLabel()
-        gif = QtGui.QMovie("mouseSelectionLK.gif", QtCore.QByteArray(), tuto)
+#         import os
+#         QtCore.qDebug("PWD is :"+str(QtCore.QFileInfo('Images\mouseSelectionLK.gif').absoluteFilePath()))
+        gif = QtGui.QMovie("Images\mouseSelectionLK.gif", QtCore.QByteArray(), tuto)
         gif.setCacheMode(QtGui.QMovie.CacheAll)
         gif.setSpeed(100)
         gifLabel.setMovie(gif)
@@ -552,10 +628,15 @@ class Window(QtGui.QMainWindow):
         gif.start()
         tuto.show()
         self.lineNumber = 3
+        self.tutoMuscle = True 
         self.videoWidget.clicked.connect(self.getsurfacePosition)
                 
     def chooseTreatment(self, index):
-        """Add the filters to be applied."""
+        """Add the chosen treatment to the Applier.
+        
+        :param index: The index inf the combobox used to select the treatment.
+        :type index: int
+        """
         if(index == 0):
             self.filterApplied.setParameters(self.source, nrSkipFrame = self.SkipFrameSpinBox.value())
             l = self.videoWidget.mapToVideo(self.videoWidget.getLines())
@@ -567,8 +648,9 @@ class Window(QtGui.QMainWindow):
         if(index == 2):
             self.filterApplied.setParameters(self.source, nrSkipFrame = self.SkipFrameSpinBox.value())
             l = self.videoWidget.mapToVideo(self.videoWidget.getLines())
-            self.filterApplied.setMethod(TotalTreatments.RadonMethod(Aponeurosises = l, manySamples=self.multipleRadonCheckBox))
+            self.filterApplied.setMethod(TotalTreatments.RadonMethod(Aponeurosises = l, manySamples=self.multipleRadonCheckBox.isChecked()))
         if(index == 3):
             self.filterApplied.setParameters(self.source,  nrSkipFrame = self.SkipFrameSpinBox.value())
             r = self.videoWidget.mapToVideo(self.videoWidget.getRect())[0]
-            self.filterApplied.setMethod(TotalTreatments.junctionComputation(limits=r, AponeurosisThickness=self.SCThicknessSpinBox.value()))
+            p = self.videoWidget.mapToVideo(self.videoWidget.getPoints())[0]
+            self.filterApplied.setMethod(TotalTreatments.junctionComputation(limits=r, firstApproximation=p))

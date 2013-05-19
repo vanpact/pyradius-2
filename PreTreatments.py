@@ -8,171 +8,41 @@
     .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
-from PyQt4 import QtCore, QtMultimedia
+
 import cv2, numpy
-from VideoWidget import Movie
 from multiprocessing.pool import ThreadPool
 import multiprocessing
 import math
-from imageConverter import ImageConverter
-from Treatments import AbstractTreatment
-import pandas
-import cython
-import pyximport; pyximport.install() 
-import gc, os
-    
-class Applier(QtCore.QThread):
-    """This is the class which apply all the filters. For the preTreatment and the treatments."""
-    frameComputed = QtCore.pyqtSignal()
-    endOfProcessing = QtCore.pyqtSignal()
-    frameToSend = None
-    
-    def __init__(self, src=None, nrSkipFrame=0):
-#            Applier.__single = Applier.__single
-        super(Applier, self).__init__()
-#        Applier.__single.filtersToPreApply = []
-#        Applier.__single.filtersToPreApply = [ [] for i in range(nrChannel)]
-        self.backToFirst=False
-        self.methodToApply = None
-        self.processedVideo = []
-        self.lastComputedFrame = None
-        self.wait=True
-        self.angleFinal=0
-        self.nrSkipFrame=nrSkipFrame
-        self.infoGathered = []
-        self.writeFile='output.txt'
-        self.src = None
-        self.setSource(src)
-    
-    def setParameters(self, src=None, nrSkipFrame=0):
-        del(self.processedVideo)
-        self.processedVideo = []
-        self.infoGathered = []
-        self.setSource(src)
-        self.nrSkipFrame=nrSkipFrame
-        
-    def __del__(self):
-        del(self.methodToApply)
-        del(self.processedVideo)
-        if(self.src is not None):
-            del(self.src)
-        del(self.writeFile)
-        
-    def toggle(self):
-        """Toggle the applier state. if wait is true, the applier will pause the processing of the video."""
-        self.wait = not self.wait
-        
-          
-    def setSource(self, src=file):
-        if(isinstance(src, Movie)):
-            self.wait=True
-            self.processedVideo = []
-            if(self.src is not None):
-                self.src.endOfVideo.disconnect(self.finishedVideo)
-                del(self.src)
-            self.src = src
-            self.src.endOfVideo.connect(self.finishedVideo)
-        elif src is not None:
-            raise TypeError("Src must be none or a Movie!")
-        
-    def setMethod(self, method):
-        self.methodToApply=method
-        
-    def apply(self, img):
-        img, info = self.methodToApply.compute(img)
-        info['Time'] = self.src.getEllapsedTime()
-        self.infoGathered.append(info)
-        gc.collect()
-        return img
 
-            
-    def applyNext(self):
-        if(self.backToFirst==True):
-            self.backToFirst=False
-            self.src.readNCFrame(0)
-        else:
-            self.src.readNCFrame(self.nrSkipFrame+1)
-        if(self.src is not None and self.src.rawBuffer is not None):
-            ndimg = self.apply(self.src.rawBuffer)
-            del(self.lastComputedFrame)
-            self.lastComputedFrame=ndimg
-            del(ndimg)
-#        self.processedVideo.append(ndimg)
-            self.frameComputed.emit()
-#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
-        
-    def applyOne(self):
-        self.src.readNCFrame(0)
-        self.backToFirst=True
-        ndimg = self.src.rawBuffer
-        del(self.lastComputedFrame)
-        self.lastComputedFrame=ndimg
-        del(ndimg)
-#        self.processedVideo.append(ndimg)
-        self.frameComputed.emit()
-#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
-        
-    def applyAll(self):
-        frameNb = self.src.getFrameNumber()
-        self.finished=False
-        for i in range(0, frameNb, self.nrSkipFrame+1):
-            if(not self.finished):
-                self.applyNext()
-            while(self.wait):
-                self.msleep(50)
-    
-    def run(self):
-        self.applyAll()
-        self.finished=True
-        self.endOfProcessing.emit()
-    
-    def finishedVideo(self):
-        self.finished=True
-        self.endOfProcessing.emit()
-        
-    def getLastComputedFrame(self):
-        self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)#self.processedVideo[-1]).copy()
-        return QtMultimedia.QVideoFrame(self.frameToSend)
-
-
-    def getLastInformation(self):
-        if(len(self.infoGathered)>0):
-            return self.infoGathered[-1]
-        else:
-            return None
-    
-    def saveResult(self, fileName):
-        if(len(self.processedVideo)>0 and (fileName[-4:]=='.avi' or fileName[-4:]=='.AVI')):
-            videoWriter = cv2.VideoWriter(fileName, 0, 25, (self.processedVideo[0].shape[0], self.processedVideo[0].shape[1]), isColor=False)
-            for frame in self.processedVideo:
-                videoWriter.write(frame)
-        else: 
-            raise ValueError("You have to use the applier on each frame you want to process and the file name has to finish by '.avi'.")
-
-
-class AbstractPreTreatment(AbstractTreatment):
-    
+class AbstractPreTreatment(object):
+    """Abstract class. All pretreatments inherit from this class"""
     def __init__(self):
-        '''
+        """
         Constructor
-        '''
+        """
         if(type(self) is AbstractPreTreatment):
             raise NotImplementedError('This class is abstract and cannot be instantiated') 
         super(AbstractPreTreatment, self).__init__()
 
     
 class CannyTreatment(AbstractPreTreatment):
-    '''
-    classdocs
-    '''
-    minThreshold = 25
-    ratio = 3
-    kernelSize = 3
+    """
+    Canny edge detector
+    """
     
     def __init__(self, minThreshold = 200, ratio = 1.2, kernelSize = 7, L2gradient=False):
-        '''
-        Constructor
-        '''
+        """    
+        :param minThreshold: The minimum threshold used by the Canny edge detector
+        :type minThreshold: int
+        :param ratio: use to know the maximal threshold used by the Canny edge detector : maxThreshold=ratio*minThreshold
+        :type ratio: float
+        :param kernelSize: The size of the kernel used for the gradient computation
+        :type kernelSize: int
+        :param L2Gradient: The method used to computer the gradient value. If true, results are more accurate but the method is slower.
+        :type L2Gradient: bool
+        
+        Constructor 
+        """
         super(CannyTreatment, self).__init__()
         self.minThreshold = minThreshold
         self.ratio = ratio
@@ -180,6 +50,14 @@ class CannyTreatment(AbstractPreTreatment):
         self.L2gradient = L2gradient
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image
+        """
         if(len(img.shape)==2):
             img= cv2.GaussianBlur( img, (9, 9), sigmaX=1.0, sigmaY=1.0)
     #        image = cv2.cvtColor( image, cv2.cv.CV_RGB2GRAY)
@@ -193,20 +71,33 @@ class CannyTreatment(AbstractPreTreatment):
         return edges
 
 class GaussianBlurTreatment(AbstractPreTreatment):
-    '''
-    classdocs
-    '''
+    """
+    Gaussian blur
+    """
     
     def __init__(self, kernelSize = (7, 7), Sigma = (1.0, 1.0)):
-        '''
+        """        
+        :param kernelSize: The size of the kernel used.
+        :type kernelSize: int  
+        :param Sigma: The variance of the gaussian function.
+        :type Sigma: float
+        
         Constructor
-        '''
-        super(GaborTreatment, self).__init__()
+        """
+        super(GaussianBlurTreatment, self).__init__()
         self.kernelSize = kernelSize
         self.sigmaX = Sigma[0]
         self.sigmaY = Sigma[1]
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image
+        """
         if(len(img.shape)==2):
             return cv2.GaussianBlur( img, self.kernelSize, sigmaX=self.sigmaX, sigmaY=self.sigmaY)
         else:
@@ -214,9 +105,28 @@ class GaussianBlurTreatment(AbstractPreTreatment):
     
         
 class GaborTreatment(AbstractPreTreatment):
+    """The Gabor filter bank treatment"""
     filters = []
     
     def __init__(self, ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0, ktype = numpy.float32, angleToProcess=[]):
+        """        
+        :param ksize: The size of the kernel used.
+        :type ksize: int  
+        :param sigma: The variance.
+        :type sigma: float
+        :param lambd: The wavelength
+        :type lambd: int  
+        :param gamma: The excentricity
+        :type gamma: float
+        :param psi: the offset
+        :type psi: int  
+        :param ktype: The type of the kernel value
+        :type ktype: Numpy type
+        :param angleToProcess: The angles to process
+        :type angleToProcess: list of float  
+        
+        Constructor
+        """
         super(GaborTreatment, self).__init__()
         self.angleToProcess = angleToProcess
         self.ksize = ksize
@@ -225,12 +135,18 @@ class GaborTreatment(AbstractPreTreatment):
         self.gamma = gamma
         self.psi = psi
         self.ktype = ktype
-        self.cpuNumber = max(multiprocessing.cpu_count()-2, 1)
+        self.cpuNumber = max(multiprocessing.cpu_count()-1, 1)
         if(self.cpuNumber>1):
             self.pool = ThreadPool(processes=self.cpuNumber)
         self.buildFilters()
        
     def getGaborKernel(self, theta): 
+        """        
+        :param theta: The orientation of the kernel
+        :type theta: float
+        
+        create a Gabor kernel with all the arguments given in the constructor. the Theta is the last missing argument
+        """
         sigma_x = self.sigma
         sigma_y = self.sigma/self.gamma
         nstds = 3
@@ -263,6 +179,9 @@ class GaborTreatment(AbstractPreTreatment):
         return kernel
     
     def buildFilters(self):
+        """                
+        build all the kernel for the Gabor bank filter. the orientation is the varying parameter
+        """
         if(self.angleToProcess==[]):
             self.angleToProcess = numpy.arange(0, numpy.pi, numpy.pi / 32)
         for theta in self.angleToProcess:
@@ -276,6 +195,14 @@ class GaborTreatment(AbstractPreTreatment):
         return self.filters
     
     def process(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image
+        """
         accum = numpy.zeros_like(img)
 #        angle = numpy.zeros_like(img,dtype=numpy.float32)
         for kern, _ in self.filters:
@@ -298,6 +225,14 @@ class GaborTreatment(AbstractPreTreatment):
         return accum
 
     def processThreaded(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image (multi-threaded version of process).
+        """
         accum = numpy.zeros_like(img)
 #        angle = numpy.zeros_like(img,dtype=numpy.float32)
         accumLock = multiprocessing.Lock()
@@ -335,6 +270,14 @@ class GaborTreatment(AbstractPreTreatment):
         return accum
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image by using process or processThreaded (choice is made automatically).
+        """
         if(len(img.shape)==2):
             if(self.cpuNumber>1):
                 img = self.processThreaded(img)
@@ -345,36 +288,78 @@ class GaborTreatment(AbstractPreTreatment):
         return img
 
 class ReduceSizeTreatment(AbstractPreTreatment):
-    
+    """Reduce the size of an image"""
     def __init__(self, dstSize=None):
+        """        
+        :param dstSize: The final size
+        :type dstSize: Tuple of int
+        
+        Constructor
+        """
         super(ReduceSizeTreatment, self).__init__()
         self.dstSize=dstSize
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image
+        """
         if(len(img.shape)==2):
                 return cv2.pyrDown(img, dstsize=self.dstSize)
         else:
             raise ValueError("The image must have 2 dimension(gray scale).")
 
 class IncreaseSizeTreatment(AbstractPreTreatment):
-    
+    """Increase the size of an image"""
     def __init__(self, dstSize=None):
+        """        
+        :param dstSize: The final size
+        :type dstSize: Tuple of int
+        
+        Constructor
+        """
         super(IncreaseSizeTreatment, self).__init__()
         self.dstSize=dstSize
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         if(len(img.shape)==2):
                 return numpy.uint8(cv2.pyrUp(img, dstsize=self.dstSize))
         else:
             raise ValueError("The image must have 2 dimension(gray scale).")
 
 class changeContrastTreatment(AbstractPreTreatment):
-    
+    """Change the contrast of the image"""
     def __init__(self, value=1.0):
+        """        
+        :param value: Contrast multiplier
+        :type value: float
+        
+        Constructor
+        """
         super(changeContrastTreatment, self).__init__()
         self.value=value
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         image = numpy.zeros(img.shape, dtype = numpy.uint32)
         if(len(img.shape)==2):
                 image = numpy.uint32(img)*self.value
@@ -384,28 +369,63 @@ class changeContrastTreatment(AbstractPreTreatment):
             raise ValueError("The image must have 2 dimension(gray scale).")
 
 class cropTreatment(AbstractPreTreatment):
-
+    """Crop the image"""
     def __init__(self, roi = None):
+        """        
+        :param roi: Coordinates of the region of interest
+        :type roi: Tuple of Tuple of int
+        
+        Constructor
+        """
         super(cropTreatment, self).__init__()        
         self.roi = roi
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         if(self.roi is not None and self.roi[0][0]>=0 and self.roi[0][1]>=0 and self.roi[0][0]<self.roi[1][0] and self.roi[0][1]<self.roi[1][1] and self.roi[1][0]<img.shape[0] and self.roi[1][1]<img.shape[1]):
             return img[self.roi[0][1]:self.roi[1][1],self.roi[0][0]:self.roi[1][0]]
         else: 
             raise ValueError("Incorrect size for the region of interest when cropping.")    
 
 class rotateTreatment(AbstractPreTreatment):
+    """Rotate the image"""
     def __init__(self, angle = 0):
+        """        
+        :param angle: The angle of rotation
+        :type value: float
+        
+        Constructor
+        """
         super(rotateTreatment, self).__init__()
         self.setAngle(angle)
     
     def setAngle(self, angle):
+        """        
+        :param angle: The angle of rotation
+        :type angle: float
+        
+        Change the angle
+        """
         self.angle=angle
         self.alpha = numpy.cos(-self.angle)
         self.beta = numpy.sin(-self.angle)
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         center = (img.shape[0]/2.0, img.shape[1]/2.0)
         M = cv2.getRotationMatrix2D(center, numpy.degrees(self.angle), 1.0)
         sizemaxX = numpy.int(numpy.abs(self.alpha*img.shape[1]))#-beta*img.shape[0])
@@ -413,14 +433,32 @@ class rotateTreatment(AbstractPreTreatment):
         return cv2.warpAffine(img, M, (sizemaxX, sizemaxY), borderMode=cv2.BORDER_WRAP).copy()#[sizemaxY/2-30:sizemaxY/2+30, 0:sizemaxX]
         
 class LaplacianTreatment(AbstractPreTreatment):
-
+    """Perform filtering using a Laplacian of Gaussian"""
     def __init__(self, kernelSize=3, scale=1, delta=0):
+        """        
+        :param kernelSize: The kernel size
+        :type kernelSize: int
+        :param scale: The scale factor computer for the laplacian value
+        :type scale: float
+        :param delta: value added to the results
+        :type delta: int
+        
+        Constructor
+        """
         super(LaplacianTreatment, self).__init__()  
         self.kernelSize=kernelSize
         self.scale=scale
         self.delta=delta
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
 #        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
         result = cv2.Laplacian( numpy.uint8(img), ddepth=cv2.CV_32F, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
 #        result = -result
@@ -429,8 +467,22 @@ class LaplacianTreatment(AbstractPreTreatment):
 #        result[result<50]=0
     
 class SobelTreatment(AbstractPreTreatment):
-
+    """Compute the Sobel derivative of an image"""
     def __init__(self, dx=1, dy=1, kernelSize=7, scale=1, delta=0):
+        """        
+        :param dx: The order of the x derivative
+        :type kernelSize: int
+        :param dy: The order of the y derivative
+        :type dy: float
+        :param kernelSize: The kernel size
+        :type kernelSize: int
+        :param scale: The scale factor for the derivative values
+        :type scale: float
+        :param delta: value added to the results
+        :type delta: int
+        
+        Constructor
+        """
         super(SobelTreatment, self).__init__()  
         self.dx=dx
         self.dy=dy
@@ -439,6 +491,14 @@ class SobelTreatment(AbstractPreTreatment):
         self.delta=delta
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
 #        img= cv2.GaussianBlur( img, (31,31), sigmaX=1.0, sigmaY=1.0)
         result = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=self.dx, dy=self.dy, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         result[result<0] = 0
@@ -450,24 +510,42 @@ class SobelTreatment(AbstractPreTreatment):
 #        result[result<50]=0
         return result
     
-    def compute2(self, img):
-#        img = cv2.GaussianBlur( img, (7, 7), sigmaX=0.0, sigmaY=0.0);
-        grad_x = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=1, dy=0, ksize=7, scale=1, delta=0)
-#        abs_grad_x = cv2.convertScaleAbs( grad_x,  alpha=255.0/numpy.max(numpy.abs(grad_x)))
-        
-        grad_y = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=0, dy=1, ksize=7, scale=1, delta=0)
-#        abs_grad_y = cv2.convertScaleAbs( grad_y,  alpha=255.0/numpy.max(numpy.abs(grad_y)))
-        norm =  numpy.sqrt(numpy.add(numpy.square(numpy.asarray(grad_x, dtype=numpy.float)), numpy.square(numpy.asarray(grad_y, dtype=numpy.float))))#cv2.addWeighted( numpy.abs(grad_x), 0.5, numpy.abs(grad_y), 0.5, 0)
-        return numpy.asarray((norm/numpy.max(norm))*255.0, dtype=numpy.uint8)
+#     def compute2(self, img):
+# #        img = cv2.GaussianBlur( img, (7, 7), sigmaX=0.0, sigmaY=0.0);
+#         grad_x = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=1, dy=0, ksize=7, scale=1, delta=0)
+# #        abs_grad_x = cv2.convertScaleAbs( grad_x,  alpha=255.0/numpy.max(numpy.abs(grad_x)))
+#         
+#         grad_y = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=0, dy=1, ksize=7, scale=1, delta=0)
+# #        abs_grad_y = cv2.convertScaleAbs( grad_y,  alpha=255.0/numpy.max(numpy.abs(grad_y)))
+#         norm =  numpy.sqrt(numpy.add(numpy.square(numpy.asarray(grad_x, dtype=numpy.float)), numpy.square(numpy.asarray(grad_y, dtype=numpy.float))))#cv2.addWeighted( numpy.abs(grad_x), 0.5, numpy.abs(grad_y), 0.5, 0)
+#         return numpy.asarray((norm/numpy.max(norm))*255.0, dtype=numpy.uint8)
 class DOHTreatment(AbstractPreTreatment):
-
+    """Compute the determinant of the Hessian matrix"""
     def __init__(self, kernelSize=7, scale=1, delta=0):
+        """        
+        :param kernelSize: The kernel size
+        :type kernelSize: int
+        :param scale: The scale factor for the derivative values
+        :type scale: float
+        :param delta: value added to the results
+        :type delta: int
+        
+        Constructor
+        """
         super(DOHTreatment, self).__init__()  
         self.kernelSize=kernelSize
         self.scale=scale
         self.delta=delta
     
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
 #        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
         resultxy = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=1, dy=1, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         resultxx = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=2, dy=0, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
@@ -481,27 +559,50 @@ class DOHTreatment(AbstractPreTreatment):
         return numpy.uint8((result/numpy.max(result))*255.0)
 #        result[result<50]=0
    
-class rotationTreatment(AbstractPreTreatment):
-    def __init__(self, angle):
-        super(rotationTreatment, self).__init__()
-        self.angle = angle
-        
-    def compute(self, img):
-        center = (img.shape[0]/2.0, img.shape[1]/2.0)
-        M = cv2.getRotationMatrix2D(center, self.angle, 1.0)
-        alpha = numpy.cos(-numpy.radians(self.angle))
-        beta = numpy.sin(-numpy.radians(self.angle))
-        sizemaxX = numpy.int(alpha*img.shape[1])#-beta*img.shape[0])
-        sizemaxY = numpy.int(beta*img.shape[1]+alpha*img.shape[0])
-        result = cv2.warpAffine(img, M, (sizemaxX, sizemaxY))
-        return result[result.shape[0]/2-30:result.shape[0]/2+30, 0:result.shape[1]].copy()
+# class rotationTreatment(AbstractPreTreatment):
+#     def __init__(self, angle):
+#         super(rotationTreatment, self).__init__()
+#         self.angle = angle
+#         
+#     def compute(self, img):
+#         """        
+#         :param img: The image to process
+#         :type img: Numpy array    
+#         :return: The processed image
+#         :rtype: Numpy array
+#         
+#         Process one image.
+#         """
+#         center = (img.shape[0]/2.0, img.shape[1]/2.0)
+#         M = cv2.getRotationMatrix2D(center, self.angle, 1.0)
+#         alpha = numpy.cos(-numpy.radians(self.angle))
+#         beta = numpy.sin(-numpy.radians(self.angle))
+#         sizemaxX = numpy.int(alpha*img.shape[1])#-beta*img.shape[0])
+#         sizemaxY = numpy.int(beta*img.shape[1]+alpha*img.shape[0])
+#         result = cv2.warpAffine(img, M, (sizemaxX, sizemaxY))
+#         return result[result.shape[0]/2-30:result.shape[0]/2+30, 0:result.shape[1]].copy()
     
 class ThresholdTreatment(AbstractPreTreatment):
+    """"Perform Thesholding"""
     def __init__(self, threshold=-1):
+        """        
+        :param threshold: The threshold. -1 means automatic threshold.
+        :type threshold: int
+        
+        Constructor
+        """
         super(ThresholdTreatment, self).__init__()
         self.threshold = threshold
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         if(self.threshold<-1):
             self.threshold=numpy.mean(img[img>=numpy.max(self.threshold, 0)])
         elif(self.threshold<0):
@@ -511,12 +612,29 @@ class ThresholdTreatment(AbstractPreTreatment):
         return img
     
 class addHlineTreatment(AbstractPreTreatment):
+    """add horizontal white line on the image"""
     def __init__(self, thickness = 1, lineDistance=10):
+        """        
+        :param thickness: The line thickness
+        :type thickness: int
+        :param lineDistance: The distance between the lines
+        :type lineDistance: int
+        
+        Constructor
+        """
         super(addHlineTreatment, self).__init__()
         self.thickness = thickness
         self.lineDistance = numpy.int(lineDistance)
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         x = img.shape[1]
         y = img.shape[0]
 #        lineNumber = numpy.int(y/self.lineDistance)
@@ -525,32 +643,80 @@ class addHlineTreatment(AbstractPreTreatment):
         return img.copy()
         
 class DilationTreatment(AbstractPreTreatment):
+    """Perform morphological dilation"""
     def __init__(self, morphology=cv2.MORPH_RECT, size=(3, 3)):
+        """        
+        :param morphology: The shape of the mask
+        :type morphology: int
+        :param size: The size of the shape
+        :type size: int
+        
+        Constructor
+        """
         super(DilationTreatment, self).__init__()
         self.morphology=morphology
         self.size=size
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         elem = cv2.getStructuringElement( self.morphology, self.size )
         return cv2.dilate(img, elem)#cv2.dilate(cv2.erode(img, elem), elem)
 
 class erosionTreatment(AbstractPreTreatment):
+    """Perform morphological erosion"""
     def __init__(self, morphology=cv2.MORPH_RECT, size=(3, 3)):
+        """        
+        :param morphology: The shape of the mask
+        :type morphology: int
+        :param size: The size of the shape
+        :type size: int
+        
+        Constructor
+        """
         super(erosionTreatment, self).__init__()
         self.morphology=morphology
         self.size=size
         
     def compute(self, img):
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         elem = cv2.getStructuringElement( self.morphology, self.size )
         return cv2.erode(img, elem)#cv2.dilate(cv2.erode(img, elem), elem)
 
-class SkeletonTreatment(AbstractTreatment):
+class SkeletonTreatment(AbstractPreTreatment):
+    """Compute morphological skeleton of blobs in an image"""
     def __init__(self, size=(3, 3)):
+        """        
+        :param size: The size of the cross shaped mask used in the method
+        :type size: int
+        
+        Constructor
+        """
         super(SkeletonTreatment, self).__init__()
         self.size=size
         
     def compute(self, img):
-
+        """        
+        :param img: The image to process
+        :type img: Numpy array    
+        :return: The processed image
+        :rtype: Numpy array
+        
+        Process one image.
+        """
         k = cv2.getStructuringElement( cv2.MORPH_CROSS, self.size )
         skel = numpy.zeros_like(img, dtype = numpy.uint8)
         temp = numpy.zeros_like(img, dtype = numpy.uint8)
@@ -580,64 +746,72 @@ class SkeletonTreatment(AbstractTreatment):
 #            elem = numpy.array([(0, 1, 0),(1, 1, -1),(0, -1, -1)], dtype=numpy.int8)
 #            img = self.erodeSP(img, elem)
         return skel.astype(numpy.uint8)*255
-    def erodeSP(self, img, elem):
-        imgPre = numpy.copy(img)
-        for y in numpy.arange(1, img.shape[0]-2, 1):
-            for x in (1, img.shape[1]-2, 1):
-                tmp = numpy.copy(img[max(y-numpy.int(elem.shape[0]/2), 0):min(y+numpy.int(elem.shape[0]/2)+1, img.shape[0]), max(x-numpy.int(elem.shape[1]/2), 0):min(x+numpy.int(elem.shape[1]/2)+1, img.shape[1])]).astype(numpy.int)
-                tmp[numpy.where(elem==-1)] = -1
-                tmp[numpy.where(tmp>0)] = 1
-                if(numpy.all(elem == tmp) and tmp[1][1]!=1 or (not(numpy.all(elem == tmp)) and tmp[1][1]==1)):
-                    imgPre[y][x] = 255 if (numpy.all(elem == tmp)) else 0
-        return imgPre
+#     def erodeSP(self, img, elem):
+#         """        
+#         :param img: The image to process
+#         :type img: Numpy array
+#         :param elem: The size of the shape
+#         :type elem: int
+#         
+#         Special erosion function. internal to the class.
+#         """
+#         imgPre = numpy.copy(img)
+#         for y in numpy.arange(1, img.shape[0]-2, 1):
+#             for x in (1, img.shape[1]-2, 1):
+#                 tmp = numpy.copy(img[max(y-numpy.int(elem.shape[0]/2), 0):min(y+numpy.int(elem.shape[0]/2)+1, img.shape[0]), max(x-numpy.int(elem.shape[1]/2), 0):min(x+numpy.int(elem.shape[1]/2)+1, img.shape[1])]).astype(numpy.int)
+#                 tmp[numpy.where(elem==-1)] = -1
+#                 tmp[numpy.where(tmp>0)] = 1
+#                 if(numpy.all(elem == tmp) and tmp[1][1]!=1 or (not(numpy.all(elem == tmp)) and tmp[1][1]==1)):
+#                     imgPre[y][x] = 255 if (numpy.all(elem == tmp)) else 0
+#         return imgPre
     
-class ThinningTreatment(AbstractTreatment):
-    def __init__(self, size=(3, 3)):
-        super(ThinningTreatment, self).__init__()
-        self.size=size
-    def thinningIteration(self, img, itera):
-        marker = numpy.zeros_like(img, dtype = numpy.uint8)
-        for y in numpy.arange(1, img.shape[0]-2, 1):
-            for x in numpy.arange(1, img.shape[1]-2, 1):
-                v2 = img[y-1, x]
-                v3 = img[y-1, x+1]
-                v4 = img[y, x+1]
-                v5 = img[y+1, x+1]
-                v6 = img[y+1, x]
-                v7 = img[y+1, x-1]
-                v8 = img[y, x-1]
-                v9 = img[y-1, x-1]
-                B = v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9
-                if(B >= 2 and B <= 6):
-                    if(itera == 0):
-                        m1 = (v2 * v4 * v6)
-                        m2 = (v4 * v6 * v8)
-                    else :
-                        m1 = (v2 * v4 * v8)
-                        m2 = (v2 * v6 * v8)
-                    if( m1 == 0 and m2 == 0):
-                        v2 = v2==0
-                        v3 = v3==0
-                        v4 = v4==0
-                        v5 = v5==0
-                        v6 = v6==0
-                        v7 = v7==0
-                        v8 = v8==0
-                        v9 = v9==0
-                        A = (sum([(v2 and not v3), (v3 and not v4), (v4 and not v5), (v5 and not v6), (v6 and not v7), (v7 and not v8), (v8 and not v9), (v9 and not v2)]))
-                        if (A == 1): 
-                            marker[y][x] = 1
-        return numpy.logical_and(img, numpy.logical_not(marker)).astype(numpy.uint8)
-    def compute(self, img):
-        img[numpy.where(img>0)] = 1
-        prev = numpy.zeros_like(img, dtype = numpy.uint8)
-        diff=None
-    
-        while (numpy.sum(diff) > 0 or diff==None):
-            img = self.thinningIteration(img, 0)
-            img = self.thinningIteration(img, 1)
-            diff = cv2.absdiff(img, prev)
-            prev = numpy.copy(img)
-    
-        return img.astype(numpy.uint8)*255
+# class ThinningTreatment(AbstractTreatment):
+#     def __init__(self, size=(3, 3)):
+#         super(ThinningTreatment, self).__init__()
+#         self.size=size
+#     def thinningIteration(self, img, itera):
+#         marker = numpy.zeros_like(img, dtype = numpy.uint8)
+#         for y in numpy.arange(1, img.shape[0]-2, 1):
+#             for x in numpy.arange(1, img.shape[1]-2, 1):
+#                 v2 = img[y-1, x]
+#                 v3 = img[y-1, x+1]
+#                 v4 = img[y, x+1]
+#                 v5 = img[y+1, x+1]
+#                 v6 = img[y+1, x]
+#                 v7 = img[y+1, x-1]
+#                 v8 = img[y, x-1]
+#                 v9 = img[y-1, x-1]
+#                 B = v2 + v3 + v4 + v5 + v6 + v7 + v8 + v9
+#                 if(B >= 2 and B <= 6):
+#                     if(itera == 0):
+#                         m1 = (v2 * v4 * v6)
+#                         m2 = (v4 * v6 * v8)
+#                     else :
+#                         m1 = (v2 * v4 * v8)
+#                         m2 = (v2 * v6 * v8)
+#                     if( m1 == 0 and m2 == 0):
+#                         v2 = v2==0
+#                         v3 = v3==0
+#                         v4 = v4==0
+#                         v5 = v5==0
+#                         v6 = v6==0
+#                         v7 = v7==0
+#                         v8 = v8==0
+#                         v9 = v9==0
+#                         A = (sum([(v2 and not v3), (v3 and not v4), (v4 and not v5), (v5 and not v6), (v6 and not v7), (v7 and not v8), (v8 and not v9), (v9 and not v2)]))
+#                         if (A == 1): 
+#                             marker[y][x] = 1
+#         return numpy.logical_and(img, numpy.logical_not(marker)).astype(numpy.uint8)
+#     def compute(self, img):
+#         img[numpy.where(img>0)] = 1
+#         prev = numpy.zeros_like(img, dtype = numpy.uint8)
+#         diff=None
+#     
+#         while (numpy.sum(diff) > 0 or diff==None):
+#             img = self.thinningIteration(img, 0)
+#             img = self.thinningIteration(img, 1)
+#             diff = cv2.absdiff(img, prev)
+#             prev = numpy.copy(img)
+#     
+#         return img.astype(numpy.uint8)*255
 

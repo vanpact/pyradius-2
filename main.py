@@ -14,11 +14,11 @@ from PyQt4 import QtGui, QtCore
 from View import Window
 
 def main():
-    """The main function of the program
+    """
+    The main function of the program
         
-        Returns: 
-            int.  The return code::
-                0 -- Success!
+    :return: 0 if success
+    :rtype: int
     """
     app = QtGui.QApplication(sys.argv)
 #     styleSheet = QtCore.QFile("darkorange.stylesheet")
@@ -32,5 +32,6 @@ def main():
     return 0
     
 if __name__ == '__main__':
+    """Entry point of the program."""
     main()
     

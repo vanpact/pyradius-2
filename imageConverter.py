@@ -1,28 +1,34 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Created on Oct 12, 2012
 
 @author: yvesremi
-'''
+"""
+
 from PyQt4 import QtGui
 import numpy, cv2
 import gc, sys, debugsp
 
 class ImageConverter(object):
-    '''
-    classdocs
-    '''
+    """Class to convert a numpy array to QImage and a QImage to a Numpy array."""
 
 
     def __init__(self):
-        '''
-        Constructor
-        '''
+        """Constructor"""
     
     @staticmethod
     def qimageToNdarray(img, colorToGray=False):
+        """Convert a QImage to a Numpy array
+        
+        :param img: The QImage to be converted
+        :type img: QImage
+        :param colorToGray: if true, convert the image to grayScale
+        :type colorToGray: bool
+        :return: The converted image
+        :rtype: Numpy array
+        """
         if(isinstance(img, QtGui.QImage)):
             imageShape = (img.height(), img.width())
             temporaryShape = (img.height(), img.bytesPerLine() * 8 / img.depth())
@@ -50,6 +56,15 @@ class ImageConverter(object):
         
     @staticmethod
     def ndarrayToQimage(ndimg, form=QtGui.QImage.Format_RGB888):
+        """Convert a Numpy array to a QImage
+
+        :param ndimg: The Numpy array to be converted
+        :type ndimg: Numpy array
+        :param form: The QImage pixel format
+        :type form: int
+        :return: The converted image
+        :rtype: QImage
+        """
         if(isinstance(ndimg, numpy.ndarray)):
             ndimg1 = numpy.asarray(ndimg, numpy.uint8)
             if(len(ndimg1.shape)==2):#Grayscale images

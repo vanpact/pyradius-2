@@ -1,15 +1,17 @@
-'''
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
 Created on Oct 20, 2012
 
 @author: yvesremi
+"""
 
-'''
 import cv2, numpy
 import skimage.transform
 import PreTreatments
 from PyQt4 import QtCore
-import gc, sys, debugsp
-#import cython
+import gc
 #import pyximport; pyximport.install() 
 
 class AbstractTreatment(object):
@@ -32,7 +34,7 @@ class AbstractTreatment(object):
         :raise: NotImplementedError
         """
         raise NotImplementedError( "The method need to be implemented" )
-      
+    
 class blobDetectionTreatment(AbstractTreatment):
     """This class use Ellipsoid to detect the angle of the aponeurosis."""
     def __init__(self, mode = cv2.cv.CV_RETR_LIST, method=cv2.cv.CV_CHAIN_APPROX_NONE, lines=None):
@@ -299,7 +301,7 @@ class MuscleTracker2(AbstractTreatment):
         self.xoffset = self.limitx[0]
         self.yoffset =  self.limity[0]-30
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([oldminx, oldminy-30], [oldmaxx, oldmaxy+30])))
-#        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))
+#         self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 8, gamma = 0.02, psi = 0))
                                       
         self.prevImg = None
         leftpointfiber = numpy.argsort(numpy.asarray([fiber[0].x(), fiber[1].x()]))[0]

@@ -62,9 +62,8 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     
     def __init__(self, parent=None):
         """Constructs the video surface. 
-        
-        Args:
-            parent: A QWidget object representing the parent.
+
+        :param parent: A QWidget object representing the parent.
         """
         self.widget = None
         self.imageFormat = None
@@ -83,11 +82,9 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     def supportedPixelFormats(self, handleType):
         """ Returns the supported pixel format.
             
-        Args:
-            handleType: A QtMultimedia.QAbstractVideoBuffer.HandleType object representing to identify the video buffers handle.
+        :param handleType: A QtMultimedia.QAbstractVideoBuffer.HandleType object representing to identify the video buffers handle.
         
-        Returns: 
-            A list of QtMultimedia.QVideoFrame.PixelFormat containing the supported pixels formats. If No pixel formats are supported, the list will be empty.
+        :return: A list of QtMultimedia.QVideoFrame.PixelFormat containing the supported pixels formats. If No pixel formats are supported, the list will be empty.
         """
         if(handleType == QtMultimedia.QAbstractVideoBuffer.NoHandle ):
             return [QtMultimedia.QVideoFrame.Format_RGB32, QtMultimedia.QVideoFrame.Format_ARGB32, QtMultimedia.QVideoFrame.Format_RGB32_Premultiplied, QtMultimedia.QVideoFrame.Format_RGB565, QtMultimedia.QVideoFrame.Format_RGB555]
@@ -97,11 +94,9 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     def  isFormatSupported(self, form):
         """ Check if the video surface format is supported. The function will check if the image format is valid, has a size and if the HandleType is NoHandle.
         
-        Args:
-            form: A QtMultimedia.QVideoSurfaceFormat object to be checked.
+        :param form: A QtMultimedia.QVideoSurfaceFormat object to be checked.
         
-        Returns: 
-            True if the format is supported. False otherwise.
+        :return: True if the format is supported. False otherwise.
         """
         imageFormat=QtMultimedia.QVideoFrame.imageFormatFromPixelFormat(form.pixelFormat())
         size = form.frameSize()
@@ -110,11 +105,10 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
         
     def present(self, frame):
         """ Force an immediate repaint of the video surface when a new frame has been received.
-        Args:
-            frame: A QtMultimedia.QVideoFrame object to be painted
+        
+        :param frame: A QtMultimedia.QVideoFrame object to be painted
             
-        Returns:
-            True if there was no error. False otherwise. 
+        :return: True if there was no error. False otherwise. 
         """
         if (self.surfaceFormat().pixelFormat() != frame.pixelFormat() or self.surfaceFormat().frameSize() != frame.size()):
             raise Exception
@@ -130,11 +124,9 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     def start(self, form):
         """Start the video surface.
         
-        Args: 
-            form: The QtMultimedia.QVideoSurfaceFormat used by the surface. 
+        :param form: The QtMultimedia.QVideoSurfaceFormat used by the surface. 
             
-        Returns:
-            True if there was no error. False otherwise. 
+        :return: True if there was no error. False otherwise. 
         """
         imageFormat = QtMultimedia.QVideoFrame.imageFormatFromPixelFormat(form.pixelFormat())
         size = form.frameSize()
@@ -159,8 +151,7 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     def videoRect(self):
         """Returns a rectangle of the video.
         
-        Returns: 
-            A QtCore.QRect representing the painted zone.
+        :return: A QtCore.QRect representing the painted zone.
         """
         return self.targetRect
         
@@ -174,8 +165,7 @@ class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     def paint(self, painter):
         """Paints the current video frame on the widget surface.
         
-        Args: 
-            painter: A QtGui.QPainter used to draw the image on the surface.
+        :param painter: A QtGui.QPainter used to draw the image on the surface.
         """
         if (self.currentFrame.map(QtMultimedia.QAbstractVideoBuffer.ReadOnly)):
             oldTransform = painter.transform()
@@ -198,8 +188,7 @@ class VideoWidget(QtGui.QWidget):
     def __init__(self, parent=None):
         """Constructs the video Widget. 
         
-        Args:
-            parent: A QWidget object representing the parent.
+        :param parent: A QWidget object representing the parent.
         """
         if parent is None:
             super(VideoWidget, self).__init__()
@@ -228,16 +217,21 @@ class VideoWidget(QtGui.QWidget):
     def videoSurface(self):
         """Return the VideoWidgetSurface.
         
-        Returns:
-            The VideoWidgetSurface embedded in the widget.
+        :return: The VideoWidgetSurface embedded in the widget.
         """
         return self.surface
     
     def mapFromGlobalToVideo(self, pos):
+        """Convert screen coordinates to video coordinates
+        :param pos: the screen coordinates
+        :return: the video coordinates
+        """
         pos = self.mapFromGlobal(pos)
         return (pos.x()-self.surface.videoRect().left(), pos.y()-self.surface.videoRect().top())
         
     def mapToVideo(self, pos):
+        """Map surface coordinates to video coordinates
+        :param pos: the surface coordinate"""
         if(isinstance(pos, list)):
             result = []
             for values in pos:
@@ -258,91 +252,161 @@ class VideoWidget(QtGui.QWidget):
     def sizeHint(self): 
         """Return the recommend size for the widget.
         
-        Returns:
-            The recommend size for the widget.
+        :return: The recommend size for the widget.
         """
         return self.surface.surfaceFormat().sizeHint()
     
     def mouseReleaseEvent(self, e):
+        """Event triggered when the user release the mouse button 
+        """
         if ((self.mouseClick) and (e.pos() == self.lastPoint)):
             self.clicked.emit()
     def mousePressEvent (self, e):
+        """Event triggered when the user press the mouse button 
+        """
         self.lastPoint = e.pos()
         self.mouseClick = True
         self.clicking.emit()
     
     def appendLine(self, begin, end):
+        """append a line to the list of liens to draw
+        
+        :param begin: one extremity of the line
+        :param end: the other extremity of the line
+        """
         if(isinstance(begin, QtCore.QPoint) and isinstance(end, QtCore.QPoint)):
             self.Lines.append((begin, end))
             self.repaint()
     
     def appendRect(self, begin, end):
+        """append a rectangle to the list of liens to draw
+            
+        :param begin: one corner of the rectangle
+        :param end: the opposite corner of the rectanle
+        """
         if(isinstance(begin, QtCore.QPoint) and isinstance(end, QtCore.QPoint)):
             self.Rect.append((begin, end))
             self.repaint()
             
     def appendPoint(self, point):
+        """append a point to the list of liens to draw
+            
+        :param point: the point coordinates
+        """
         if(isinstance(point, QtCore.QPoint)):
             self.Points.append(point)
             self.repaint()
             
     def getLineNumbers(self):
+        """Get the number of lines to draw
+        
+        :return: the number of lines to draw
+        """
         return len(self.Lines)
     
     def getPointNumbers(self):
+        """Get the number of points to draw
+        
+        :return: the number of points to draw
+        """
         return len(self.Points)
                    
     def getLines(self):
+        """Get the lines to draw
+        
+        :return: the lines to draw
+        """
         return self.Lines
     
     def getPoints(self):
+        """Get the points to draw
+        
+        :return: the points to draw
+        """
         return self.Points
     
     def getRect(self):
+        """Get the rectangles to draw
+        
+        :return: the rectangles to draw
+        """
         return self.Rect
     
     def getString(self):
+        """Get the strings to draw
+        
+        :return: the strings to draw
+        """
         return str(self.stringDrawn)
     
     def setString(self, string):
+        """Set the string to draw
+        
+        :param string: the string to draw
+        """
         self.stringsToDraw = True;
         self.stringDrawn = QtCore.QString(string)
         
     def getStringStartPosition(self):
+        """Get the position of the string to draw
+        
+        :return: the position of the string to draw
+        """
         return (self.stringStartPosition.x(), self.stringStartPosition.y())
     
     def setStringStartPosition(self, position):
+        """Set the position of the string to draw
+        
+        :param position: the position of the string to draw
+        """
         self.stringStartPosition = QtCore.QPoint(position[0], position[1])
     
     def removeLastLine(self):
+        """Remove the last line added to the list of the lines to draw.
+        """
         self.Lines.pop()  
         self.repaint() 
     
     def removeLastRect(self):
+        """Remove the last rectangle added to the list of the rectangles to draw.
+        """
         self.Rect.pop()  
         self.repaint() 
         
     def popLastLine(self):
+        """Pop the last line added to the list of the lines to draw.
+        :return: the popped line
+        """
         r = self.Rect.pop()  
         self.repaint() 
         return r
     
     def stopDrawingString(self):
+        """Stop drawing the string.
+        """
         self.stringDrawn = False
  
     def startDrawingString(self):
+        """Start drawing the string.
+        """
         self.stringDrawn = True
                
     def removeLastPoint(self):
+        """Remove the last point added to the point of the lines to draw.
+        """
         self.Points.pop()  
         self.repaint() 
           
     def popLastPoint(self):
+        """Pop the last point added to the list of the point to draw.
+        :return: the popped point
+        """
         p = self.Points.pop()  
         self.repaint() 
         return p
     
     def resetShapes(self):
+        """remove all the shapes which need to be drawn."""
         self.Points = []
         self.Lines = []
         self.Rect = []
@@ -350,8 +414,7 @@ class VideoWidget(QtGui.QWidget):
     def paintEvent(self, event): 
         """Slot called when the widget receives a paint event.
         
-        Args: 
-            event: The received event.
+        :param event: The received event.
         """
         painter= QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
@@ -401,8 +464,7 @@ class VideoWidget(QtGui.QWidget):
     def resizeEvent(self, event):
         """Slot called when the widget is resized.
         
-        Args: 
-            event: The received event.
+        :param event: The received event.
         """
         super(VideoWidget, self).resizeEvent(event)
         self.surface.updateVideoRect()
@@ -416,8 +478,7 @@ class Movie(QtCore.QObject):
     def __init__(self, fileName=None):
         """Initialize the video stream and open the video file if a fileName is provided.
         
-        Args: 
-            filename: a string containing the name of the file to be opened.
+        :param filename: a string containing the name of the file to be opened.
         """
         self.rawBuffer=None
         self.source=None
@@ -434,6 +495,7 @@ class Movie(QtCore.QObject):
         self.frameNumber = 0
     
     def reset(self):
+        """Reset the movie object. Remove the source."""
         self.rawBuffer=None
         self.source=None
         self.timer = None
@@ -444,14 +506,12 @@ class Movie(QtCore.QObject):
     def setMovie(self, fileName):
         """Open a video file.
         
-        Args:
-            filename: a string containing the name of the file to be opened.
+        :param filename: a string containing the name of the file to be opened.
             
-        raise:
-            TypeError: The fileName is not a string.
+        :raise: TypeError: The fileName is not a string.
         """
         if(isinstance(fileName, basestring)):
-            self.fileName = unicode(fileName)
+            self.fileName =  u''.join(fileName).encode('utf-8')
             self.source = VideoStream(self.fileName)
         else: 
             raise TypeError('fileName must be a string')
@@ -472,6 +532,7 @@ class Movie(QtCore.QObject):
         self.timer.timeout.connect(self.frameMustChange)
     
     def resetMovie(self):
+        """Reset the video stream."""
         self.source = VideoStream(self.fileName)
         
     def play(self): 
@@ -486,8 +547,8 @@ class Movie(QtCore.QObject):
         
     def frameMustChange(self):
         """Slot called when it is time to load the next frame.
-        Raise: 
-            Exception: The file cannot be read because the codec is not supported or the video is compressed.
+        
+        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
         self.readNextFrame()
         
@@ -524,8 +585,7 @@ class Movie(QtCore.QObject):
     def jumpToFrame(self, position):
         """Modify the position in the video.
         
-        Args: 
-            position: a value between 0 and 1 corresponding to the position in the video. 0 is the beginning and 1 is the end.
+        :param position: a value between 0 and 1 corresponding to the position in the video. 0 is the beginning and 1 is the end.
         """
         if(position>1.0):
             position = 1.0
@@ -536,8 +596,7 @@ class Movie(QtCore.QObject):
     
     def readNextFrame(self):
         """Load the next frame.
-        Raise: 
-            Exception: The file cannot be read because the codec is not supported or the video is compressed.
+        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
         try:
             self.rawBuffer = self.source.next().ndarray()
@@ -560,8 +619,7 @@ class Movie(QtCore.QObject):
         
     def readNCFrame(self, number):
         """Load the next frame.
-        Raise: 
-            Exception: The file cannot be read because the codec is not supported or the video is compressed.
+        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
         position = self.source.current().frameno
         try:
@@ -589,19 +647,23 @@ class Movie(QtCore.QObject):
     def currentPositionRatio(self):
         """Returns the position in the video.
         
-        Returns:
-            a value between 0 and 1 representing the position in the video. 0 is the beginning and 1 is the end.
+        :return: a value between 0 and 1 representing the position in the video. 0 is the beginning and 1 is the end.
         """
         if(self.source is not None and self.source.current() is not None):
-            return self.source.current().timestamp/self.source.duration
+            result = self.source.current().timestamp/self.source.duration
+            if(result>1.0):
+                return 1.0
+            elif(result<0.0):
+                return 0.0
+            else:
+                return result
         else:
             return 1.0
     
     def getFrameNumber(self):
         """Returns the number of frame in the video.
         
-        Returns:
-            an integer representing the number of frame in the video.
+        :return: An integer representing the number of frame in the video.
         """
         return int(self.source.duration*self.source.framerate)
     
@@ -611,8 +673,7 @@ class Movie(QtCore.QObject):
     def getEllapsedTime(self):
         """Returns the number ellapsed time in the video.
         
-        Returns:
-            an integer representing the number of frame in the video.
+        :return: An integer representing the number of frame in the video.
         """
         return self.source.current().timestamp
         
