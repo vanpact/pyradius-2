@@ -20,6 +20,8 @@ def runSetup(setup_args):
 
 if __name__=='__main__':
     try:
+        sys.stdout = open("nul", "w")
+        sys.stderr = open("nul", "w")
         os.rename('Applier.py', 'Applier.pyx')
         os.rename('MainTreatments.py', 'MainTreatments.pyx')
         os.rename('PreTreatments.py', 'PreTreatments.pyx')
@@ -66,3 +68,8 @@ if __name__=='__main__':
         os.rename('TotalTreatments.pyx', 'TotalTreatments.py')
         os.rename('imageConverter.pyx', 'imageConverter.py')
         os.rename('PostTreatments.pyx', 'PostTreatments.py')
+        try:
+            os.remove('dist/pyradius.exe')
+        except:
+            pass
+        os.rename('dist/main.exe', 'dist/pyradius.exe')

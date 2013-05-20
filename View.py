@@ -440,7 +440,7 @@ class Window(QtGui.QMainWindow):
                 self.playButton.setText("Continuer")
             if(not(self.filterApplied.wait) or not(self.filterApplied.isRunning())):
                     self.treatmentComboBox.setEnabled(False)
-                    self.resetTreatmentButton.setEnabled(True)
+                    self.resetTreatmentButton.setEnabled(False)
                     self.SkipFrameSpinBox.setEnabled(False)
                     self.playButton.setIcon(QtGui.QIcon("Images/pause.png"))
                     self.playButton.setText("Pause")
