@@ -1,0 +1,557 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MainTreatments Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="VideoItem Module" href="VideoItem.html" />
+    <link rel="prev" title="TotalTreatments Module" href="TotalTreatments.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VideoItem.html" title="VideoItem Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="maintreatments-module">
+<h1>MainTreatments Module<a class="headerlink" href="#maintreatments-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-MainTreatments" title="MainTreatments"><tt class="xref py py-mod docutils literal"><span class="pre">MainTreatments</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-MainTreatments"></span><p>Created on Oct 20, 2012</p>
+<p>&#64;author: yvesremi</p>
+<dl class="class">
+<dt id="MainTreatments.AbstractTreatment">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">AbstractTreatment</tt><a class="reference internal" href="_modules/MainTreatments.html#AbstractTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AbstractTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract class for treatments.</p>
+<dl class="method">
+<dt id="MainTreatments.AbstractTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#AbstractTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AbstractTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.AbstractTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#AbstractTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AbstractTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>abstract method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raise :</th><td class="field-body">NotImplementedError</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="MainTreatments.AponeurosisTracker">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">AponeurosisTracker</tt><big>(</big><em>line=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#AponeurosisTracker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AponeurosisTracker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MainTreatments.AbstractTreatment" title="MainTreatments.AbstractTreatment"><tt class="xref py py-class docutils literal"><span class="pre">MainTreatments.AbstractTreatment</span></tt></a></p>
+<p>This class track the position of the aponeurosis using the Lucas-Kanade algorithm and return it&#8217;s orientation.</p>
+<dl class="method">
+<dt id="MainTreatments.AponeurosisTracker.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>line=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#AponeurosisTracker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AponeurosisTracker.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> &#8211; The extremities of the aponeurosis</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.AponeurosisTracker.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#AponeurosisTracker.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.AponeurosisTracker.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image in order to extract the aponeurosis angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The image and the extracted angle</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="MainTreatments.MuscleTracker2">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">MuscleTracker2</tt><big>(</big><em>lines=None</em>, <em>fiber=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#MuscleTracker2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.MuscleTracker2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MainTreatments.AbstractTreatment" title="MainTreatments.AbstractTreatment"><tt class="xref py py-class docutils literal"><span class="pre">MainTreatments.AbstractTreatment</span></tt></a></p>
+<p>This class track the muscle fascicle orientation using the Lucas-Kanade algorithm and return it&#8217;s orientation.</p>
+<dl class="method">
+<dt id="MainTreatments.MuscleTracker2.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>lines=None</em>, <em>fiber=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#MuscleTracker2.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.MuscleTracker2.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lines</strong> (<em>Collection of QPoints</em>) &#8211; The two extremities of the aponeurosis</li>
+<li><strong>fiber</strong> (<em>Collection of QPoints</em>) &#8211; The extremities of a line parallel to the muscle fascicle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.MuscleTracker2.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#MuscleTracker2.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.MuscleTracker2.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image in order to extract the muscle fascicle angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The image and the extracted angle</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="MainTreatments.blobDetectionTreatment">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">blobDetectionTreatment</tt><big>(</big><em>mode=1</em>, <em>method=1</em>, <em>lines=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#blobDetectionTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.blobDetectionTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MainTreatments.AbstractTreatment" title="MainTreatments.AbstractTreatment"><tt class="xref py py-class docutils literal"><span class="pre">MainTreatments.AbstractTreatment</span></tt></a></p>
+<p>This class use Ellipsoid to detect the angle of the aponeurosis.</p>
+<dl class="method">
+<dt id="MainTreatments.blobDetectionTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>mode=1</em>, <em>method=1</em>, <em>lines=None</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#blobDetectionTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.blobDetectionTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mode</strong> (<em>Int</em>) &#8211; The mode argument in the OpenCV method findcontours</li>
+<li><strong>method</strong> (<em>Int</em>) &#8211; The method argument in the OpenCV method findcontours</li>
+<li><strong>lines</strong> (<em>Collection of QPoints</em>) &#8211; The two extremities of the aponeurosis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.blobDetectionTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#blobDetectionTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.blobDetectionTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image in order to extract the muscle fascicle angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The image and the extracted angle</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="MainTreatments.seamCarving">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">seamCarving</tt><big>(</big><em>limits</em>, <em>firstApproximation</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MainTreatments.AbstractTreatment" title="MainTreatments.AbstractTreatment"><tt class="xref py py-class docutils literal"><span class="pre">MainTreatments.AbstractTreatment</span></tt></a></p>
+<p>This function use SeamCarving to extract the junction position</p>
+<dl class="method">
+<dt id="MainTreatments.seamCarving.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>limits</em>, <em>firstApproximation</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>limits</strong> (<em>Collection of QPoints</em>) &#8211; The region of interest</li>
+<li><strong>firstApproximation</strong> (<em>QPoint</em>) &#8211; The value of initialisation of the position of the junction</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.addOffset">
+<tt class="descname">addOffset</tt><big>(</big><em>pointList</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.addOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.addOffset" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pointList</strong> &#8211; List of the points for which the offset will be added</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the offset list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the seams carving process on the image to find the white lines and the junction point
+The image for this application needs to be an ultrasound image (in grey).
+The hiding area is the thickness of the fasciae (in pixel).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img</strong> &#8211; matrix of the image</li>
+<li><strong>a</strong> &#8211; thickness of the hiding area (below)</li>
+<li><strong>b</strong> &#8211; thickness of the hiding area (above)</li>
+<li><strong>hide</strong> &#8211; boolean to show or not the hiding area</li>
+<li><strong>ref</strong> &#8211; boolean to show or not a reference point</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the image with the fasciae in blue and the junction in red, the coordinates of the junction</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.drawPointRed">
+<tt class="descname">drawPointRed</tt><big>(</big><em>img</em>, <em>point</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.drawPointRed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.drawPointRed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw a red little square at the position given by &#8220;point&#8221;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img</strong> &#8211; matrix of the image</li>
+<li><strong>point</strong> &#8211; coordinate of the point of junction</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the image with the red point</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.drawSeamsBlack">
+<tt class="descname">drawSeamsBlack</tt><big>(</big><em>img</em>, <em>coord</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.drawSeamsBlack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.drawSeamsBlack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the image with some thickness in black following the first seam</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img</strong> &#8211; matrix of the image</li>
+<li><strong>coord</strong> &#8211; array of the coordinates [x,y] of the seams</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the image with the seams in black</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.drawSeamsBlue">
+<tt class="descname">drawSeamsBlue</tt><big>(</big><em>img</em>, <em>coord</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.drawSeamsBlue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.drawSeamsBlue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draw the image with seams in blue</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img</strong> &#8211; matrix of the image</li>
+<li><strong>coord</strong> &#8211; array of the coordinates [x,y] of the seams</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the image with the seams in blue</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.findJunction">
+<tt class="descname">findJunction</tt><big>(</big><em>coord1</em>, <em>coord2</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.findJunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.findJunction" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>coord1</strong> &#8211; coordinates of the first fascia</li>
+<li><strong>coord2</strong> &#8211; coordinates of the second fascia</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the coordinate of the junction</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.findSeams">
+<tt class="descname">findSeams</tt><big>(</big><em>img_score</em>, <em>dimr</em>, <em>dimc</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.findSeams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.findSeams" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img_score</strong> &#8211; matrix of score of the image</li>
+<li><strong>dimr</strong> &#8211; dimension for the rows</li>
+<li><strong>dimc</strong> &#8211; dimension for the columns</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">the coordinates of the seams (way with the lowest cost)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.findSeamsHor">
+<tt class="descname">findSeamsHor</tt><big>(</big><em>coord</em>, <em>i</em>, <em>img_score</em>, <em>dimr</em>, <em>dimc</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.findSeamsHor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.findSeamsHor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add coordinates of the seams in a list, by finding the minimum value of the adjacent rows of the next column</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>coord</strong> &#8211; list of the coordinates of the seams</li>
+<li><strong>i</strong> &#8211; arguments of the row with minimum value</li>
+<li><strong>img_score</strong> &#8211; matrix of the image score</li>
+<li><strong>dimr</strong> &#8211; dimension of rows</li>
+<li><strong>dimc</strong> &#8211; dimension of columns</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.makeSeams">
+<tt class="descname">makeSeams</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.makeSeams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.makeSeams" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> &#8211; Matrix of the image</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the array of the Seams Carving Image</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.seamCarving.pixelScore">
+<tt class="descname">pixelScore</tt><big>(</big><em>img</em>, <em>dimr</em>, <em>dimc</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#seamCarving.pixelScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.seamCarving.pixelScore" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>img</strong> &#8211; matrix of the image</li>
+<li><strong>dimr</strong> &#8211; dimension for rows</li>
+<li><strong>dimc</strong> &#8211; dimension for columns</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">matrix of score following horizontal seam carving algorithm</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="MainTreatments.testRadon">
+<em class="property">class </em><tt class="descclassname">MainTreatments.</tt><tt class="descname">testRadon</tt><big>(</big><em>lines=None</em>, <em>manyCircles=False</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#testRadon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.testRadon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#MainTreatments.AbstractTreatment" title="MainTreatments.AbstractTreatment"><tt class="xref py py-class docutils literal"><span class="pre">MainTreatments.AbstractTreatment</span></tt></a></p>
+<p>This class extract the muscle fascicle orientation using the Radon transform.</p>
+<dl class="method">
+<dt id="MainTreatments.testRadon.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>lines=None</em>, <em>manyCircles=False</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#testRadon.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.testRadon.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>lines</strong> (<em>Collection of QPoints</em>) &#8211; The two extremity of the aponeurosis</li>
+<li><strong>manyCircles</strong> &#8211; if True, use 3 samples instead of one but is three times slower</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="MainTreatments.testRadon.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/MainTreatments.html#testRadon.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#MainTreatments.testRadon.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image in order to extract the muscle fascicle angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The image and the extracted angle</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">MainTreatments Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">MainTreatments</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="TotalTreatments.html"
+                        title="previous chapter">TotalTreatments Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="VideoItem.html"
+                        title="next chapter">VideoItem Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/MainTreatments.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VideoItem.html" title="VideoItem Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

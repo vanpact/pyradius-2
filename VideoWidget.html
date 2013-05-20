@@ -1,0 +1,761 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VideoWidget Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="View Module" href="View.html" />
+    <link rel="prev" title="VideoItem Module" href="VideoItem.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="View.html" title="View Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="VideoItem.html" title="VideoItem Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="videowidget-module">
+<h1>VideoWidget Module<a class="headerlink" href="#videowidget-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-VideoWidget" title="VideoWidget: module which manage the video. It also contains a widget to visualize it. (Unix, Windows)"><tt class="xref py py-mod docutils literal"><span class="pre">VideoWidget</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-VideoWidget"></span><span class="target" id="module-VideoWidget"></span><dl class="class">
+<dt id="VideoWidget.Movie">
+<em class="property">class </em><tt class="descclassname">VideoWidget.</tt><tt class="descname">Movie</tt><big>(</big><em>fileName=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtCore.QObject</span></tt></p>
+<p>This class represent the video data stream</p>
+<dl class="method">
+<dt id="VideoWidget.Movie.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>fileName=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the video stream and open the video file if a fileName is provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; a string containing the name of the file to be opened.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.currentPositionRatio">
+<tt class="descname">currentPositionRatio</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.currentPositionRatio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.currentPositionRatio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the position in the video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">a value between 0 and 1 representing the position in the video. 0 is the beginning and 1 is the end.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="VideoWidget.Movie.endOfVideo">
+<tt class="descname">endOfVideo</tt><a class="headerlink" href="#VideoWidget.Movie.endOfVideo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VideoWidget.Movie.frameChanged">
+<tt class="descname">frameChanged</tt><a class="headerlink" href="#VideoWidget.Movie.frameChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.frameMustChange">
+<tt class="descname">frameMustChange</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.frameMustChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.frameMustChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot called when it is time to load the next frame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Raise :</th><td class="field-body">Exception: The file cannot be read because the codec is not supported or the video is compressed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.getEllapsedTime">
+<tt class="descname">getEllapsedTime</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.getEllapsedTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.getEllapsedTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number ellapsed time in the video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An integer representing the number of frame in the video.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.getFrameNumber">
+<tt class="descname">getFrameNumber</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.getFrameNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.getFrameNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of frame in the video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An integer representing the number of frame in the video.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.getFrameSize">
+<tt class="descname">getFrameSize</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.getFrameSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.getFrameSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.jumpToFrame">
+<tt class="descname">jumpToFrame</tt><big>(</big><em>position</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.jumpToFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.jumpToFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modify the position in the video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>position</strong> &#8211; a value between 0 and 1 corresponding to the position in the video. 0 is the beginning and 1 is the end.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.pause">
+<tt class="descname">pause</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.pause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.pause" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the reading of the video stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.play">
+<tt class="descname">play</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.play"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.play" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start to read the video stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.readNCFrame">
+<tt class="descname">readNCFrame</tt><big>(</big><em>number</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.readNCFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.readNCFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the next frame.
+:raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.readNextFrame">
+<tt class="descname">readNextFrame</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.readNextFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.readNextFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the next frame.
+:raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.reset">
+<tt class="descname">reset</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the movie object. Remove the source.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.resetMovie">
+<tt class="descname">resetMovie</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.resetMovie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.resetMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the video stream.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.setMovie">
+<tt class="descname">setMovie</tt><big>(</big><em>fileName</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.setMovie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.setMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open a video file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; a string containing the name of the file to be opened.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raise :</th><td class="field-body">TypeError: The fileName is not a string.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.Movie.toggleState">
+<tt class="descname">toggleState</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#Movie.toggleState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.Movie.toggleState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggle between playing and pausing the video.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VideoWidget.VideoWidget">
+<em class="property">class </em><tt class="descclassname">VideoWidget.</tt><tt class="descname">VideoWidget</tt><big>(</big><em>parent=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></tt></p>
+<p>The VideoWidget class implement the actual videoWidget embedding the VideoWidgetSurface.</p>
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the video Widget.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; A QWidget object representing the parent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.appendLine">
+<tt class="descname">appendLine</tt><big>(</big><em>begin</em>, <em>end</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.appendLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.appendLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>append a line to the list of liens to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>begin</strong> &#8211; one extremity of the line</li>
+<li><strong>end</strong> &#8211; the other extremity of the line</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.appendPoint">
+<tt class="descname">appendPoint</tt><big>(</big><em>point</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.appendPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.appendPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>append a point to the list of liens to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>point</strong> &#8211; the point coordinates</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.appendRect">
+<tt class="descname">appendRect</tt><big>(</big><em>begin</em>, <em>end</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.appendRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.appendRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>append a rectangle to the list of liens to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>begin</strong> &#8211; one corner of the rectangle</li>
+<li><strong>end</strong> &#8211; the opposite corner of the rectanle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="VideoWidget.VideoWidget.clicked">
+<tt class="descname">clicked</tt><a class="headerlink" href="#VideoWidget.VideoWidget.clicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="VideoWidget.VideoWidget.clicking">
+<tt class="descname">clicking</tt><a class="headerlink" href="#VideoWidget.VideoWidget.clicking" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getLineNumbers">
+<tt class="descname">getLineNumbers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getLineNumbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getLineNumbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of lines to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of lines to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getLines">
+<tt class="descname">getLines</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getLines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the lines to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the lines to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getPointNumbers">
+<tt class="descname">getPointNumbers</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getPointNumbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getPointNumbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of points to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the number of points to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getPoints">
+<tt class="descname">getPoints</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getPoints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the points to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the points to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getRect">
+<tt class="descname">getRect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the rectangles to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the rectangles to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getString">
+<tt class="descname">getString</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the strings to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the strings to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.getStringStartPosition">
+<tt class="descname">getStringStartPosition</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.getStringStartPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.getStringStartPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the position of the string to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">the position of the string to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.mapFromGlobalToVideo">
+<tt class="descname">mapFromGlobalToVideo</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.mapFromGlobalToVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.mapFromGlobalToVideo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert screen coordinates to video coordinates
+:param pos: the screen coordinates
+:return: the video coordinates</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.mapToVideo">
+<tt class="descname">mapToVideo</tt><big>(</big><em>pos</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.mapToVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.mapToVideo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Map surface coordinates to video coordinates
+:param pos: the surface coordinate</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.mousePressEvent">
+<tt class="descname">mousePressEvent</tt><big>(</big><em>e</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event triggered when the user press the mouse button</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.mouseReleaseEvent">
+<tt class="descname">mouseReleaseEvent</tt><big>(</big><em>e</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Event triggered when the user release the mouse button</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.paintEvent">
+<tt class="descname">paintEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.paintEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.paintEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot called when the widget receives a paint event.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; The received event.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.popLastLine">
+<tt class="descname">popLastLine</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.popLastLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.popLastLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop the last line added to the list of the lines to draw.
+:return: the popped line</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.popLastPoint">
+<tt class="descname">popLastPoint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.popLastPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.popLastPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pop the last point added to the list of the point to draw.
+:return: the popped point</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.removeLastLine">
+<tt class="descname">removeLastLine</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.removeLastLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.removeLastLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last line added to the list of the lines to draw.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.removeLastPoint">
+<tt class="descname">removeLastPoint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.removeLastPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.removeLastPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last point added to the point of the lines to draw.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.removeLastRect">
+<tt class="descname">removeLastRect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.removeLastRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.removeLastRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the last rectangle added to the list of the rectangles to draw.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.resetShapes">
+<tt class="descname">resetShapes</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.resetShapes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.resetShapes" title="Permalink to this definition">¶</a></dt>
+<dd><p>remove all the shapes which need to be drawn.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.resizeEvent">
+<tt class="descname">resizeEvent</tt><big>(</big><em>event</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.resizeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slot called when the widget is resized.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>event</strong> &#8211; The received event.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.setString">
+<tt class="descname">setString</tt><big>(</big><em>string</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.setString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.setString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the string to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> &#8211; the string to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.setStringStartPosition">
+<tt class="descname">setStringStartPosition</tt><big>(</big><em>position</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.setStringStartPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.setStringStartPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the position of the string to draw</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>position</strong> &#8211; the position of the string to draw</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.sizeHint">
+<tt class="descname">sizeHint</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.sizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the recommend size for the widget.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The recommend size for the widget.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.startDrawingString">
+<tt class="descname">startDrawingString</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.startDrawingString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.startDrawingString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start drawing the string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.stopDrawingString">
+<tt class="descname">stopDrawingString</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.stopDrawingString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.stopDrawingString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop drawing the string.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidget.videoSurface">
+<tt class="descname">videoSurface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidget.videoSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidget.videoSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the VideoWidgetSurface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The VideoWidgetSurface embedded in the widget.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="VideoWidget.VideoWidgetSurface">
+<em class="property">class </em><tt class="descclassname">VideoWidget.</tt><tt class="descname">VideoWidgetSurface</tt><big>(</big><em>parent=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtMultimedia.QAbstractVideoSurface</span></tt></p>
+<p>VideoWidgetSurface is a class used for the video presentation in a QWidget.</p>
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent=None</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the video surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> &#8211; A QWidget object representing the parent.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.isFormatSupported">
+<tt class="descname">isFormatSupported</tt><big>(</big><em>form</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.isFormatSupported"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.isFormatSupported" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the video surface format is supported. The function will check if the image format is valid, has a size and if the HandleType is NoHandle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>form</strong> &#8211; A QtMultimedia.QVideoSurfaceFormat object to be checked.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if the format is supported. False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.paint">
+<tt class="descname">paint</tt><big>(</big><em>painter</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.paint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Paints the current video frame on the widget surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>painter</strong> &#8211; A QtGui.QPainter used to draw the image on the surface.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.present">
+<tt class="descname">present</tt><big>(</big><em>frame</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.present"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.present" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force an immediate repaint of the video surface when a new frame has been received.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>frame</strong> &#8211; A QtMultimedia.QVideoFrame object to be painted</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if there was no error. False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.start">
+<tt class="descname">start</tt><big>(</big><em>form</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the video surface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>form</strong> &#8211; The QtMultimedia.QVideoSurfaceFormat used by the surface.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True if there was no error. False otherwise.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.stop">
+<tt class="descname">stop</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>stop the video surface.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.supportedPixelFormats">
+<tt class="descname">supportedPixelFormats</tt><big>(</big><em>handleType</em><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.supportedPixelFormats"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.supportedPixelFormats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the supported pixel format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>handleType</strong> &#8211; A QtMultimedia.QAbstractVideoBuffer.HandleType object representing to identify the video buffers handle.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A list of QtMultimedia.QVideoFrame.PixelFormat containing the supported pixels formats. If No pixel formats are supported, the list will be empty.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.updateVideoRect">
+<tt class="descname">updateVideoRect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.updateVideoRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.updateVideoRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescale the rectangle to paint.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="VideoWidget.VideoWidgetSurface.videoRect">
+<tt class="descname">videoRect</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/VideoWidget.html#VideoWidgetSurface.videoRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#VideoWidget.VideoWidgetSurface.videoRect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a rectangle of the video.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A QtCore.QRect representing the painted zone.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">VideoWidget Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">VideoWidget</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="VideoItem.html"
+                        title="previous chapter">VideoItem Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="View.html"
+                        title="next chapter">View Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/VideoWidget.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="View.html" title="View Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="VideoItem.html" title="VideoItem Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

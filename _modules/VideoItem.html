@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VideoItem &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for VideoItem</h1><div class="highlight"><pre>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Oct 4, 2012</span>
+
+<span class="sd">@author: yvesremi</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtMultimedia</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<div class="viewcode-block" id="VideoItem"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem">[docs]</a><span class="k">class</span> <span class="nc">VideoItem</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoSurface</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    classdocs</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">imageFormat</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_Invalid</span>
+    <span class="n">framePainted</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">imageSize</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">currentFrame</span> <span class="o">=</span> <span class="bp">None</span>
+    
+
+<div class="viewcode-block" id="VideoItem.__init__"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="VideoItem.boundingRect"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.boundingRect">[docs]</a>    <span class="k">def</span> <span class="nf">boundingRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">a</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">+</span><span class="mi">1</span>
+    </div>
+<div class="viewcode-block" id="VideoItem.paint"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">)):</span>
+            <span class="n">oldTransform</span> <span class="o">=</span> <span class="n">painter</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
+             
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">scanLineDirection</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoSurfaceFormat</span><span class="o">.</span><span class="n">BottomToTop</span><span class="p">):</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">image</span><span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">bits</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">bytesPerLine</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceRect</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setTransform</span><span class="p">(</span><span class="n">oldTransform</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">framePainted</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">unmap</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VideoItem.supportedPixelFormats"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.supportedPixelFormats">[docs]</a>    <span class="k">def</span> <span class="nf">supportedPixelFormats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handleType</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">handleType</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">NoHandle</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_ARGB32</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_ARGB32_Premultiplied</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB24</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB565</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB555</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+    </div>
+<div class="viewcode-block" id="VideoItem.start"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isFormatSupported</span><span class="p">(</span><span class="n">form</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">imageFormatFromPixelFormat</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imageSize</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">frameSize</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">framePainted</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prepareGeometryChange</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        </div>
+<div class="viewcode-block" id="VideoItem.stop"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="p">();</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">framePainted</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VideoItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="VideoItem.present"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.present">[docs]</a>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framePainted</span><span class="p">)):</span>
+            <span class="k">if</span><span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isActive</span><span class="p">())):</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Video is not started!&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span> <span class="o">=</span> <span class="n">frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">framePainted</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="VideoItem.sizeHint"><a class="viewcode-back" href="../VideoItem.html#VideoItem.VideoItem.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">600</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

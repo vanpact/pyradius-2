@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ResultsWriter Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="TotalTreatments Module" href="TotalTreatments.html" />
+    <link rel="prev" title="PreTreatments Module" href="PreTreatments.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="PreTreatments.html" title="PreTreatments Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="resultswriter-module">
+<h1>ResultsWriter Module<a class="headerlink" href="#resultswriter-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-ResultsWriter" title="ResultsWriter"><tt class="xref py py-mod docutils literal"><span class="pre">ResultsWriter</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ResultsWriter"></span><p>Created on Apr 11, 2013</p>
+<p>&#64;author: yvesremi</p>
+<dl class="class">
+<dt id="ResultsWriter.ResultsWriter">
+<em class="property">class </em><tt class="descclassname">ResultsWriter.</tt><tt class="descname">ResultsWriter</tt><big>(</big><em>fileName=None</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class for outputing results in csv or xls files</p>
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>fileName=None</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fileName</strong> (<em>String</em>) &#8211; The name of the file where to output the results</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.addDatas">
+<tt class="descname">addDatas</tt><big>(</big><em>info</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.addDatas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.addDatas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push data in the list of data to write to the file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>a dictionnary or a list of dictionnary</em>) &#8211; The information to add</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.mergeDatas">
+<tt class="descname">mergeDatas</tt><big>(</big><em>info</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.mergeDatas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.mergeDatas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal method, merge the info with the current dataFrame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>a list of dictionnaries</em>) &#8211; The information merge</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.preparexls">
+<tt class="descname">preparexls</tt><big>(</big><em>sheet=None</em>, <em>xlsFile=None</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.preparexls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.preparexls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internal method, used when reading the file into a dataFrame.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sheet</strong> (<em>String</em>) &#8211; argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</li>
+<li><strong>xlsFile</strong> (<em>a pandas ExcelFile</em>) &#8211; The Excel file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.setWriteFile">
+<tt class="descname">setWriteFile</tt><big>(</big><em>fileName</em>, <em>sheet=None</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.setWriteFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.setWriteFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read the file and put the results in a data frame</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fileName</strong> (<em>String</em>) &#8211; The name of the file where to output the results</li>
+<li><strong>sheet</strong> (<em>String</em>) &#8211; argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ResultsWriter.ResultsWriter.write">
+<tt class="descname">write</tt><big>(</big><em>padNewColumn=True</em>, <em>outFileName=None</em>, <em>sheet=None</em><big>)</big><a class="reference internal" href="_modules/ResultsWriter.html#ResultsWriter.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ResultsWriter.ResultsWriter.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the info added with the method addData to the outputFile</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>padNewColumn</strong> (<em>bool</em>) &#8211; the write file already has information and sampling of the file is higher, pad the new data to add so there is no holes in the modifiers/added columns</li>
+<li><strong>outFileName</strong> (<em>String</em>) &#8211; The output file name</li>
+<li><strong>sheet</strong> (<em>String</em>) &#8211; argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ResultsWriter Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">ResultsWriter</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PreTreatments.html"
+                        title="previous chapter">PreTreatments Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="TotalTreatments.html"
+                        title="next chapter">TotalTreatments Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ResultsWriter.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="PreTreatments.html" title="PreTreatments Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

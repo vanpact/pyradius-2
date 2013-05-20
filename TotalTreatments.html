@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TotalTreatments Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="MainTreatments Module" href="MainTreatments.html" />
+    <link rel="prev" title="ResultsWriter Module" href="ResultsWriter.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MainTreatments.html" title="MainTreatments Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ResultsWriter.html" title="ResultsWriter Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="totaltreatments-module">
+<h1>TotalTreatments Module<a class="headerlink" href="#totaltreatments-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-TotalTreatments" title="TotalTreatments"><tt class="xref py py-mod docutils literal"><span class="pre">TotalTreatments</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-TotalTreatments"></span><p>Created on Oct 12, 2012</p>
+<p>&#64;author: yvesremi</p>
+<dl class="class">
+<dt id="TotalTreatments.EllipseMethod">
+<em class="property">class </em><tt class="descclassname">TotalTreatments.</tt><tt class="descname">EllipseMethod</tt><big>(</big><em>Aponeurosises</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#EllipseMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.EllipseMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class performing the pretreatments, treatments and post-treatments for the method using the Ellipsoids to detect the muscle fascicle orientation</p>
+<dl class="method">
+<dt id="TotalTreatments.EllipseMethod.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>Aponeurosises</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#EllipseMethod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.EllipseMethod.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>Aponeurosises</strong> (<em>list of 2 tuple containing 2 QPoints each</em>) &#8211; The position of the extremities of the aponeurosises</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="TotalTreatments.EllipseMethod.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#EllipseMethod.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.EllipseMethod.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image and a dictionnary containing the 2 pennation angles extracted(the key is the channel name)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="TotalTreatments.LKMethod">
+<em class="property">class </em><tt class="descclassname">TotalTreatments.</tt><tt class="descname">LKMethod</tt><big>(</big><em>Aponeurosises</em>, <em>fiber</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#LKMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.LKMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class performing the pretreatments, treatments and post-treatments for the method using the Lucas-Kanade algorithm</p>
+<dl class="method">
+<dt id="TotalTreatments.LKMethod.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>Aponeurosises</em>, <em>fiber</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#LKMethod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.LKMethod.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Aponeurosises</strong> (<em>list of 2 tuple containing 2 QPoints each</em>) &#8211; The position of the extremities of the aponeurosises</li>
+<li><strong>fiber</strong> (<em>tuple containing 2 QPoints</em>) &#8211; The position of the extremities of a muscle fascicle</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="TotalTreatments.LKMethod.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#LKMethod.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.LKMethod.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image and a dictionnary containing the 2 pennation angles extracted (the key is the channel name)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="TotalTreatments.RadonMethod">
+<em class="property">class </em><tt class="descclassname">TotalTreatments.</tt><tt class="descname">RadonMethod</tt><big>(</big><em>Aponeurosises</em>, <em>manySamples=False</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#RadonMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.RadonMethod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class performing the pretreatments, treatments and post-treatments for the method using the Radon transform</p>
+<dl class="method">
+<dt id="TotalTreatments.RadonMethod.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>Aponeurosises</em>, <em>manySamples=False</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#RadonMethod.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.RadonMethod.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Aponeurosises</strong> (<em>list of 2 tuple containing 2 QPoints each</em>) &#8211; The position of the extremities of the aponeurosises</li>
+<li><strong>manySamples</strong> (<em>bool</em>) &#8211; if True, use 3 samples instead of one but is three times slower</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="TotalTreatments.RadonMethod.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#RadonMethod.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.RadonMethod.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image and a dictionnary containing the 2 pennation angles extracted (the key is the channel name)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="TotalTreatments.junctionComputation">
+<em class="property">class </em><tt class="descclassname">TotalTreatments.</tt><tt class="descname">junctionComputation</tt><big>(</big><em>limits</em>, <em>firstApproximation</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#junctionComputation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.junctionComputation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class performing the pretreatments, treatments and post-treatments in order to extract the junction of an aponeurosis</p>
+<dl class="method">
+<dt id="TotalTreatments.junctionComputation.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>limits</em>, <em>firstApproximation</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#junctionComputation.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.junctionComputation.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>limits</strong> (<em>Tuple of 2 QPoints</em>) &#8211; 2 points delimitating a rectangular region of interest</li>
+<li><strong>firstApproximation</strong> (<em>QPoint</em>) &#8211; First approximation of the center</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The processed image and a dictionnary containing the center of the junction extracted (the key is the channel name)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Tuple</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="TotalTreatments.junctionComputation.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/TotalTreatments.html#junctionComputation.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TotalTreatments.junctionComputation.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image and a dictionnary containing the center of the junction extracted (the key is the channel name)</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Tuple</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">TotalTreatments Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">TotalTreatments</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ResultsWriter.html"
+                        title="previous chapter">ResultsWriter Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="MainTreatments.html"
+                        title="next chapter">MainTreatments Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/TotalTreatments.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MainTreatments.html" title="MainTreatments Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ResultsWriter.html" title="ResultsWriter Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

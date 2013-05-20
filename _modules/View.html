@@ -1,0 +1,661 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>View &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for View</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. module:: View</span>
+<span class="sd">        :platform: Unix, Windows</span>
+<span class="sd">        :synopsis: module which manage the view of the application.</span>
+<span class="sd">    .. moduleauthor:: Yves-Rémi Van Eycke &lt;yveycke [at] ulb.ac.be&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtMultimedia</span>
+<span class="kn">from</span> <span class="nn">VideoWidget</span> <span class="kn">import</span> <span class="n">VideoWidget</span><span class="p">,</span> <span class="n">Movie</span>
+<span class="kn">import</span> <span class="nn">Tutorial</span>
+<span class="kn">from</span> <span class="nn">Applier</span> <span class="kn">import</span> <span class="n">Applier</span>
+<span class="kn">import</span> <span class="nn">TotalTreatments</span> <span class="c">#import Applier, CannyTreatment, GaborTreatment</span>
+
+
+<div class="viewcode-block" id="Window"><a class="viewcode-back" href="../View.html#View.Window">[docs]</a><span class="k">class</span> <span class="nc">Window</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">):</span>
+    <span class="n">finishedWork</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="sd">&quot;&quot;&quot; This is the class which contains all the GUI.&quot;&quot;&quot;</span>
+<span class="c">#    timeSlider = None</span>
+    
+<div class="viewcode-block" id="Window.__init__"><a class="viewcode-back" href="../View.html#View.Window.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the view object.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Window</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initUI</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="Window.initUI"><a class="viewcode-back" href="../View.html#View.Window.initUI">[docs]</a>    <span class="k">def</span> <span class="nf">initUI</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize the main windows of the application. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">640</span><span class="p">,</span> <span class="mi">480</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">centerWindow</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s">&#39;Line&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&#39;Images/Icon.png&#39;</span><span class="p">))</span> 
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTextCodec</span><span class="o">.</span><span class="n">setCodecForCStrings</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QTextCodec</span><span class="o">.</span><span class="n">codecForName</span><span class="p">(</span><span class="s">&#39;UTF-8&#39;</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">firstTimePlayed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createMenuBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rect</span><span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">InputFile</span><span class="o">=</span><span class="bp">None</span>
+<span class="c">#        self.source = movie()</span>
+<span class="c">#        QtCore.QObject.connect(self.source, QtCore.SIGNAL(&#39;frameChanged&#39;), self.frameChanged)</span>
+<span class="c">#        self.source.frameChanged.connect(self.frameChanged)</span>
+<span class="c">#        self.filterApplied = PreTreatments.Applier()</span>
+<span class="c">#        self.filterApplied.frameComputed.connect(self.frameChanged)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Prêt&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Window.centerWindow"><a class="viewcode-back" href="../View.html#View.Window.centerWindow">[docs]</a>    <span class="k">def</span> <span class="nf">centerWindow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Center the windows on the screen of the user. &quot;&quot;&quot;</span>
+        <span class="n">windowsGeometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frameGeometry</span><span class="p">()</span>
+        <span class="n">ScreenCenter</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDesktopWidget</span><span class="p">()</span><span class="o">.</span><span class="n">availableGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">()</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">windowsGeometry</span><span class="o">.</span><span class="n">moveCenter</span><span class="p">(</span><span class="n">ScreenCenter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">windowsGeometry</span><span class="o">.</span><span class="n">center</span><span class="p">())</span>       
+     </div>
+<div class="viewcode-block" id="Window.createMenuBar"><a class="viewcode-back" href="../View.html#View.Window.createMenuBar">[docs]</a>    <span class="k">def</span> <span class="nf">createMenuBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the Menu bar with its menu and add the actions to the menus. &quot;&quot;&quot;</span>
+        <span class="n">menubar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">menuBar</span><span class="p">()</span>
+        <span class="n">fileMenu</span> <span class="o">=</span> <span class="n">menubar</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&#39;&amp;Fichiers&#39;</span><span class="p">)</span>
+        <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createAction</span><span class="p">(</span><span class="s">&#39;&amp;Fermer&#39;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">qApp</span><span class="o">.</span><span class="n">quit</span><span class="p">,</span> <span class="s">&#39;Ctrl+Q&#39;</span><span class="p">,</span> <span class="s">&#39;Quitte application&#39;</span><span class="p">))</span>
+        <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createAction</span><span class="p">(</span><span class="s">&#39;&amp;Ouvrir&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">openFile</span><span class="p">,</span> <span class="s">&#39;Ctrl+O&#39;</span><span class="p">,</span> <span class="s">&#39;Ouvre un film&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printImageAction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">createAction</span><span class="p">(</span><span class="s">&#39;&amp;Sauver image&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">captureImage</span><span class="p">,</span> <span class="s">&#39;Ctrl+S&#39;</span><span class="p">,</span> <span class="s">&#39;Sauvegarde l</span><span class="se">\&#39;</span><span class="s">image présente à l</span><span class="se">\&#39;</span><span class="s">écran&#39;</span><span class="p">)</span>
+        <span class="n">fileMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">printImageAction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">printImageAction</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">helpMenu</span> <span class="o">=</span> <span class="n">menubar</span><span class="o">.</span><span class="n">addMenu</span><span class="p">(</span><span class="s">&#39;Aide&#39;</span><span class="p">)</span>
+        <span class="n">helpMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createAction</span><span class="p">(</span><span class="s">&#39;A propos&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">printAbout</span><span class="p">,</span> <span class="s">&#39;Ctrl+?&#39;</span><span class="p">,</span> <span class="s">&#39;A propos&#39;</span><span class="p">))</span>
+        <span class="n">helpMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createAction</span><span class="p">(</span><span class="s">&#39;A propos de Qt&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">printAboutQt</span><span class="p">,</span> <span class="s">&#39;A propos de qt&#39;</span><span class="p">))</span>
+        </div>
+<div class="viewcode-block" id="Window.printAbout"><a class="viewcode-back" href="../View.html#View.Window.printAbout">[docs]</a>    <span class="k">def</span> <span class="nf">printAbout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Display the information about the application&quot;&quot;&quot;</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">about</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;A propos de Pyradius&#39;</span><span class="p">,</span> <span class="s">&#39;&lt;p&gt;&lt;strong&gt;Pyradius V1.0&lt;/strong&gt;&lt;/p&gt;</span><span class="se">\</span>
+<span class="s">        &lt;p&gt;Pyradius est un logiciel de traitement d</span><span class="se">\&#39;</span><span class="s">images permettant l</span><span class="se">\&#39;</span><span class="s">extraction de l</span><span class="se">\&#39;</span><span class="s">angle de pennation et de la position de la jonction des aponévroses.&lt;/p&gt;</span><span class="se">\</span>
+<span class="s">        &lt;p&gt;Copyright&amp;copy; 2013 Yves-Rémi Van Eycke.&lt;/p&gt;</span><span class="se">\</span>
+<span class="s">        &lt;p&gt;Ce logiciel est sous licence &lt;a href=https://www.gnu.org/licenses/quick-guide-gplv3.fr.html&gt;GNU GPLv3&lt;/a&gt;.</span><span class="se">\</span>
+<span class="s">        Il a été rendu possible grâce à: </span><span class="se">\</span>
+<span class="s">        &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://www.python.org/</span><span class="se">\&#39;</span><span class="s">&gt;Python&lt;/a&gt;, &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://www.cython.org/</span><span class="se">\&#39;</span><span class="s">&gt;Cython&lt;/a&gt;, </span><span class="se">\</span>
+<span class="s">        &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://www.riverbankcomputing.co.uk/software/pyqt</span><span class="se">\&#39;</span><span class="s">&gt;PyQt&lt;/a&gt;, &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://www.numpy.org/</span><span class="se">\&#39;</span><span class="s">&gt;Numpy&lt;/a&gt;, </span><span class="se">\</span>
+<span class="s">        &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://opencv.org/</span><span class="se">\&#39;</span><span class="s">&gt;OpenCV&lt;/a&gt;, &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://scikit-image.org/</span><span class="se">\&#39;</span><span class="s">&gt;scikit-image&lt;/a&gt;, </span><span class="se">\</span>
+<span class="s">        &lt;a href=</span><span class="se">\&#39;</span><span class="s">https://bitbucket.org/zakhar/ffvideo/wiki/Home</span><span class="se">\&#39;</span><span class="s">&gt;FFVideo&lt;/a&gt;, &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://www.ffmpeg.org/</span><span class="se">\&#39;</span><span class="s">&gt;FFMpeg&lt;/a&gt;, </span><span class="se">\</span>
+<span class="s">        &lt;a href=</span><span class="se">\&#39;</span><span class="s">http://pandas.pydata.org/</span><span class="se">\&#39;</span><span class="s">&gt;Pandas&lt;/a&gt;.&lt;/p&gt;</span><span class="se">\</span>
+<span class="s">        Le code source est disponible &lt;a href=</span><span class="se">\&#39;</span><span class="s">https://code.google.com/p/pyradius/</span><span class="se">\&#39;</span><span class="s">&gt;ici&lt;/a&gt;.&lt;p&gt;&lt;/p&gt;&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Window.printAboutQt"><a class="viewcode-back" href="../View.html#View.Window.printAboutQt">[docs]</a>    <span class="k">def</span> <span class="nf">printAboutQt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Display the information about Qt&quot;&quot;&quot;</span>
+        <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">aboutQt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;A propos de Qt&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Window.createAction"><a class="viewcode-back" href="../View.html#View.Window.createAction">[docs]</a>    <span class="k">def</span> <span class="nf">createAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">funct</span><span class="p">,</span> <span class="n">shortcut</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">statusTip</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the actions used, for example, in the menu bar and return it.</span>
+<span class="sd">        </span>
+<span class="sd">        :param name: The name of the action.</span>
+<span class="sd">        :param funct: The function to be triggered by the action.</span>
+<span class="sd">        :param shortcut: The shortcut for the action.</span>
+<span class="sd">        :param statusTip: A tip which will appear when hovering the action.</span>
+<span class="sd">        :return: The QAction object</span>
+<span class="sd">        :raise: AttributeError: if there is the name or the function send is none.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">action</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&#39;The action need a name!&#39;</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">shortcut</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">shortcut</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">statusTip</span> <span class="o">!=</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">setStatusTip</span><span class="p">(</span><span class="n">statusTip</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">funct</span> <span class="o">!=</span> <span class="bp">None</span> <span class="p">:</span>
+            <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">funct</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&#39;The action need a callable or a signal for when triggered!&#39;</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">action</span>
+</div>
+<div class="viewcode-block" id="Window.createLayout"><a class="viewcode-back" href="../View.html#View.Window.createLayout">[docs]</a>    <span class="k">def</span> <span class="nf">createLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout of the window. &quot;&quot;&quot;</span>
+        <span class="n">centralWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">centralWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span> <span class="o">=</span> <span class="n">VideoWidget</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">videoSurface</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">setStringStartPosition</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">*</span><span class="mf">0.9</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()))</span>
+<span class="c">#        scene = QtGui.QGraphicsScene(self)</span>
+<span class="c">#        graphicsView = QtGui.QGraphicsView(scene)</span>
+<span class="c">#        self.videoItem = VideoItem(scene)</span>
+<span class="c">#        scene.addItem(self.videoItem)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createInfoInterface</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">creatBasicControls</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createOptionControls</span><span class="p">()</span>
+        
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="p">)</span>
+        <span class="n">mainLayout</span><span class="o">.</span><span class="n">insertLayout</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">controlLayout</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">centralWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Window.creatBasicControls"><a class="viewcode-back" href="../View.html#View.Window.creatBasicControls">[docs]</a>    <span class="k">def</span> <span class="nf">creatBasicControls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets controlling the video. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicControlLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basicControlLayout</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;Images/play.png&quot;</span><span class="p">),</span> <span class="s">&#39;Commencer&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QProgressBar</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toggleProcessVideo</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicControlLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicControlLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Window.createOptionControls"><a class="viewcode-back" href="../View.html#View.Window.createOptionControls">[docs]</a>    <span class="k">def</span> <span class="nf">createOptionControls</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets common to all the treatments. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oLayout</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OptionWidget</span><span class="p">)</span>
+        
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">(</span><span class="s">&quot;Options Générales&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basicOptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c">#         self.basicOptionLayout.setContentsMargins(0, 0, 0, 0)</span>
+
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s">&#39;Lucas-Kanade&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s">&#39;Fit ellipsoïde&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s">&#39;Radon transform&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s">&#39;Seam Carving&#39;</span><span class="p">)</span>
+<span class="c">#         self.outputLabel = QtGui.QLabel(&#39;Sauver les résultats :&#39;)</span>
+<span class="c">#         self.outputCheckBox = QtGui.QCheckBox()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;Nombre d&#39;images à passer:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameLabel</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="o">|</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadCorrectInterface</span><span class="p">)</span>
+<span class="c">#         self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameLabel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="p">)</span>
+<span class="c">#         self.basicOptionLayout.addWidget(self.outputLabel)</span>
+<span class="c">#         self.basicOptionLayout.addWidget(self.outputCheckBox)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">createEllipsoidMethodInterface</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createRadonMethodInterface</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createLKMethodInterface</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createSCMethodInterface</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Window.createInfoInterface"><a class="viewcode-back" href="../View.html#View.Window.createInfoInterface">[docs]</a>    <span class="k">def</span> <span class="nf">createInfoInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the labels displaying the extracted information. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoInterfaceLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controlLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infoInterfaceLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span> <span class="o">=</span> <span class="p">[]</span>
+        </div>
+<div class="viewcode-block" id="Window.updateInfoInterface"><a class="viewcode-back" href="../View.html#View.Window.updateInfoInterface">[docs]</a>    <span class="k">def</span> <span class="nf">updateInfoInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">infoNumber</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the layout containing the labels displaying the extracted information. </span>
+<span class="sd">        </span>
+<span class="sd">        :param infoNumber: The number of info to display (=the number of labels needed).</span>
+<span class="sd">        :type infoNumber: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">value</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span><span class="p">):</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+            
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">infoNumber</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoInterfaceLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoInterfaceLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="Window.updateInfo"><a class="viewcode-back" href="../View.html#View.Window.updateInfo">[docs]</a>    <span class="k">def</span> <span class="nf">updateInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the labels containing the extracted information. </span>
+<span class="sd">        </span>
+<span class="sd">        :param info: The new extracted information.</span>
+<span class="sd">        :type info: dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">infoNumber</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">infoNumber</span><span class="o">!=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateInfoInterface</span><span class="p">(</span><span class="n">infoNumber</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoLabelList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s">&quot; : &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">infoValueList</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+<span class="c">#         self.infoInterfaceWidget.update()</span>
+
+            </div>
+<div class="viewcode-block" id="Window.createEllipsoidMethodInterface"><a class="viewcode-back" href="../View.html#View.Window.createEllipsoidMethodInterface">[docs]</a>    <span class="k">def</span> <span class="nf">createEllipsoidMethodInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment which use ellipsoids. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c">#         self.ellipsoidOptionLayout.setContentsMargins(0, 0, 0, 0)</span>
+
+        </div>
+<div class="viewcode-block" id="Window.createRadonMethodInterface"><a class="viewcode-back" href="../View.html#View.Window.createRadonMethodInterface">[docs]</a>    <span class="k">def</span> <span class="nf">createRadonMethodInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment which use the Radon transform. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radonOptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonLabel</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s">&quot;Prendre plus d&#39;échantillons:&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonLabel</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="o">|</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonCheckBox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonLabel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c">#         self.radonOptionLayout.setContentsMargins(0, 0, 0, 0)</span>
+        </div>
+<div class="viewcode-block" id="Window.createLKMethodInterface"><a class="viewcode-back" href="../View.html#View.Window.createLKMethodInterface">[docs]</a>    <span class="k">def</span> <span class="nf">createLKMethodInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LKOptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c">#         self.LKOptionLayout.setContentsMargins(0, 0, 0, 0)</span>
+    </div>
+<div class="viewcode-block" id="Window.createSCMethodInterface"><a class="viewcode-back" href="../View.html#View.Window.createSCMethodInterface">[docs]</a>    <span class="k">def</span> <span class="nf">createSCMethodInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment extraction the junction position. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGroupBox</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SCOptionLayout</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="c">#         self.SCOptionLayout.setContentsMargins(0, 0, 0, 0)</span>
+        </div>
+<div class="viewcode-block" id="Window.loadCorrectInterface"><a class="viewcode-back" href="../View.html#View.Window.loadCorrectInterface">[docs]</a>    <span class="k">def</span> <span class="nf">loadCorrectInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Select the correct layout depending on the method chosen by the user. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideAllInterface</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">basicOptionWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadLKTransformInterface</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadEllipsoidTransformInterface</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadRadonTransformInterface</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadSCTransformInterface</span><span class="p">()</span>
+       </div>
+<div class="viewcode-block" id="Window.hideAllInterface"><a class="viewcode-back" href="../View.html#View.Window.hideAllInterface">[docs]</a>    <span class="k">def</span> <span class="nf">hideAllInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Hide all the layouts containing the treatment specific widgets. &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+            <span class="n">possibleWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OptionLayout</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">possibleWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">()):</span>
+                <span class="n">possibleWidget</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="Window.loadEllipsoidTransformInterface"><a class="viewcode-back" href="../View.html#View.Window.loadEllipsoidTransformInterface">[docs]</a>    <span class="k">def</span> <span class="nf">loadEllipsoidTransformInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Load the layout for the widgets specific to the treatment which use ellipsoids. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ellipsoidOptionWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Window.loadRadonTransformInterface"><a class="viewcode-back" href="../View.html#View.Window.loadRadonTransformInterface">[docs]</a>    <span class="k">def</span> <span class="nf">loadRadonTransformInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment which use the Radon transform. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radonOptionWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="Window.loadLKTransformInterface"><a class="viewcode-back" href="../View.html#View.Window.loadLKTransformInterface">[docs]</a>    <span class="k">def</span> <span class="nf">loadLKTransformInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LKOptionWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="Window.loadSCTransformInterface"><a class="viewcode-back" href="../View.html#View.Window.loadSCTransformInterface">[docs]</a>    <span class="k">def</span> <span class="nf">loadSCTransformInterface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the layout for the widgets specific to the treatment extraction the junction position. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SCOptionWidget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Window.chooseOutputFile"><a class="viewcode-back" href="../View.html#View.Window.chooseOutputFile">[docs]</a>    <span class="k">def</span> <span class="nf">chooseOutputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="sd">&quot;&quot;&quot; Show the dialog to let the user select the output file. &quot;&quot;&quot;</span>
+        
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Ouvrir le fichier de sortie&quot;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&#39;Fichiers Excel (*.xlsx *.xls);;Fichiers Texte (*.txt);;Fichiers CSV (*.csv)&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">fileName</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">())):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span> <span class="o">=</span> <span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Window.chooseInputFile"><a class="viewcode-back" href="../View.html#View.Window.chooseInputFile">[docs]</a>    <span class="k">def</span> <span class="nf">chooseInputFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+        <span class="sd">&quot;&quot;&quot; Show the dialog to let the user select the output file. &quot;&quot;&quot;</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;Ouvrir le fichier d&#39;entrée&quot;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&#39;Fichiers Excel (*.xlsx *.xls);;Fichiers Texte (*.txt);;Fichiers CSV (*.csv)&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="n">fileName</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">())):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">InputFile</span> <span class="o">=</span> <span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>           
+
+             </div>
+<div class="viewcode-block" id="Window.openFile"><a class="viewcode-back" href="../View.html#View.Window.openFile">[docs]</a>    <span class="k">def</span> <span class="nf">openFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Show a dialog where there user can pick a file. &quot;&quot;&quot;</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;ouvrir la vidéo&quot;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&#39;Fichiers vidéo (*.avi *.mpeg *.mpg);;Autres (*.*)&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">fileName</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">())):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="c">#            self.videoItem.stop()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resetMovie</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">setMovie</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span> <span class="o">=</span> <span class="n">Applier</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">frameComputed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frameChanged</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setSource</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">endOfProcessing</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishVideo</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">firstTimePlayed</span> <span class="o">=</span> <span class="bp">True</span><span class="p">;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleProcessVideo</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">printImageAction</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+<span class="c">#            self.source.play()</span>
+</div>
+<div class="viewcode-block" id="Window.resetMovie"><a class="viewcode-back" href="../View.html#View.Window.resetMovie">[docs]</a>    <span class="k">def</span> <span class="nf">resetMovie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Reset the movie. &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getsurfacePosition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">Movie</span><span class="p">()</span></div>
+<div class="viewcode-block" id="Window.finishVideo"><a class="viewcode-back" href="../View.html#View.Window.finishVideo">[docs]</a>    <span class="k">def</span> <span class="nf">finishVideo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Close the video, ask the applier to write the output file if necessary and quit. &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Traitement terminé&#39;</span><span class="p">)</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span><span class="p">,</span> <span class="s">&#39;Sauvegarde&#39;</span><span class="p">,</span> 
+                  <span class="s">&#39;&lt;p&gt;&lt;strong&gt;Le traitement est terminé! Voulez vous sauver les résultats?&lt;/strong&gt;&lt;/p&gt; </span><span class="se">\</span>
+<span class="s">                  &lt;p&gt;Si vous sélectionnez oui, deux fenêtres de dialogue vont s</span><span class="se">\&#39;</span><span class="s">ouvrir. </span><span class="se">\</span>
+<span class="s">                  &lt;ul&gt;&lt;li&gt;La première va permettre de choisir un fichier d</span><span class="se">\&#39;</span><span class="s">entrée si vous voulez fusionner les résultats avec d</span><span class="se">\&#39;</span><span class="s">autres résultats que vous possèdez déjà. Dans le cas où vous ne désirez pas fusionner de résultats, fermez cette fenêtre sans choisir de fichier.&lt;/li&gt;</span><span class="se">\</span>
+<span class="s">                  &lt;li&gt;La deuxième va permettre de choisir où les résultats seront sauvegardés.&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt;&#39;</span><span class="p">,</span> 
+                  <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="o">|</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="o">==</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savingProcedure</span><span class="p">()</span>
+        <span class="n">box</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span><span class="p">,</span> <span class="s">&#39;Fin du traitement&#39;</span><span class="p">,</span> 
+            <span class="s">&#39;Travail terminé! Le programme va maintenant se fermer&#39;</span><span class="p">,</span> 
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishedWork</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">buttonClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">finishedWork</span><span class="o">.</span><span class="n">emit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Fermeture du programme&#39;</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Window.savingProcedure"><a class="viewcode-back" href="../View.html#View.Window.savingProcedure">[docs]</a>    <span class="k">def</span> <span class="nf">savingProcedure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save the results in a file&quot;&quot;&quot;</span>
+        <span class="n">cont</span><span class="o">=</span><span class="bp">True</span>
+        <span class="k">while</span><span class="p">(</span><span class="n">cont</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InputFile</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">InputFile</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chooseInputFile</span><span class="p">()</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">chooseOutputFile</span><span class="p">()</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span><span class="p">):</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span><span class="p">,</span> <span class="s">&#39;Pas de fichier de sortie&#39;</span><span class="p">,</span> 
+                  <span class="s">&#39;Vous n</span><span class="se">\&#39;</span><span class="s">avez pas sélectionné de fichier de sortie. Les resultats ne seront donc pas sauvegardés. Êtes vous sûr de votre choix?&#39;</span><span class="p">,</span> 
+                  <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="o">|</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+                <span class="n">ret</span> <span class="o">=</span> <span class="n">box</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+                <span class="k">if</span><span class="p">(</span><span class="n">ret</span><span class="o">==</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">):</span>
+                    <span class="n">cont</span><span class="o">=</span><span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">cont</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Sauvegarde en cours&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">saveResult</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InputFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">OutputFile</span><span class="p">)</span>
+                <span class="n">cont</span><span class="o">=</span><span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Sauvegarde terminée&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Window.toggleProcessVideo"><a class="viewcode-back" href="../View.html#View.Window.toggleProcessVideo">[docs]</a>    <span class="k">def</span> <span class="nf">toggleProcessVideo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pause and play the video processing&quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">firstTimePlayed</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">firstTimePlayed</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">applyOne</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">launchTutorial</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">toggle</span><span class="p">()</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">wait</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;Images/play.png&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Continuer&quot;</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">wait</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">isRunning</span><span class="p">())):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s">&quot;Images/pause.png&quot;</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">playButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s">&quot;Pause&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="c">#                    self.filterApplied.start(QtCore.QThread.HighestPriority)</span>
+            
+        </div>
+<div class="viewcode-block" id="Window.frameChanged"><a class="viewcode-back" href="../View.html#View.Window.frameChanged">[docs]</a>    <span class="k">def</span> <span class="nf">frameChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Update the view when the frame has changed. &quot;&quot;&quot;</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">getLastComputedFrame</span><span class="p">()</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">getLastInformation</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateInfo</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">isValid</span><span class="p">())):</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span><span class="p">,</span> <span class="s">&#39;Error&#39;</span><span class="p">,</span> <span class="s">&#39;Frame not valid!&#39;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">False</span><span class="p">;</span>
+        <span class="n">currentFormat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">()</span> <span class="o">!=</span> <span class="n">currentFormat</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">()</span> <span class="ow">or</span> <span class="n">frame</span><span class="o">.</span><span class="n">size</span><span class="p">()</span> <span class="o">!=</span> <span class="n">currentFormat</span><span class="o">.</span><span class="n">frameSize</span><span class="p">()):</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoSurfaceFormat</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">size</span><span class="p">(),</span> <span class="n">frame</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">())</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">fmt</span><span class="p">))):</span>
+                <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Critical</span><span class="p">,</span> <span class="s">&#39;Error&#39;</span><span class="p">,</span> <span class="s">&#39;Surface could not start!&#39;</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+                <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">present</span><span class="p">(</span><span class="n">frame</span><span class="p">))):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">setValue</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">currentPositionRatio</span><span class="p">()</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">maximum</span><span class="p">()))</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Window.jumpToFrame"><a class="viewcode-back" href="../View.html#View.Window.jumpToFrame">[docs]</a>    <span class="k">def</span> <span class="nf">jumpToFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Jump to a position in the movie. </span>
+<span class="sd">        </span>
+<span class="sd">        :param value: A value in the range of the slider.</span>
+<span class="sd">        :raise: AttributeError: if value is to high or negative.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">progressBar</span><span class="o">.</span><span class="n">maximum</span><span class="p">())</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">ratio</span><span class="o">&lt;=</span><span class="mf">1.0</span> <span class="ow">and</span> <span class="n">ratio</span><span class="o">&gt;=</span><span class="mf">0.0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">jumpToFrame</span><span class="p">(</span><span class="n">ratio</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Trying to jump at a position which does not exists&quot;</span><span class="p">)</span>
+         </div>
+<div class="viewcode-block" id="Window.captureImage"><a class="viewcode-back" href="../View.html#View.Window.captureImage">[docs]</a>    <span class="k">def</span> <span class="nf">captureImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Take a snapshot of the video and save it. &quot;&quot;&quot;</span>
+<span class="c">#        snapshot = self.source.currentImage()</span>
+        <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">getLastComputedImage</span><span class="p">()</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&quot;save an image&quot;</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QDir</span><span class="o">.</span><span class="n">homePath</span><span class="p">(),</span> <span class="s">&#39;Image (*.png *.PNG)&#39;</span><span class="p">)</span>
+        <span class="n">snapshot</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s">&quot;png&quot;</span><span class="p">)</span>
+<span class="c">#         self.source.play()</span>
+        </div>
+<div class="viewcode-block" id="Window.getsurfacePosition"><a class="viewcode-back" href="../View.html#View.Window.getsurfacePosition">[docs]</a>    <span class="k">def</span> <span class="nf">getsurfacePosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the position of the cursor in the video and ask the surface to draw a shape if necessary.&quot;&quot;&quot;</span>
+        <span class="n">p</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QCursor</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+        <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapFromGlobal</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">shape</span><span class="o">==</span><span class="s">&#39;point&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getPointNumbers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">appendPoint</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> 
+            <span class="k">if</span><span class="p">(</span><span class="n">shape</span><span class="o">==</span><span class="s">&#39;point&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">shape</span><span class="o">==</span><span class="s">&#39;rectangle&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getPointNumbers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">popLastPoint</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">appendRect</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>  
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">shape</span><span class="o">==</span><span class="s">&#39;line&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getPointNumbers</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">p1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">popLastPoint</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">appendLine</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>                  
+        <span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getsurfacePosition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">chooseTreatment</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">resetShapes</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;Traitement en cours&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">toggleProcessVideo</span><span class="p">()</span>
+            </div>
+<div class="viewcode-block" id="Window.launchTutorial"><a class="viewcode-back" href="../View.html#View.Window.launchTutorial">[docs]</a>    <span class="k">def</span> <span class="nf">launchTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Launch a tutorial specific to the selected treatment.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;En attente d</span><span class="se">\&#39;</span><span class="s">informations de la part de l</span><span class="se">\&#39;</span><span class="s">utilisateur&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">changeTutorial</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">MuscleTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">LinesTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">LinesTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">JunctionTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tutorial</span><span class="o">.</span><span class="n">displayIntroduction</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getsurfacePosition</span><span class="p">)</span>
+<span class="c">#             self.chooseTreatment(self.treatmentComboBox.currentIndex())</span>
+<span class="c">#             self.toggleProcessVideo()</span>
+    </div>
+<div class="viewcode-block" id="Window.changeTutorial"><a class="viewcode-back" href="../View.html#View.Window.changeTutorial">[docs]</a>    <span class="k">def</span> <span class="nf">changeTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the shapes drawn on the surface and reload a new tutorial specific to the selected treatment.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="p">()</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s">&#39;En attente d</span><span class="se">\&#39;</span><span class="s">informations de la part de l</span><span class="se">\&#39;</span><span class="s">utilisateur&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getsurfacePosition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drawlist</span><span class="o">=</span><span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">resetShapes</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">MuscleTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">LinesTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">LinesTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="n">tutorial</span> <span class="o">=</span> <span class="n">Tutorial</span><span class="o">.</span><span class="n">JunctionTutorial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">tutorial</span><span class="o">.</span><span class="n">displayIntroduction</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getsurfacePosition</span><span class="p">)</span>
+<span class="c">#             self.chooseTreatment(self.treatmentComboBox.currentIndex())</span>
+<span class="c">#             self.toggleProcessVideo()</span>
+            
+                </div>
+<div class="viewcode-block" id="Window.chooseTreatment"><a class="viewcode-back" href="../View.html#View.Window.chooseTreatment">[docs]</a>    <span class="k">def</span> <span class="nf">chooseTreatment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add the chosen treatment to the Applier.</span>
+<span class="sd">        </span>
+<span class="sd">        :param index: The index inf the combobox used to select the treatment.</span>
+<span class="sd">        :type index: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">nrSkipFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getLines</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setMethod</span><span class="p">(</span><span class="n">TotalTreatments</span><span class="o">.</span><span class="n">LKMethod</span><span class="p">(</span><span class="n">Aponeurosises</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">fiber</span><span class="o">=</span><span class="n">l</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">nrSkipFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getLines</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setMethod</span><span class="p">(</span><span class="n">TotalTreatments</span><span class="o">.</span><span class="n">EllipseMethod</span><span class="p">(</span><span class="n">Aponeurosises</span> <span class="o">=</span> <span class="n">l</span><span class="p">))</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">nrSkipFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+            <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getLines</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setMethod</span><span class="p">(</span><span class="n">TotalTreatments</span><span class="o">.</span><span class="n">RadonMethod</span><span class="p">(</span><span class="n">Aponeurosises</span> <span class="o">=</span> <span class="n">l</span><span class="p">,</span> <span class="n">manySamples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">multipleRadonCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()))</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">index</span> <span class="o">==</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span>  <span class="n">nrSkipFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SkipFrameSpinBox</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getRect</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">videoWidget</span><span class="o">.</span><span class="n">getPoints</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">filterApplied</span><span class="o">.</span><span class="n">setMethod</span><span class="p">(</span><span class="n">TotalTreatments</span><span class="o">.</span><span class="n">junctionComputation</span><span class="p">(</span><span class="n">limits</span><span class="o">=</span><span class="n">r</span><span class="p">,</span> <span class="n">firstApproximation</span><span class="o">=</span><span class="n">p</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

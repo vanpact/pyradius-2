@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PostTreatments Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="PreTreatments Module" href="PreTreatments.html" />
+    <link rel="prev" title="main Module" href="main.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PreTreatments.html" title="PreTreatments Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="main.html" title="main Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="posttreatments-module">
+<h1>PostTreatments Module<a class="headerlink" href="#posttreatments-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-PostTreatments" title="PostTreatments"><tt class="xref py py-mod docutils literal"><span class="pre">PostTreatments</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-PostTreatments"></span><p>Created on Oct 12, 2012</p>
+<p>&#64;author: yvesremi</p>
+<dl class="function">
+<dt id="PostTreatments.computeAngle">
+<tt class="descclassname">PostTreatments.</tt><tt class="descname">computeAngle</tt><big>(</big><em>angleAponeurosis</em>, <em>angleFiber</em><big>)</big><a class="reference internal" href="_modules/PostTreatments.html#computeAngle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PostTreatments.computeAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute a pennation angle from an aponeurosis orientation and a muscle fascicle orientation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>angleAponeurosis</strong> (<em>float</em>) &#8211; The aponeurosis orientation</li>
+<li><strong>angleFiber</strong> (<em>float</em>) &#8211; The muscle fiber orientation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">the pennation angle</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="PostTreatments.mergeMaxImages">
+<tt class="descclassname">PostTreatments.</tt><tt class="descname">mergeMaxImages</tt><big>(</big><em>imgList</em><big>)</big><a class="reference internal" href="_modules/PostTreatments.html#mergeMaxImages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PostTreatments.mergeMaxImages" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare the pixel at the same position in a list of image and create an image with the maximum value for each pixel</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>imgList</strong> (<em>list</em>) &#8211; The list of images</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PostTreatments Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">PostTreatments</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="main.html"
+                        title="previous chapter">main Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="PreTreatments.html"
+                        title="next chapter">PreTreatments Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/PostTreatments.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="PreTreatments.html" title="PreTreatments Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="main.html" title="main Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

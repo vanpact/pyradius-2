@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ResultsWriter &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for ResultsWriter</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Apr 11, 2013</span>
+
+<span class="sd">@author: yvesremi</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">sets</span> <span class="kn">import</span> <span class="n">Set</span>
+<span class="kn">import</span> <span class="nn">pandas</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<div class="viewcode-block" id="ResultsWriter"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter">[docs]</a><span class="k">class</span> <span class="nc">ResultsWriter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for outputing results in csv or xls files&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ResultsWriter.__init__"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructor</span>
+<span class="sd">        </span>
+<span class="sd">        :param fileName: The name of the file where to output the results</span>
+<span class="sd">        :type fileName: String   </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columnsToPad</span> <span class="o">=</span> <span class="n">Set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">fileExtension</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span><span class="bp">None</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">fileName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">fileExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.xlsx&#39;</span> <span class="ow">or</span> <span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.xls&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isExcel</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isCSV</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.csv&#39;</span> <span class="ow">or</span> <span class="n">fileExtension</span> <span class="o">!=</span><span class="s">&#39;.txt&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isCSV</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isExcel</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">fileName</span><span class="o">!=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;The input file must either be a csv, txt or an Excel(xls or xlsx) file.&#39;</span><span class="p">)</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">args</span><span class="o">=</span><span class="s">&quot;inp&quot;</span>
+            <span class="k">raise</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWriteFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ResultsWriter.setWriteFile"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.setWriteFile">[docs]</a>    <span class="k">def</span> <span class="nf">setWriteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the file and put the results in a data frame</span>
+<span class="sd">        </span>
+<span class="sd">        :param fileName: The name of the file where to output the results</span>
+<span class="sd">        :type fileName: String   </span>
+<span class="sd">        :param sheet: argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</span>
+<span class="sd">        :type sheet: String </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isExcel</span><span class="p">):</span>
+                <span class="n">xlsFile</span><span class="o">=</span><span class="bp">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+                        <span class="n">xlsFile</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">preparexls</span><span class="p">(</span><span class="n">sheet</span><span class="p">,</span> <span class="n">xlsFile</span><span class="p">)</span>
+            <span class="k">elif</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isCSV</span><span class="p">):</span>
+                <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">fileName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            
+                </div>
+<div class="viewcode-block" id="ResultsWriter.preparexls"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.preparexls">[docs]</a>    <span class="k">def</span> <span class="nf">preparexls</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xlsFile</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal method, used when reading the file into a dataFrame.</span>
+<span class="sd">  </span>
+<span class="sd">        :param sheet: argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</span>
+<span class="sd">        :type sheet: String </span>
+<span class="sd">        :param xlsFile: The Excel file</span>
+<span class="sd">        :type xlsFile: a pandas ExcelFile </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span><span class="n">sheet</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">==</span><span class="bp">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="o">=</span> <span class="n">xlsFile</span><span class="o">.</span><span class="n">sheet_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">xlsFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span><span class="s">&#39;sheet1&#39;</span>
+        </div>
+<div class="viewcode-block" id="ResultsWriter.addDatas"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.addDatas">[docs]</a>    <span class="k">def</span> <span class="nf">addDatas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Push data in the list of data to write to the file</span>
+<span class="sd">        </span>
+<span class="sd">        :param info: The information to add</span>
+<span class="sd">        :type info: a dictionnary or a list of dictionnary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">inf</span> <span class="ow">in</span> <span class="n">info</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inf</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ResultsWriter.mergeDatas"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.mergeDatas">[docs]</a>    <span class="k">def</span> <span class="nf">mergeDatas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Internal method, merge the info with the current dataFrame</span>
+<span class="sd">        </span>
+<span class="sd">        :param info: The information merge</span>
+<span class="sd">        :type info: a list of dictionnaries</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileExist</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">)],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="c">#         info = pandas.DataFrame(info).dropna(how = &#39;any&#39;, subset = [&#39;Time&#39;])</span>
+        <span class="n">dataToMerge</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="n">dataToMerge</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">)],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">colName</span> <span class="ow">in</span> <span class="n">dataToMerge</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">columnsToPad</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">colName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="p">,</span> <span class="n">dataToMerge</span><span class="p">,</span> <span class="n">left_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">right_index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s">&#39;outer&#39;</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="ResultsWriter.write"><a class="viewcode-back" href="../ResultsWriter.html#ResultsWriter.ResultsWriter.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padNewColumn</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">outFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sheet</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the info added with the method addData to the outputFile</span>
+<span class="sd">        </span>
+<span class="sd">        :param padNewColumn: the write file already has information and sampling of the file is higher, pad the new data to add so there is no holes in the modifiers/added columns</span>
+<span class="sd">        :type padNewColumn: bool</span>
+<span class="sd">        :param outFileName: The output file name</span>
+<span class="sd">        :type outFileName: String</span>
+<span class="sd">        :param sheet: argument only useful if the file format is xls or xlsx. It is the sheet name in the Excel file</span>
+<span class="sd">        :type sheet: String </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mergeDatas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">padNewColumn</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">colName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnsToPad</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="p">[</span><span class="n">colName</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;ffill&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">colName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnsToPad</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="p">[</span><span class="n">colName</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s">&#39;bfill&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">toCheck</span><span class="o">=</span><span class="nb">set</span><span class="p">()</span>    
+        <span class="k">for</span> <span class="n">colName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">toCheck</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">colName</span><span class="p">)</span>
+        <span class="n">toCheck</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">toCheck</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnsToPad</span><span class="p">)</span>
+        <span class="n">colNameList</span> <span class="o">=</span> <span class="p">[</span><span class="n">colName</span> <span class="k">for</span> <span class="n">colName</span> <span class="ow">in</span> <span class="n">toCheck</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">how</span> <span class="o">=</span> <span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="n">subset</span> <span class="o">=</span> <span class="n">colNameList</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">outFileName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">outFileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">fileExtension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">outFileName</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">sheet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sheet</span><span class="o">=</span><span class="s">&#39;sheet1&#39;</span>
+            <span class="n">sheet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sheet</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.xlsx&#39;</span> <span class="ow">or</span> <span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.xls&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="n">sheet</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">index_label</span><span class="o">=</span><span class="s">&#39;Time&#39;</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">fileExtension</span> <span class="o">==</span><span class="s">&#39;.csv&#39;</span> <span class="ow">or</span> <span class="n">fileExtension</span> <span class="o">!=</span><span class="s">&#39;.txt&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parsedInfo</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">outFileName</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">na_rep</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">float_format</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%.6f</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">index_label</span><span class="o">=</span><span class="s">&#39;Time&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;The output file must either be a csv, txt or an Excel(xls or xlsx) file.&#39;</span><span class="p">)</span>
+            <span class="n">val</span><span class="o">.</span><span class="n">args</span><span class="o">=</span><span class="s">&quot;out&quot;</span>
+            <span class="k">raise</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

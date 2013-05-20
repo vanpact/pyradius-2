@@ -1,0 +1,408 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>View Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="prev" title="VideoWidget Module" href="VideoWidget.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VideoWidget.html" title="VideoWidget Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="view-module">
+<h1>View Module<a class="headerlink" href="#view-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-View" title="View: module which manage the view of the application. (Unix, Windows)"><tt class="xref py py-mod docutils literal"><span class="pre">View</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-View"></span><span class="target" id="module-View"></span><dl class="class">
+<dt id="View.Window">
+<em class="property">class </em><tt class="descclassname">View.</tt><tt class="descname">Window</tt><a class="reference internal" href="_modules/View.html#Window"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QMainWindow</span></tt></p>
+<dl class="method">
+<dt id="View.Window.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the view object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.captureImage">
+<tt class="descname">captureImage</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.captureImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.captureImage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a snapshot of the video and save it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.centerWindow">
+<tt class="descname">centerWindow</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.centerWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.centerWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Center the windows on the screen of the user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.changeTutorial">
+<tt class="descname">changeTutorial</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.changeTutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.changeTutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the shapes drawn on the surface and reload a new tutorial specific to the selected treatment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.chooseInputFile">
+<tt class="descname">chooseInputFile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.chooseInputFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.chooseInputFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the dialog to let the user select the output file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.chooseOutputFile">
+<tt class="descname">chooseOutputFile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.chooseOutputFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.chooseOutputFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show the dialog to let the user select the output file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.chooseTreatment">
+<tt class="descname">chooseTreatment</tt><big>(</big><em>index</em><big>)</big><a class="reference internal" href="_modules/View.html#Window.chooseTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.chooseTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add the chosen treatment to the Applier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<em>int</em>) &#8211; The index inf the combobox used to select the treatment.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.creatBasicControls">
+<tt class="descname">creatBasicControls</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.creatBasicControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.creatBasicControls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets controlling the video.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createAction">
+<tt class="descname">createAction</tt><big>(</big><em>name</em>, <em>funct</em>, <em>shortcut=''</em>, <em>statusTip=''</em><big>)</big><a class="reference internal" href="_modules/View.html#Window.createAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createAction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the actions used, for example, in the menu bar and return it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; The name of the action.</li>
+<li><strong>funct</strong> &#8211; The function to be triggered by the action.</li>
+<li><strong>shortcut</strong> &#8211; The shortcut for the action.</li>
+<li><strong>statusTip</strong> &#8211; A tip which will appear when hovering the action.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The QAction object</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raise :</th><td class="field-body"><p class="first last">AttributeError: if there is the name or the function send is none.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createEllipsoidMethodInterface">
+<tt class="descname">createEllipsoidMethodInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createEllipsoidMethodInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createEllipsoidMethodInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment which use ellipsoids.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createInfoInterface">
+<tt class="descname">createInfoInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createInfoInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createInfoInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the labels displaying the extracted information.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createLKMethodInterface">
+<tt class="descname">createLKMethodInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createLKMethodInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createLKMethodInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createLayout">
+<tt class="descname">createLayout</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createLayout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createLayout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout of the window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createMenuBar">
+<tt class="descname">createMenuBar</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createMenuBar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createMenuBar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the Menu bar with its menu and add the actions to the menus.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createOptionControls">
+<tt class="descname">createOptionControls</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createOptionControls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createOptionControls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets common to all the treatments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createRadonMethodInterface">
+<tt class="descname">createRadonMethodInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createRadonMethodInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createRadonMethodInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment which use the Radon transform.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.createSCMethodInterface">
+<tt class="descname">createSCMethodInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.createSCMethodInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.createSCMethodInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment extraction the junction position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.finishVideo">
+<tt class="descname">finishVideo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.finishVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.finishVideo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Close the video, ask the applier to write the output file if necessary and quit.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="View.Window.finishedWork">
+<tt class="descname">finishedWork</tt><a class="headerlink" href="#View.Window.finishedWork" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the class which contains all the GUI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.frameChanged">
+<tt class="descname">frameChanged</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.frameChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.frameChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the view when the frame has changed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.getsurfacePosition">
+<tt class="descname">getsurfacePosition</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.getsurfacePosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.getsurfacePosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the position of the cursor in the video and ask the surface to draw a shape if necessary.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.hideAllInterface">
+<tt class="descname">hideAllInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.hideAllInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.hideAllInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hide all the layouts containing the treatment specific widgets.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.initUI">
+<tt class="descname">initUI</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.initUI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.initUI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize the main windows of the application.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.jumpToFrame">
+<tt class="descname">jumpToFrame</tt><big>(</big><em>value</em><big>)</big><a class="reference internal" href="_modules/View.html#Window.jumpToFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.jumpToFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jump to a position in the movie.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; A value in the range of the slider.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raise :</th><td class="field-body">AttributeError: if value is to high or negative.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.launchTutorial">
+<tt class="descname">launchTutorial</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.launchTutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.launchTutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Launch a tutorial specific to the selected treatment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.loadCorrectInterface">
+<tt class="descname">loadCorrectInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.loadCorrectInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.loadCorrectInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select the correct layout depending on the method chosen by the user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.loadEllipsoidTransformInterface">
+<tt class="descname">loadEllipsoidTransformInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.loadEllipsoidTransformInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.loadEllipsoidTransformInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the layout for the widgets specific to the treatment which use ellipsoids.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.loadLKTransformInterface">
+<tt class="descname">loadLKTransformInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.loadLKTransformInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.loadLKTransformInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.loadRadonTransformInterface">
+<tt class="descname">loadRadonTransformInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.loadRadonTransformInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.loadRadonTransformInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment which use the Radon transform.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.loadSCTransformInterface">
+<tt class="descname">loadSCTransformInterface</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.loadSCTransformInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.loadSCTransformInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the layout for the widgets specific to the treatment extraction the junction position.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.openFile">
+<tt class="descname">openFile</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.openFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.openFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Show a dialog where there user can pick a file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.printAbout">
+<tt class="descname">printAbout</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.printAbout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.printAbout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the information about the application</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.printAboutQt">
+<tt class="descname">printAboutQt</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.printAboutQt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.printAboutQt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display the information about Qt</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.resetMovie">
+<tt class="descname">resetMovie</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.resetMovie"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.resetMovie" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the movie.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.savingProcedure">
+<tt class="descname">savingProcedure</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.savingProcedure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.savingProcedure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the results in a file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.toggleProcessVideo">
+<tt class="descname">toggleProcessVideo</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/View.html#Window.toggleProcessVideo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.toggleProcessVideo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause and play the video processing</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.updateInfo">
+<tt class="descname">updateInfo</tt><big>(</big><em>info</em><big>)</big><a class="reference internal" href="_modules/View.html#Window.updateInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.updateInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the labels containing the extracted information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>info</strong> (<em>dictionary</em>) &#8211; The new extracted information.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="View.Window.updateInfoInterface">
+<tt class="descname">updateInfoInterface</tt><big>(</big><em>infoNumber</em><big>)</big><a class="reference internal" href="_modules/View.html#Window.updateInfoInterface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#View.Window.updateInfoInterface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the layout containing the labels displaying the extracted information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>infoNumber</strong> (<em>int</em>) &#8211; The number of info to display (=the number of labels needed).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">View Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">View</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="VideoWidget.html"
+                        title="previous chapter">VideoWidget Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/View.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="VideoWidget.html" title="VideoWidget Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

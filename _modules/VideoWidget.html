@@ -1,0 +1,772 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VideoWidget &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for VideoWidget</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    .. module:: VideoWidget</span>
+<span class="sd">        :platform: Unix, Windows</span>
+<span class="sd">        :synopsis: module which manage the video. It also contains a widget to visualize it.</span>
+<span class="sd">    .. moduleauthor:: Yves-Rémi Van Eycke &lt;yveycke [at] ulb.ac.be&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"> /****************************************************************************</span>
+<span class="sd"> **</span>
+<span class="sd"> ** Copyright (C) 2011 Nokia Corporation and/or its subsidiary(-ies).</span>
+<span class="sd"> ** All rights reserved.</span>
+<span class="sd"> ** Contact: Nokia Corporation (qt-info@nokia.com)</span>
+<span class="sd"> **</span>
+<span class="sd"> ** This file has been created from an example of the Qt Toolkit in C++.</span>
+<span class="sd"> **</span>
+<span class="sd"> ** $QT_BEGIN_LICENSE:BSD$</span>
+<span class="sd"> ** You may use this file under the terms of the BSD license as follows:</span>
+<span class="sd"> **</span>
+<span class="sd"> ** &quot;Redistribution and use in source and binary forms, with or without</span>
+<span class="sd"> ** modification, are permitted provided that the following conditions are</span>
+<span class="sd"> ** met:</span>
+<span class="sd"> **   * Redistributions of source code must retain the above copyright</span>
+<span class="sd"> **     notice, this list of conditions and the following disclaimer.</span>
+<span class="sd"> **   * Redistributions in binary form must reproduce the above copyright</span>
+<span class="sd"> **     notice, this list of conditions and the following disclaimer in</span>
+<span class="sd"> **     the documentation and/or other materials provided with the</span>
+<span class="sd"> **     distribution.</span>
+<span class="sd"> **   * Neither the name of Nokia Corporation and its Subsidiary(-ies) nor</span>
+<span class="sd"> **     the names of its contributors may be used to endorse or promote</span>
+<span class="sd"> **     products derived from this software without specific prior written</span>
+<span class="sd"> **     permission.</span>
+<span class="sd"> **</span>
+<span class="sd"> ** THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<span class="sd"> ** &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<span class="sd"> ** LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<span class="sd"> ** A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<span class="sd"> ** OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<span class="sd"> ** SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<span class="sd"> ** LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<span class="sd"> ** DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<span class="sd"> ** THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<span class="sd"> ** (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<span class="sd"> ** OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.&quot;</span>
+<span class="sd"> ** $QT_END_LICENSE$</span>
+<span class="sd"> **</span>
+<span class="sd"> ****************************************************************************/</span>
+<span class="sd"> &quot;&quot;&quot;</span>
+ 
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtMultimedia</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">cv2</span><span class="o">,</span> <span class="nn">numpy</span><span class="o">,</span> <span class="nn">ffvideo</span>
+<span class="kn">from</span> <span class="nn">ffvideo</span> <span class="kn">import</span> <span class="n">VideoStream</span>
+<span class="kn">import</span> <span class="nn">gc</span><span class="o">,</span> <span class="nn">sys</span>
+
+
+<div class="viewcode-block" id="VideoWidgetSurface"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface">[docs]</a><span class="k">class</span> <span class="nc">VideoWidgetSurface</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoSurface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; VideoWidgetSurface is a class used for the video presentation in a QWidget.&quot;&quot;&quot;</span>
+
+    
+<div class="viewcode-block" id="VideoWidgetSurface.__init__"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs the video surface. </span>
+
+<span class="sd">        :param parent: A QWidget object representing the parent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageSize</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceRect</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidgetSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidgetSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_Invalid</span>
+
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.supportedPixelFormats"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.supportedPixelFormats">[docs]</a>    <span class="k">def</span> <span class="nf">supportedPixelFormats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">handleType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns the supported pixel format.</span>
+<span class="sd">            </span>
+<span class="sd">        :param handleType: A QtMultimedia.QAbstractVideoBuffer.HandleType object representing to identify the video buffers handle.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A list of QtMultimedia.QVideoFrame.PixelFormat containing the supported pixels formats. If No pixel formats are supported, the list will be empty.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">handleType</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">NoHandle</span> <span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB32</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_ARGB32</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB32_Premultiplied</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB565</span><span class="p">,</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">Format_RGB555</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.isFormatSupported"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.isFormatSupported">[docs]</a>    <span class="k">def</span>  <span class="nf">isFormatSupported</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Check if the video surface format is supported. The function will check if the image format is valid, has a size and if the HandleType is NoHandle.</span>
+<span class="sd">        </span>
+<span class="sd">        :param form: A QtMultimedia.QVideoSurfaceFormat object to be checked.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: True if the format is supported. False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imageFormat</span><span class="o">=</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">imageFormatFromPixelFormat</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">())</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">frameSize</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="p">(</span><span class="n">imageFormat</span> <span class="o">!=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_Invalid</span>  <span class="ow">and</span> <span class="ow">not</span> <span class="n">size</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()</span> <span class="ow">and</span> <span class="n">format</span><span class="o">.</span><span class="n">handleType</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">NoHandle</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.present"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.present">[docs]</a>    <span class="k">def</span> <span class="nf">present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Force an immediate repaint of the video surface when a new frame has been received.</span>
+<span class="sd">        </span>
+<span class="sd">        :param frame: A QtMultimedia.QVideoFrame object to be painted</span>
+<span class="sd">            </span>
+<span class="sd">        :return: True if there was no error. False otherwise. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">()</span> <span class="o">!=</span> <span class="n">frame</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">frameSize</span><span class="p">()</span> <span class="o">!=</span> <span class="n">frame</span><span class="o">.</span><span class="n">size</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">del</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span> <span class="o">=</span> <span class="n">frame</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">repaint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.start"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the video surface.</span>
+<span class="sd">        </span>
+<span class="sd">        :param form: The QtMultimedia.QVideoSurfaceFormat used by the surface. </span>
+<span class="sd">            </span>
+<span class="sd">        :return: True if there was no error. False otherwise. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">imageFormat</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="o">.</span><span class="n">imageFormatFromPixelFormat</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">pixelFormat</span><span class="p">())</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">frameSize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">imageFormat</span> <span class="o">!=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="o">.</span><span class="n">Format_Invalid</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">size</span><span class="o">.</span><span class="n">isEmpty</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span> <span class="o">=</span> <span class="n">imageFormat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">imageSize</span> <span class="o">=</span> <span class="n">size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sourceRect</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidgetSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">updateGeometry</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateVideoRect</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.stop"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.stop">[docs]</a>    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;stop the video surface.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span> <span class="o">=</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoFrame</span><span class="p">();</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">();</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidgetSurface</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">stop</span><span class="p">();</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">update</span><span class="p">();</span>
+    </div>
+<div class="viewcode-block" id="VideoWidgetSurface.videoRect"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.videoRect">[docs]</a>    <span class="k">def</span> <span class="nf">videoRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a rectangle of the video.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: A QtCore.QRect representing the painted zone.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.updateVideoRect"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.updateVideoRect">[docs]</a>    <span class="k">def</span> <span class="nf">updateVideoRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Rescale the rectangle to paint.&quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span>
+        <span class="n">size</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">boundedTo</span><span class="p">(</span><span class="n">size</span><span class="p">),</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">KeepAspectRatio</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span><span class="o">.</span><span class="n">moveCenter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">rect</span><span class="p">()</span><span class="o">.</span><span class="n">center</span><span class="p">())</span>
+        </div>
+<div class="viewcode-block" id="VideoWidgetSurface.paint"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidgetSurface.paint">[docs]</a>    <span class="k">def</span> <span class="nf">paint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">painter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Paints the current video frame on the widget surface.</span>
+<span class="sd">        </span>
+<span class="sd">        :param painter: A QtGui.QPainter used to draw the image on the surface.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QAbstractVideoBuffer</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">)):</span>
+            <span class="n">oldTransform</span> <span class="o">=</span> <span class="n">painter</span><span class="o">.</span><span class="n">transform</span><span class="p">()</span>
+             
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">scanLineDirection</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtMultimedia</span><span class="o">.</span><span class="n">QVideoSurfaceFormat</span><span class="o">.</span><span class="n">BottomToTop</span><span class="p">):</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">image</span><span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QImage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">bits</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">bytesPerLine</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">imageFormat</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">drawImage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetRect</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceRect</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setTransform</span><span class="p">(</span><span class="n">oldTransform</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFrame</span><span class="o">.</span><span class="n">unmap</span><span class="p">()</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">oldTransform</span><span class="p">)</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+            </div></div>
+<div class="viewcode-block" id="VideoWidget"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget">[docs]</a><span class="k">class</span> <span class="nc">VideoWidget</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The VideoWidget class implement the actual videoWidget embedding the VideoWidgetSurface.&quot;&quot;&quot;</span>
+    <span class="n">clicked</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">clicking</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+<div class="viewcode-block" id="VideoWidget.__init__"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Constructs the video Widget. </span>
+<span class="sd">        </span>
+<span class="sd">        :param parent: A QWidget object representing the parent.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_NoSystemBackground</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setAttribute</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WA_PaintOnScreen</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">palette</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span>
+        <span class="n">palette</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPalette</span><span class="o">.</span><span class="n">Background</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">black</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPalette</span><span class="p">(</span><span class="n">palette</span><span class="p">);</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="n">VideoWidgetSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">LinesToDraw</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PointsToDraw</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPoint</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">RectToDraw</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringsToDraw</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringStartPosition</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseClick</span> <span class="o">=</span> <span class="bp">False</span>
+          </div>
+<div class="viewcode-block" id="VideoWidget.videoSurface"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.videoSurface">[docs]</a>    <span class="k">def</span> <span class="nf">videoSurface</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the VideoWidgetSurface.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: The VideoWidgetSurface embedded in the widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.mapFromGlobalToVideo"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.mapFromGlobalToVideo">[docs]</a>    <span class="k">def</span> <span class="nf">mapFromGlobalToVideo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert screen coordinates to video coordinates</span>
+<span class="sd">        :param pos: the screen coordinates</span>
+<span class="sd">        :return: the video coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapFromGlobal</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+        </div>
+<div class="viewcode-block" id="VideoWidget.mapToVideo"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.mapToVideo">[docs]</a>    <span class="k">def</span> <span class="nf">mapToVideo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Map surface coordinates to video coordinates</span>
+<span class="sd">        :param pos: the surface coordinate&quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">:</span>
+                <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                    <span class="n">tempresult0</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+                    <span class="n">tempresult1</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tempresult0</span><span class="p">,</span> <span class="n">tempresult1</span><span class="p">))</span>
+                <span class="k">elif</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)):</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">values</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">()))</span>
+        <span class="k">elif</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">tempresult0</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+            <span class="n">tempresult1</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">tempresult0</span><span class="p">,</span> <span class="n">tempresult1</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">left</span><span class="p">(),</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span><span class="o">.</span><span class="n">top</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">result</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.sizeHint"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.sizeHint">[docs]</a>    <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;Return the recommend size for the widget.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: The recommend size for the widget.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">surfaceFormat</span><span class="p">()</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.mouseReleaseEvent"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.mouseReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Event triggered when the user release the mouse button </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">mouseClick</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastPoint</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+<div class="viewcode-block" id="VideoWidget.mousePressEvent"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.mousePressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mousePressEvent</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Event triggered when the user press the mouse button </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPoint</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mouseClick</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clicking</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.appendLine"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.appendLine">[docs]</a>    <span class="k">def</span> <span class="nf">appendLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;append a line to the list of liens to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :param begin: one extremity of the line</span>
+<span class="sd">        :param end: the other extremity of the line</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.appendRect"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.appendRect">[docs]</a>    <span class="k">def</span> <span class="nf">appendRect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;append a rectangle to the list of liens to draw</span>
+<span class="sd">            </span>
+<span class="sd">        :param begin: one corner of the rectangle</span>
+<span class="sd">        :param end: the opposite corner of the rectanle</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">begin</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+            </div>
+<div class="viewcode-block" id="VideoWidget.appendPoint"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.appendPoint">[docs]</a>    <span class="k">def</span> <span class="nf">appendPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;append a point to the list of liens to draw</span>
+<span class="sd">            </span>
+<span class="sd">        :param point: the point coordinates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+            </div>
+<div class="viewcode-block" id="VideoWidget.getLineNumbers"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getLineNumbers">[docs]</a>    <span class="k">def</span> <span class="nf">getLineNumbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the number of lines to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the number of lines to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.getPointNumbers"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getPointNumbers">[docs]</a>    <span class="k">def</span> <span class="nf">getPointNumbers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the number of points to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the number of points to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">)</span>
+                   </div>
+<div class="viewcode-block" id="VideoWidget.getLines"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getLines">[docs]</a>    <span class="k">def</span> <span class="nf">getLines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the lines to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the lines to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.getPoints"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getPoints">[docs]</a>    <span class="k">def</span> <span class="nf">getPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the points to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the points to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Points</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.getRect"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getRect">[docs]</a>    <span class="k">def</span> <span class="nf">getRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the rectangles to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the rectangles to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.getString"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getString">[docs]</a>    <span class="k">def</span> <span class="nf">getString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the strings to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the strings to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.setString"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.setString">[docs]</a>    <span class="k">def</span> <span class="nf">setString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the string to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :param string: the string to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringsToDraw</span> <span class="o">=</span> <span class="bp">True</span><span class="p">;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QString</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="VideoWidget.getStringStartPosition"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.getStringStartPosition">[docs]</a>    <span class="k">def</span> <span class="nf">getStringStartPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the position of the string to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :return: the position of the string to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stringStartPosition</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">stringStartPosition</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.setStringStartPosition"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.setStringStartPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setStringStartPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the position of the string to draw</span>
+<span class="sd">        </span>
+<span class="sd">        :param position: the position of the string to draw</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringStartPosition</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QPoint</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.removeLastLine"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.removeLastLine">[docs]</a>    <span class="k">def</span> <span class="nf">removeLastLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the last line added to the list of the lines to draw.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span> 
+    </div>
+<div class="viewcode-block" id="VideoWidget.removeLastRect"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.removeLastRect">[docs]</a>    <span class="k">def</span> <span class="nf">removeLastRect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the last rectangle added to the list of the rectangles to draw.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span> 
+        </div>
+<div class="viewcode-block" id="VideoWidget.popLastLine"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.popLastLine">[docs]</a>    <span class="k">def</span> <span class="nf">popLastLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pop the last line added to the list of the lines to draw.</span>
+<span class="sd">        :return: the popped line</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span> 
+        <span class="k">return</span> <span class="n">r</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.stopDrawingString"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.stopDrawingString">[docs]</a>    <span class="k">def</span> <span class="nf">stopDrawingString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop drawing the string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span> <span class="o">=</span> <span class="bp">False</span>
+ </div>
+<div class="viewcode-block" id="VideoWidget.startDrawingString"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.startDrawingString">[docs]</a>    <span class="k">def</span> <span class="nf">startDrawingString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start drawing the string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span> <span class="o">=</span> <span class="bp">True</span>
+               </div>
+<div class="viewcode-block" id="VideoWidget.removeLastPoint"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.removeLastPoint">[docs]</a>    <span class="k">def</span> <span class="nf">removeLastPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the last point added to the point of the lines to draw.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span> 
+          </div>
+<div class="viewcode-block" id="VideoWidget.popLastPoint"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.popLastPoint">[docs]</a>    <span class="k">def</span> <span class="nf">popLastPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pop the last point added to the list of the point to draw.</span>
+<span class="sd">        :return: the popped point</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span> 
+        <span class="k">return</span> <span class="n">p</span>
+    </div>
+<div class="viewcode-block" id="VideoWidget.resetShapes"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.resetShapes">[docs]</a>    <span class="k">def</span> <span class="nf">resetShapes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;remove all the shapes which need to be drawn.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Points</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span> <span class="o">=</span> <span class="p">[]</span>
+        </div>
+<div class="viewcode-block" id="VideoWidget.paintEvent"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.paintEvent">[docs]</a>    <span class="k">def</span> <span class="nf">paintEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;Slot called when the widget receives a paint event.</span>
+<span class="sd">        </span>
+<span class="sd">        :param event: The received event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">painter</span><span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setRenderHint</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="o">.</span><span class="n">Antialiasing</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">isActive</span><span class="p">()):</span>
+            <span class="n">videoRect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">videoRect</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">videoRect</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">rect</span><span class="p">()))):</span>
+                <span class="n">region</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">region</span><span class="p">()</span>
+                <span class="n">region</span><span class="o">.</span><span class="n">subtract</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QRegion</span><span class="p">(</span><span class="n">videoRect</span><span class="p">))</span>
+                <span class="n">brush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">background</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">rect</span> <span class="ow">in</span> <span class="n">region</span><span class="o">.</span><span class="n">rects</span><span class="p">():</span>
+                    <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">rect</span><span class="p">,</span> <span class="n">brush</span><span class="p">)</span>
+                    <span class="k">del</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+                <span class="k">del</span><span class="p">(</span><span class="n">region</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">paint</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+            <span class="k">del</span><span class="p">(</span><span class="n">videoRect</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">painter</span><span class="o">.</span><span class="n">fillRect</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">rect</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">palette</span><span class="p">()</span><span class="o">.</span><span class="n">background</span><span class="p">())</span>
+        <span class="n">brush</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">()</span>
+        <span class="n">brush</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">pen</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPen</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="o">.</span><span class="n">green</span><span class="p">)</span>
+        <span class="n">pen</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">pen</span><span class="o">.</span><span class="n">setCapStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RoundCap</span><span class="p">)</span>
+        <span class="n">pen</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setBrush</span><span class="p">(</span><span class="n">brush</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">PointsToDraw</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Points</span><span class="p">:</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawPoint</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LinesToDraw</span><span class="p">):</span>
+            <span class="n">pen</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Lines</span><span class="p">:</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawLine</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">l</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">RectToDraw</span><span class="p">):</span>
+            <span class="n">pen</span><span class="o">.</span><span class="n">setWidth</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">setPen</span><span class="p">(</span><span class="n">pen</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Rect</span><span class="p">:</span>
+                <span class="n">painter</span><span class="o">.</span><span class="n">drawRect</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">font</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">()</span>
+        <span class="n">font</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+        <span class="n">painter</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">font</span><span class="p">)</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stringsToDraw</span><span class="p">):</span>
+            <span class="n">painter</span><span class="o">.</span><span class="n">drawText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stringStartPosition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stringDrawn</span><span class="p">)</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+        <span class="k">del</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="VideoWidget.resizeEvent"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.VideoWidget.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Slot called when the widget is resized.</span>
+<span class="sd">        </span>
+<span class="sd">        :param event: The received event.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VideoWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">updateVideoRect</span><span class="p">()</span>
+</div></div>
+<div class="viewcode-block" id="Movie"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie">[docs]</a><span class="k">class</span> <span class="nc">Movie</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class represent the video data stream&quot;&quot;&quot;</span>
+
+    <span class="n">frameChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">endOfVideo</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="Movie.__init__"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the video stream and open the video file if a fileName is provided.</span>
+<span class="sd">        </span>
+<span class="sd">        :param filename: a string containing the name of the file to be opened.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rawBuffer</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">=</span><span class="bp">None</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Movie</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">fileName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setMovie</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="c">#    source = None</span>
+        <span class="c">#    imageBuffer = None</span>
+        <span class="c">#    rawBuffer = None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameRate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameNumber</span> <span class="o">=</span> <span class="mi">0</span>
+    </div>
+<div class="viewcode-block" id="Movie.reset"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the movie object. Remove the source.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rawBuffer</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">=</span><span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frame</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameRate</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameNumber</span> <span class="o">=</span> <span class="mi">0</span></div>
+<div class="viewcode-block" id="Movie.setMovie"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.setMovie">[docs]</a>    <span class="k">def</span> <span class="nf">setMovie</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Open a video file.</span>
+<span class="sd">        </span>
+<span class="sd">        :param filename: a string containing the name of the file to be opened.</span>
+<span class="sd">            </span>
+<span class="sd">        :raise: TypeError: The fileName is not a string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span>  <span class="s">u&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">VideoStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;fileName must be a string&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameRate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">framerate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameNumber</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">duration</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">framerate</span>
+<span class="c">#        if(self.frameRate==0):</span>
+<span class="c">#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 1)</span>
+<span class="c">#            timeMax = float(self.source.get(cv2.cv.CV_CAP_PROP_POS_MSEC))/1000.0</span>
+<span class="c">#            if(self.frameNumber &gt;= 1 and timeMax &gt;= 1):</span>
+<span class="c">#                self.frameRate = float(self.frameNumber)/float(timeMax)</span>
+<span class="c">#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 0)</span>
+<span class="c">#        if(self.frameRate==0):</span>
+<span class="c">#            self.frameRate = 25#Take a probable value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mf">1000.0</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">frameRate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">setSingleShot</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frameMustChange</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Movie.resetMovie"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.resetMovie">[docs]</a>    <span class="k">def</span> <span class="nf">resetMovie</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset the video stream.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">VideoStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">)</span>
+        </div>
+<div class="viewcode-block" id="Movie.play"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.play">[docs]</a>    <span class="k">def</span> <span class="nf">play</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot;Start to read the video stream.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+    </div>
+<div class="viewcode-block" id="Movie.pause"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.pause">[docs]</a>    <span class="k">def</span> <span class="nf">pause</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pause the reading of the video stream.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Movie.frameMustChange"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.frameMustChange">[docs]</a>    <span class="k">def</span> <span class="nf">frameMustChange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Slot called when it is time to load the next frame.</span>
+<span class="sd">        </span>
+<span class="sd">        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">readNextFrame</span><span class="p">()</span>
+        
+<span class="c">#    def currentImage(self):</span>
+<span class="c">#        &quot;&quot;&quot;Returns a QImage representing the image in the current frame.</span>
+<span class="c">#        </span>
+<span class="c">#        Returns: </span>
+<span class="c">#            A QtGui.QImage representing the current frame.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return self.imageBuffer</span>
+    
+<span class="c">#    def currentFrame(self):</span>
+<span class="c">#        &quot;&quot;&quot;Returns the current frame.</span>
+<span class="c">#        </span>
+<span class="c">#        Returns: </span>
+<span class="c">#            A QtMultimedia.QVideoFrame representing the current frame.&quot;&quot;&quot;</span>
+<span class="c">#        return self.frame</span>
+    
+<span class="c">#    def currentNdarrayFrame(self):</span>
+<span class="c">#        &quot;&quot;&quot;Returns a NdArray representing the image in the current frame.</span>
+<span class="c">#        </span>
+<span class="c">#        Returns: </span>
+<span class="c">#            A QtGui.QImage representing the current frame.</span>
+<span class="c">#        &quot;&quot;&quot;</span>
+<span class="c">#        return self.rawBuffer</span>
+    </div>
+<div class="viewcode-block" id="Movie.toggleState"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.toggleState">[docs]</a>    <span class="k">def</span> <span class="nf">toggleState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Toggle between playing and pausing the video.&quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span><span class="o">==</span><span class="bp">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">play</span><span class="p">()</span>
+            </div>
+<div class="viewcode-block" id="Movie.jumpToFrame"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.jumpToFrame">[docs]</a>    <span class="k">def</span> <span class="nf">jumpToFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Modify the position in the video.</span>
+<span class="sd">        </span>
+<span class="sd">        :param position: a value between 0 and 1 corresponding to the position in the video. 0 is the beginning and 1 is the end.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">position</span><span class="o">&gt;</span><span class="mf">1.0</span><span class="p">):</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">position</span><span class="o">&lt;</span><span class="mf">0.001</span><span class="p">):</span>
+            <span class="n">position</span> <span class="o">=</span> <span class="mf">0.001</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get_frame_at_sec</span><span class="p">(</span><span class="n">position</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">ndarray</span>
+        <span class="k">return</span> <span class="n">frame</span>
+    </div>
+<div class="viewcode-block" id="Movie.readNextFrame"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.readNextFrame">[docs]</a>    <span class="k">def</span> <span class="nf">readNextFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load the next frame.</span>
+<span class="sd">        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rawBuffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">next</span><span class="p">()</span><span class="o">.</span><span class="n">ndarray</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ffvideo</span><span class="o">.</span><span class="n">NoMoreData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rawBuffer</span> <span class="o">=</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endOfVideo</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+<span class="c">#        if(error==0):</span>
+<span class="c">#            raise ValueError(&#39;Cannot read the file. Be sure the video is not compressed.&#39;)</span>
+<span class="c">#        imSize = image.shape</span>
+<span class="c">#        self.rawBuffer=numpy.copy(image)</span>
+<span class="c">#        image = numpy.ravel(image)</span>
+<span class="c">#        image.tostring()</span>
+<span class="c">#        image = QtGui.QImage(image, imSize[1], imSize[0], imSize[1]*3, QtGui.QImage.Format_RGB888)</span>
+<span class="c">#        self.frame = QtMultimedia.QVideoFrame(image)</span>
+<span class="c">#        del(imSize)</span>
+<span class="c">#        del(image)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        </div>
+<div class="viewcode-block" id="Movie.readNCFrame"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.readNCFrame">[docs]</a>    <span class="k">def</span> <span class="nf">readNCFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load the next frame.</span>
+<span class="sd">        :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">current</span><span class="p">()</span><span class="o">.</span><span class="n">frameno</span>
+        <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rawBuffer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">get_frame_no</span><span class="p">(</span><span class="n">position</span><span class="o">+</span><span class="n">number</span><span class="p">)</span><span class="o">.</span><span class="n">ndarray</span><span class="p">()</span>
+        <span class="k">except</span> <span class="n">ffvideo</span><span class="o">.</span><span class="n">NoMoreData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endOfVideo</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">current</span><span class="p">()</span><span class="o">.</span><span class="n">frameno</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">duration</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">framerate</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isPlaying</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pause</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endOfVideo</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+<span class="c">#        error, image = self.source.read()</span>
+<span class="c">#        if(error==0):</span>
+<span class="c">#            raise ValueError(&#39;Cannot read the file. Be sure the video is not compressed.&#39;)</span>
+<span class="c">#        image = numpy.ravel(image)</span>
+<span class="c">#        image.tostring()</span>
+<span class="c">#        self.rawBuffer=image</span>
+<span class="c">#        image = QtGui.QImage(image, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)</span>
+<span class="c">#        self.frame = QtMultimedia.QVideoFrame(image)</span>
+<span class="c">#        del(image)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frameChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+
+        </div>
+<div class="viewcode-block" id="Movie.currentPositionRatio"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.currentPositionRatio">[docs]</a>    <span class="k">def</span> <span class="nf">currentPositionRatio</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the position in the video.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: a value between 0 and 1 representing the position in the video. 0 is the beginning and 1 is the end.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">current</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">current</span><span class="p">()</span><span class="o">.</span><span class="n">timestamp</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">duration</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">result</span><span class="o">&gt;</span><span class="mf">1.0</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mf">1.0</span>
+            <span class="k">elif</span><span class="p">(</span><span class="n">result</span><span class="o">&lt;</span><span class="mf">0.0</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mf">0.0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mf">1.0</span>
+    </div>
+<div class="viewcode-block" id="Movie.getFrameNumber"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.getFrameNumber">[docs]</a>    <span class="k">def</span> <span class="nf">getFrameNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number of frame in the video.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: An integer representing the number of frame in the video.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">duration</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">framerate</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Movie.getFrameSize"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.getFrameSize">[docs]</a>    <span class="k">def</span> <span class="nf">getFrameSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">frame_width</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">frame_height</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="Movie.getEllapsedTime"><a class="viewcode-back" href="../VideoWidget.html#VideoWidget.Movie.getEllapsedTime">[docs]</a>    <span class="k">def</span> <span class="nf">getEllapsedTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the number ellapsed time in the video.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: An integer representing the number of frame in the video.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">current</span><span class="p">()</span><span class="o">.</span><span class="n">timestamp</span>
+        
+    </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PreTreatments Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="ResultsWriter Module" href="ResultsWriter.html" />
+    <link rel="prev" title="PostTreatments Module" href="PostTreatments.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ResultsWriter.html" title="ResultsWriter Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="PostTreatments.html" title="PostTreatments Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="pretreatments-module">
+<h1>PreTreatments Module<a class="headerlink" href="#pretreatments-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-PreTreatments" title="PreTreatments: module which provide the preTreatments for the video. (Unix, Windows)"><tt class="xref py py-mod docutils literal"><span class="pre">PreTreatments</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-PreTreatments"></span><span class="target" id="module-PreTreatments"></span><dl class="class">
+<dt id="PreTreatments.AbstractPreTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">AbstractPreTreatment</tt><a class="reference internal" href="_modules/PreTreatments.html#AbstractPreTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.AbstractPreTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Abstract class. All pretreatments inherit from this class</p>
+<dl class="method">
+<dt id="PreTreatments.AbstractPreTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#AbstractPreTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.AbstractPreTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.CannyTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">CannyTreatment</tt><big>(</big><em>minThreshold=200</em>, <em>ratio=1.2</em>, <em>kernelSize=7</em>, <em>L2gradient=False</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#CannyTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.CannyTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Canny edge detector</p>
+<dl class="method">
+<dt id="PreTreatments.CannyTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>minThreshold=200</em>, <em>ratio=1.2</em>, <em>kernelSize=7</em>, <em>L2gradient=False</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#CannyTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.CannyTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>minThreshold</strong> (<em>int</em>) &#8211; The minimum threshold used by the Canny edge detector</li>
+<li><strong>ratio</strong> (<em>float</em>) &#8211; use to know the maximal threshold used by the Canny edge detector : maxThreshold=ratio*minThreshold</li>
+<li><strong>kernelSize</strong> (<em>int</em>) &#8211; The size of the kernel used for the gradient computation</li>
+<li><strong>L2Gradient</strong> (<em>bool</em>) &#8211; The method used to computer the gradient value. If true, results are more accurate but the method is slower.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.CannyTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#CannyTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.CannyTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.DOHTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">DOHTreatment</tt><big>(</big><em>kernelSize=7</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DOHTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DOHTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Compute the determinant of the Hessian matrix</p>
+<dl class="method">
+<dt id="PreTreatments.DOHTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>kernelSize=7</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DOHTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DOHTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernelSize</strong> (<em>int</em>) &#8211; The kernel size</li>
+<li><strong>scale</strong> (<em>float</em>) &#8211; The scale factor for the derivative values</li>
+<li><strong>delta</strong> (<em>int</em>) &#8211; value added to the results</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.DOHTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DOHTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DOHTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.DilationTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">DilationTreatment</tt><big>(</big><em>morphology=0L</em>, <em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DilationTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DilationTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Perform morphological dilation</p>
+<dl class="method">
+<dt id="PreTreatments.DilationTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>morphology=0L</em>, <em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DilationTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DilationTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>morphology</strong> (<em>int</em>) &#8211; The shape of the mask</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; The size of the shape</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.DilationTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#DilationTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.DilationTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.GaborTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">GaborTreatment</tt><big>(</big><em>ksize=31</em>, <em>sigma=1.5</em>, <em>lambd=15</em>, <em>gamma=0.02</em>, <em>psi=0</em>, <em>ktype=&lt;type 'numpy.float32'&gt;</em>, <em>angleToProcess=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>The Gabor filter bank treatment</p>
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>ksize=31</em>, <em>sigma=1.5</em>, <em>lambd=15</em>, <em>gamma=0.02</em>, <em>psi=0</em>, <em>ktype=&lt;type 'numpy.float32'&gt;</em>, <em>angleToProcess=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ksize</strong> (<em>int</em>) &#8211; The size of the kernel used.</li>
+<li><strong>sigma</strong> (<em>float</em>) &#8211; The variance.</li>
+<li><strong>lambd</strong> (<em>int</em>) &#8211; The wavelength</li>
+<li><strong>gamma</strong> (<em>float</em>) &#8211; The excentricity</li>
+<li><strong>psi</strong> (<em>int</em>) &#8211; the offset</li>
+<li><strong>ktype</strong> (<em>Numpy type</em>) &#8211; The type of the kernel value</li>
+<li><strong>angleToProcess</strong> (<em>list of float</em>) &#8211; The angles to process</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.buildFilters">
+<tt class="descname">buildFilters</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.buildFilters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.buildFilters" title="Permalink to this definition">¶</a></dt>
+<dd><p>build all the kernel for the Gabor bank filter. the orientation is the varying parameter</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image by using process or processThreaded (choice is made automatically).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="PreTreatments.GaborTreatment.filters">
+<tt class="descname">filters</tt><em class="property"> = []</em><a class="headerlink" href="#PreTreatments.GaborTreatment.filters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.getGaborKernel">
+<tt class="descname">getGaborKernel</tt><big>(</big><em>theta</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.getGaborKernel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.getGaborKernel" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a Gabor kernel with all the arguments given in the constructor. the Theta is the last missing argument</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>theta</strong> (<em>float</em>) &#8211; The orientation of the kernel</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.process">
+<tt class="descname">process</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaborTreatment.processThreaded">
+<tt class="descname">processThreaded</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaborTreatment.processThreaded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaborTreatment.processThreaded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image (multi-threaded version of process).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.GaussianBlurTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">GaussianBlurTreatment</tt><big>(</big><em>kernelSize=(7</em>, <em>7)</em>, <em>Sigma=(1.0</em>, <em>1.0)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaussianBlurTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaussianBlurTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Gaussian blur</p>
+<dl class="method">
+<dt id="PreTreatments.GaussianBlurTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>kernelSize=(7</em>, <em>7)</em>, <em>Sigma=(1.0</em>, <em>1.0)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaussianBlurTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaussianBlurTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernelSize</strong> (<em>int</em>) &#8211; The size of the kernel used.</li>
+<li><strong>Sigma</strong> (<em>float</em>) &#8211; The variance of the gaussian function.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.GaussianBlurTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#GaussianBlurTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.GaussianBlurTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.IncreaseSizeTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">IncreaseSizeTreatment</tt><big>(</big><em>dstSize=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#IncreaseSizeTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.IncreaseSizeTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Increase the size of an image</p>
+<dl class="method">
+<dt id="PreTreatments.IncreaseSizeTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>dstSize=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#IncreaseSizeTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.IncreaseSizeTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dstSize</strong> (<em>Tuple of int</em>) &#8211; The final size</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.IncreaseSizeTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#IncreaseSizeTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.IncreaseSizeTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.LaplacianTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">LaplacianTreatment</tt><big>(</big><em>kernelSize=3</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#LaplacianTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.LaplacianTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Perform filtering using a Laplacian of Gaussian</p>
+<dl class="method">
+<dt id="PreTreatments.LaplacianTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>kernelSize=3</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#LaplacianTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.LaplacianTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>kernelSize</strong> (<em>int</em>) &#8211; The kernel size</li>
+<li><strong>scale</strong> (<em>float</em>) &#8211; The scale factor computer for the laplacian value</li>
+<li><strong>delta</strong> (<em>int</em>) &#8211; value added to the results</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.LaplacianTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#LaplacianTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.LaplacianTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.ReduceSizeTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">ReduceSizeTreatment</tt><big>(</big><em>dstSize=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ReduceSizeTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ReduceSizeTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Reduce the size of an image</p>
+<dl class="method">
+<dt id="PreTreatments.ReduceSizeTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>dstSize=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ReduceSizeTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ReduceSizeTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dstSize</strong> (<em>Tuple of int</em>) &#8211; The final size</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.ReduceSizeTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ReduceSizeTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ReduceSizeTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.SkeletonTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">SkeletonTreatment</tt><big>(</big><em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SkeletonTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SkeletonTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Compute morphological skeleton of blobs in an image</p>
+<dl class="method">
+<dt id="PreTreatments.SkeletonTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SkeletonTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SkeletonTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>size</strong> (<em>int</em>) &#8211; The size of the cross shaped mask used in the method</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.SkeletonTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SkeletonTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SkeletonTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.SobelTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">SobelTreatment</tt><big>(</big><em>dx=1</em>, <em>dy=1</em>, <em>kernelSize=7</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SobelTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SobelTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Compute the Sobel derivative of an image</p>
+<dl class="method">
+<dt id="PreTreatments.SobelTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>dx=1</em>, <em>dy=1</em>, <em>kernelSize=7</em>, <em>scale=1</em>, <em>delta=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SobelTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SobelTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dx</strong> &#8211; The order of the x derivative</li>
+<li><strong>dy</strong> (<em>float</em>) &#8211; The order of the y derivative</li>
+<li><strong>kernelSize</strong> (<em>int</em>) &#8211; The kernel size</li>
+<li><strong>scale</strong> (<em>float</em>) &#8211; The scale factor for the derivative values</li>
+<li><strong>delta</strong> (<em>int</em>) &#8211; value added to the results</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.SobelTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#SobelTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.SobelTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.ThresholdTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">ThresholdTreatment</tt><big>(</big><em>threshold=-1</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ThresholdTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ThresholdTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>&#8220;Perform Thesholding</p>
+<dl class="method">
+<dt id="PreTreatments.ThresholdTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>threshold=-1</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ThresholdTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ThresholdTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>threshold</strong> (<em>int</em>) &#8211; The threshold. -1 means automatic threshold.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.ThresholdTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#ThresholdTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.ThresholdTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.addHlineTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">addHlineTreatment</tt><big>(</big><em>thickness=1</em>, <em>lineDistance=10</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#addHlineTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.addHlineTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>add horizontal white line on the image</p>
+<dl class="method">
+<dt id="PreTreatments.addHlineTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>thickness=1</em>, <em>lineDistance=10</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#addHlineTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.addHlineTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>thickness</strong> (<em>int</em>) &#8211; The line thickness</li>
+<li><strong>lineDistance</strong> (<em>int</em>) &#8211; The distance between the lines</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.addHlineTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#addHlineTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.addHlineTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.changeContrastTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">changeContrastTreatment</tt><big>(</big><em>value=1.0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#changeContrastTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.changeContrastTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Change the contrast of the image</p>
+<dl class="method">
+<dt id="PreTreatments.changeContrastTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>value=1.0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#changeContrastTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.changeContrastTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<em>float</em>) &#8211; Contrast multiplier</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.changeContrastTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#changeContrastTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.changeContrastTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.cropTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">cropTreatment</tt><big>(</big><em>roi=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#cropTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.cropTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Crop the image</p>
+<dl class="method">
+<dt id="PreTreatments.cropTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>roi=None</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#cropTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.cropTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>roi</strong> (<em>Tuple of Tuple of int</em>) &#8211; Coordinates of the region of interest</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.cropTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#cropTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.cropTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.erosionTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">erosionTreatment</tt><big>(</big><em>morphology=0L</em>, <em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#erosionTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.erosionTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Perform morphological erosion</p>
+<dl class="method">
+<dt id="PreTreatments.erosionTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>morphology=0L</em>, <em>size=(3</em>, <em>3)</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#erosionTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.erosionTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>morphology</strong> (<em>int</em>) &#8211; The shape of the mask</li>
+<li><strong>size</strong> (<em>int</em>) &#8211; The size of the shape</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.erosionTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#erosionTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.erosionTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="PreTreatments.rotateTreatment">
+<em class="property">class </em><tt class="descclassname">PreTreatments.</tt><tt class="descname">rotateTreatment</tt><big>(</big><em>angle=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#rotateTreatment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.rotateTreatment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#PreTreatments.AbstractPreTreatment" title="PreTreatments.AbstractPreTreatment"><tt class="xref py py-class docutils literal"><span class="pre">PreTreatments.AbstractPreTreatment</span></tt></a></p>
+<p>Rotate the image</p>
+<dl class="method">
+<dt id="PreTreatments.rotateTreatment.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>angle=0</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#rotateTreatment.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.rotateTreatment.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>angle</strong> &#8211; The angle of rotation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.rotateTreatment.compute">
+<tt class="descname">compute</tt><big>(</big><em>img</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#rotateTreatment.compute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.rotateTreatment.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process one image.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>img</strong> (<em>Numpy array</em>) &#8211; The image to process</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The processed image</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Numpy array</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="PreTreatments.rotateTreatment.setAngle">
+<tt class="descname">setAngle</tt><big>(</big><em>angle</em><big>)</big><a class="reference internal" href="_modules/PreTreatments.html#rotateTreatment.setAngle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PreTreatments.rotateTreatment.setAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the angle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>angle</strong> (<em>float</em>) &#8211; The angle of rotation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">PreTreatments Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">PreTreatments</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="PostTreatments.html"
+                        title="previous chapter">PostTreatments Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ResultsWriter.html"
+                        title="next chapter">ResultsWriter Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/PreTreatments.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ResultsWriter.html" title="ResultsWriter Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="PostTreatments.html" title="PostTreatments Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

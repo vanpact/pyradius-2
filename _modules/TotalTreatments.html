@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>TotalTreatments &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for TotalTreatments</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Oct 12, 2012</span>
+
+<span class="sd">@author: yvesremi</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">MainTreatments</span>
+<span class="kn">import</span> <span class="nn">PostTreatments</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<div class="viewcode-block" id="LKMethod"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.LKMethod">[docs]</a><span class="k">class</span> <span class="nc">LKMethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Class performing the pretreatments, treatments and post-treatments for the method using the Lucas-Kanade algorithm&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LKMethod.__init__"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.LKMethod.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aponeurosises</span><span class="p">,</span> <span class="n">fiber</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Constructor</span>
+<span class="sd">		</span>
+<span class="sd">		:param Aponeurosises: The position of the extremities of the aponeurosises</span>
+<span class="sd">		:type Aponeurosises: list of 2 tuple containing 2 QPoints each</span>
+<span class="sd">		:param fiber: The position of the extremities of a muscle fascicle</span>
+<span class="sd">		:type fiber: tuple containing 2 QPoints</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">left0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">left1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">upperAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">lowerAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">upperAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">lowerAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">MuscleTracker2</span><span class="p">(</span><span class="n">lines</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">,</span> <span class="n">fiber</span> <span class="o">=</span> <span class="n">fiber</span><span class="p">))</span>
+		</div>
+<div class="viewcode-block" id="LKMethod.compute"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.LKMethod.compute">[docs]</a>	<span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Process one image</span>
+<span class="sd">		</span>
+<span class="sd">		:param img: The image to process</span>
+<span class="sd">		:type img: Numpy array	</span>
+<span class="sd">		:return: The processed image and a dictionnary containing the 2 pennation angles extracted (the key is the channel name)</span>
+<span class="sd">		:rtype: Tuple</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.299</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">0.587</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">0.114</span>
+			
+		<span class="n">imgToMix</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">))]</span>
+		<span class="n">angle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">treatment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">):</span>
+			<span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">treatment</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		
+		<span class="n">pennationAngleUp</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">pennationAngleLow</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">img</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">mergeMaxImages</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">)</span>
+		
+		<span class="k">return</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;26 UpperPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleUp</span><span class="p">,</span> <span class="s">&#39;25 LowerPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleLow</span><span class="p">})</span>
+			</div></div>
+<div class="viewcode-block" id="EllipseMethod"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.EllipseMethod">[docs]</a><span class="k">class</span> <span class="nc">EllipseMethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Class performing the pretreatments, treatments and post-treatments for the method using the Ellipsoids to detect the muscle fascicle orientation&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="EllipseMethod.__init__"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.EllipseMethod.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aponeurosises</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Constructor</span>
+<span class="sd">		</span>
+<span class="sd">		:param Aponeurosises: The position of the extremities of the aponeurosises</span>
+<span class="sd">		:type Aponeurosises: list of 2 tuple containing 2 QPoints each</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">left0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">left1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">upperAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">lowerAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">1</span><span class="p">]</span>
+		
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">upperAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">lowerAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">blobDetectionTreatment</span><span class="p">(</span><span class="n">lines</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">))</span>
+		</div>
+<div class="viewcode-block" id="EllipseMethod.compute"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.EllipseMethod.compute">[docs]</a>	<span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;	</span>
+<span class="sd">		Process one image</span>
+<span class="sd">			</span>
+<span class="sd">		:param img: The image to process</span>
+<span class="sd">		:type img: Numpy array	</span>
+<span class="sd">		:return: The processed image and a dictionnary containing the 2 pennation angles extracted(the key is the channel name)</span>
+<span class="sd">		:rtype: Tuple</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.299</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">0.587</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">0.114</span>
+		
+		
+		<span class="n">imgToMix</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">))]</span>
+		<span class="n">angle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">treatment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">):</span>
+			<span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">treatment</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		
+		<span class="n">pennationAngleUp</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">pennationAngleLow</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">img</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">mergeMaxImages</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">)</span>
+
+		<span class="k">return</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;26 UpperPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleUp</span><span class="p">,</span> <span class="s">&#39;25 LowerPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleLow</span><span class="p">})</span>
+</div></div>
+<div class="viewcode-block" id="RadonMethod"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.RadonMethod">[docs]</a><span class="k">class</span> <span class="nc">RadonMethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Class performing the pretreatments, treatments and post-treatments for the method using the Radon transform&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="RadonMethod.__init__"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.RadonMethod.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Aponeurosises</span><span class="p">,</span> <span class="n">manySamples</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Constructor</span>
+<span class="sd">		</span>
+<span class="sd">		:param Aponeurosises: The position of the extremities of the aponeurosises</span>
+<span class="sd">		:type Aponeurosises: list of 2 tuple containing 2 QPoints each</span>
+<span class="sd">		:param manySamples: if True, use 3 samples instead of one but is three times slower</span>
+<span class="sd">		:type manySamples: bool</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">left0</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">left1</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">upperAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">lowerAponeurosis</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">left0</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">(),</span> <span class="n">Aponeurosises</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">left1</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">()]))[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">upperAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">AponeurosisTracker</span><span class="p">(</span><span class="n">line</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">[</span><span class="n">lowerAponeurosis</span><span class="p">]))</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">MainTreatments</span><span class="o">.</span><span class="n">testRadon</span><span class="p">(</span><span class="n">lines</span><span class="o">=</span><span class="n">Aponeurosises</span><span class="p">,</span> <span class="n">manyCircles</span><span class="o">=</span><span class="n">manySamples</span><span class="p">))</span>
+		</div>
+<div class="viewcode-block" id="RadonMethod.compute"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.RadonMethod.compute">[docs]</a>	<span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;		</span>
+<span class="sd">		Process one image</span>
+<span class="sd">				</span>
+<span class="sd">		:param img: The image to process</span>
+<span class="sd">		:type img: Numpy array	</span>
+<span class="sd">		:return: The processed image and a dictionnary containing the 2 pennation angles extracted (the key is the channel name)</span>
+<span class="sd">		:rtype: Tuple</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.299</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">0.587</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">0.114</span>
+			
+		<span class="n">imgToMix</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">))]</span>
+		<span class="n">angle</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">treatment</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">treatmentsList</span><span class="p">):</span>
+			<span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">treatment</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+		
+		<span class="n">pennationAngleUp</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">pennationAngleLow</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">computeAngle</span><span class="p">(</span><span class="n">angle</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">angle</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">img</span> <span class="o">=</span> <span class="n">PostTreatments</span><span class="o">.</span><span class="n">mergeMaxImages</span><span class="p">(</span><span class="n">imgToMix</span><span class="p">)</span>
+		
+		<span class="k">return</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;26 UpperPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleUp</span><span class="p">,</span> <span class="s">&#39;25 LowerPennationAngle&#39;</span><span class="p">:</span><span class="n">pennationAngleLow</span><span class="p">})</span>
+</div></div>
+<div class="viewcode-block" id="junctionComputation"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.junctionComputation">[docs]</a><span class="k">class</span> <span class="nc">junctionComputation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;Class performing the pretreatments, treatments and post-treatments in order to extract the junction of an aponeurosis&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="junctionComputation.__init__"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.junctionComputation.__init__">[docs]</a>	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limits</span><span class="p">,</span> <span class="n">firstApproximation</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;		</span>
+<span class="sd">		Constructor</span>
+<span class="sd">		</span>
+<span class="sd">		:param limits: 2 points delimitating a rectangular region of interest</span>
+<span class="sd">		:type limits: Tuple of 2 QPoints</span>
+<span class="sd">		:param firstApproximation: First approximation of the center</span>
+<span class="sd">		:type firstApproximation: QPoint</span>
+<span class="sd">		:return: The processed image and a dictionnary containing the center of the junction extracted (the key is the channel name)</span>
+<span class="sd">		:rtype: Tuple</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">treatment</span> <span class="o">=</span> <span class="n">MainTreatments</span><span class="o">.</span><span class="n">seamCarving</span><span class="p">(</span><span class="n">limits</span><span class="p">,</span> <span class="n">firstApproximation</span><span class="p">)</span>
+		</div>
+<div class="viewcode-block" id="junctionComputation.compute"><a class="viewcode-back" href="../TotalTreatments.html#TotalTreatments.junctionComputation.compute">[docs]</a>	<span class="k">def</span> <span class="nf">compute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;		</span>
+<span class="sd">		Process one image</span>
+<span class="sd">		</span>
+<span class="sd">		:param img: The image to process</span>
+<span class="sd">		:type img: Numpy array	</span>
+<span class="sd">		:return: The processed image and a dictionnary containing the center of the junction extracted (the key is the channel name)</span>
+<span class="sd">		:rtype: Tuple</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span><span class="p">):</span>
+			<span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mf">0.299</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mf">0.587</span><span class="o">+</span><span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mf">0.114</span>
+		<span class="n">img</span><span class="p">,</span> <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">treatment</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+		<span class="k">return</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;center&#39;</span><span class="p">:</span><span class="n">center</span><span class="p">})</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
