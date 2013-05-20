@@ -69,6 +69,8 @@
 <span class="sd">    :return: 0 if success</span>
 <span class="sd">    :rtype: int</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;nul&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s">&quot;nul&quot;</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
     <span class="n">app</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
 <span class="c">#     styleSheet = QtCore.QFile(&quot;darkorange.stylesheet&quot;)</span>
 <span class="c">#     styleSheet.open(QtCore.QFile.ReadOnly)</span>

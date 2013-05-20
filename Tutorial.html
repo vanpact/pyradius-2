@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial Module &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="index.html" />
+    <link rel="up" title="Project Modules" href="modules.html" />
+    <link rel="next" title="MainTreatments Module" href="MainTreatments.html" />
+    <link rel="prev" title="TotalTreatments Module" href="TotalTreatments.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MainTreatments.html" title="MainTreatments Module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" accesskey="U">Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial-module">
+<h1>Tutorial Module<a class="headerlink" href="#tutorial-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2><a class="reference internal" href="#module-Tutorial" title="Tutorial"><tt class="xref py py-mod docutils literal"><span class="pre">Tutorial</span></tt></a> Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-Tutorial"></span><dl class="class">
+<dt id="Tutorial.JunctionTutorial">
+<em class="property">class </em><tt class="descclassname">Tutorial.</tt><tt class="descname">JunctionTutorial</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#JunctionTutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.JunctionTutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Tutorial.Tutorial" title="Tutorial.Tutorial"><tt class="xref py py-class docutils literal"><span class="pre">Tutorial.Tutorial</span></tt></a></p>
+<p>Class for the tutorial specific to the treatment to extract the junction position.</p>
+<dl class="method">
+<dt id="Tutorial.JunctionTutorial.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#JunctionTutorial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.JunctionTutorial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>QWidget</em>) &#8211; The widget who asked to create this tutorial.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Tutorial.JunctionTutorial.displayIntroduction">
+<tt class="descname">displayIntroduction</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/Tutorial.html#JunctionTutorial.displayIntroduction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.JunctionTutorial.displayIntroduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display to the user basic information of what he has to do</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Tutorial.LinesTutorial">
+<em class="property">class </em><tt class="descclassname">Tutorial.</tt><tt class="descname">LinesTutorial</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#LinesTutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.LinesTutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Tutorial.Tutorial" title="Tutorial.Tutorial"><tt class="xref py py-class docutils literal"><span class="pre">Tutorial.Tutorial</span></tt></a></p>
+<p>Class for the tutorial specific to the treatment to extract the pennation angle using the ellipsoids detection or the Radon transform.</p>
+<dl class="method">
+<dt id="Tutorial.LinesTutorial.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#LinesTutorial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.LinesTutorial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>QWidget</em>) &#8211; The widget who asked to create this tutorial.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Tutorial.LinesTutorial.displayIntroduction">
+<tt class="descname">displayIntroduction</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/Tutorial.html#LinesTutorial.displayIntroduction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.LinesTutorial.displayIntroduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display to the user basic information of what he has to do</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Tutorial.MuscleTutorial">
+<em class="property">class </em><tt class="descclassname">Tutorial.</tt><tt class="descname">MuscleTutorial</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#MuscleTutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.MuscleTutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#Tutorial.Tutorial" title="Tutorial.Tutorial"><tt class="xref py py-class docutils literal"><span class="pre">Tutorial.Tutorial</span></tt></a></p>
+<p>Class for the tutorial specific to the treatment to extract the pennation angle using the Lucas-Kanade algorithm.</p>
+<dl class="method">
+<dt id="Tutorial.MuscleTutorial.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#MuscleTutorial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.MuscleTutorial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>QWidget</em>) &#8211; The widget who asked to create this tutorial.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Tutorial.MuscleTutorial.displayIntroduction">
+<tt class="descname">displayIntroduction</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/Tutorial.html#MuscleTutorial.displayIntroduction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.MuscleTutorial.displayIntroduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display to the user basic information of what he has to do</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="Tutorial.Tutorial">
+<em class="property">class </em><tt class="descclassname">Tutorial.</tt><tt class="descname">Tutorial</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#Tutorial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.Tutorial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<p>Class for all tutorials</p>
+<dl class="method">
+<dt id="Tutorial.Tutorial.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>parent</em><big>)</big><a class="reference internal" href="_modules/Tutorial.html#Tutorial.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.Tutorial.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>parent</strong> (<em>QWidget</em>) &#8211; The widget who asked to create this tutorial.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="Tutorial.Tutorial.displayIntroduction">
+<tt class="descname">displayIntroduction</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/Tutorial.html#Tutorial.displayIntroduction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.Tutorial.displayIntroduction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display to the user basic information of what he has to do</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Tutorial.Tutorial.showConseils">
+<tt class="descname">showConseils</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/Tutorial.html#Tutorial.showConseils"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#Tutorial.Tutorial.showConseils" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display hints on how to place the extremities of the Aponeurosis</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial Module</a><ul>
+<li><a class="reference internal" href="#id1"><tt class="docutils literal"><span class="pre">Tutorial</span></tt> Module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="TotalTreatments.html"
+                        title="previous chapter">TotalTreatments Module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="MainTreatments.html"
+                        title="next chapter">MainTreatments Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/Tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="MainTreatments.html" title="MainTreatments Module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="TotalTreatments.html" title="TotalTreatments Module"
+             >previous</a> |</li>
+        <li><a href="index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="modules.html" >Project Modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &mdash; MasterThesis 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="MasterThesis 1.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for Tutorial</h1><pre>
+﻿#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from PyQt4 import QtGui, QtCore
+from VideoWidget import VideoWidget, Movie
+
+<div class="viewcode-block" id="Tutorial"><a class="viewcode-back" href="../Tutorial.html#Tutorial.Tutorial">[docs]</a>class Tutorial(object):
+    """Class for all tutorials"""
+<div class="viewcode-block" id="Tutorial.__init__"><a class="viewcode-back" href="../Tutorial.html#Tutorial.Tutorial.__init__">[docs]</a>    def __init__(self, parent):
+        """Constructor
+        
+        :param parent: The widget who asked to create this tutorial.
+        :type parent: QWidget"""
+        if(type(self) is Tutorial):
+            raise NotImplementedError('This class is abstract and cannot be instantiated') 
+        super(Tutorial, self).__init__()
+        self.parent=parent
+    </div>
+<div class="viewcode-block" id="Tutorial.displayIntroduction"><a class="viewcode-back" href="../Tutorial.html#Tutorial.Tutorial.displayIntroduction">[docs]</a>    def displayIntroduction(self):
+        """Display to the user basic information of what he has to do"""
+        if(type(self) is Tutorial):
+            raise NotImplementedError('This method must be reimplemented') 
+    </div>
+<div class="viewcode-block" id="Tutorial.showConseils"><a class="viewcode-back" href="../Tutorial.html#Tutorial.Tutorial.showConseils">[docs]</a>    def showConseils(self):
+        """Display hints on how to place the extremities of the Aponeurosis"""
+        box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Conseils', 
+'&lt;p&gt;Afin d\'obtenir de meilleurs résultats: \
+&lt;ul&gt;&lt;li&gt;Essayez de placer les droites correspondant aux aponévroses au centre de celles-ci. &lt;/li&gt;\
+&lt;li&gt;Les droites tracées pour les aponévroses ne doivent pas nécessairement aller d\'un bout à l\'autre de celles-ci. Si l\'aponévrose change beaucoup de courbure au cours du traitement, les résultats seront meilleurs avec de plus petites droites&lt;/li&gt; \
+&lt;li&gt;Afin d\'avoir de bons résultats, il est tout de même conseillé de ne pas tracer de droites de moins de 150 pixels&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt; \
+', QtGui.QMessageBox.Ok, self.parent)
+        box.show()
+        </div></div>
+<div class="viewcode-block" id="JunctionTutorial"><a class="viewcode-back" href="../Tutorial.html#Tutorial.JunctionTutorial">[docs]</a>class JunctionTutorial(Tutorial):
+    """Class for the tutorial specific to the treatment to extract the junction position."""
+<div class="viewcode-block" id="JunctionTutorial.__init__"><a class="viewcode-back" href="../Tutorial.html#Tutorial.JunctionTutorial.__init__">[docs]</a>    def __init__(self, parent):
+        """Constructor
+        
+        :param parent: The widget who asked to create this tutorial.
+        :type parent: QWidget"""
+        self.parent=parent
+        super(LinesTutorial, self).__init__(self.parent)
+        self.drawlist=['rectangle', 'point']
+        </div>
+<div class="viewcode-block" id="JunctionTutorial.displayIntroduction"><a class="viewcode-back" href="../Tutorial.html#Tutorial.JunctionTutorial.displayIntroduction">[docs]</a>    def displayIntroduction(self):
+        """Display to the user basic information of what he has to do"""
+        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
+'&lt;p&gt;La méthode nécessite de connaitre la position de la région d\'intérêt et d\'avoir une première approximation pour la position de la jonction :\
+&lt;ul&gt;&lt;li&gt;Sur la vidéo, cliquez sur un point désignant un coin de la zone d\'intéret rectangulaire. Si rien n\'apparait, c\'est que vous avez mal cliqué.&lt;/li&gt;\
+&lt;li&gt;Si un point rouge est apparu à  l\'endroit où vous avez cliquez, cliquez sur le coin diagonalement opposé de la région d\'intéret. Un rectangle rouge devrait apparaitre à  l\'écran.&lt;/li&gt;\
+&lt;li&gt;Cliquez à  la position de la jonction.&lt;\li&gt;&lt;/ul&gt;&lt;/p&gt;\
+&lt;p&gt;&lt;strong&gt;N\'oubliez pas de modifier les options en bas de la fenêtre à  votre convenance avant de placer les aponévroses.&lt;/strong&gt;&lt;/p&gt;\
+', QtGui.QMessageBox.NoButton, self.parent)
+        tutoLayout = tuto.layout()
+        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
+        textMovieLayout = QtGui.QVBoxLayout()
+        tutoLayout.addLayout(textMovieLayout, 0, 1)
+        
+        gifLabel = QtGui.QLabel()
+        gif = QtGui.QMovie("Images/mouseSelectionJunction.gif", QtCore.QByteArray(), tuto)
+        gif.setCacheMode(QtGui.QMovie.CacheAll)
+        gif.setSpeed(100)
+        gifLabel.setMovie(gif)
+        
+        textMovieLayout.addWidget(tutoWidget)
+        textMovieLayout.addWidget(gifLabel)
+        gifLabel.show()
+        gif.start()
+        tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
+        tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
+#         hintButton.clicked.connect(self.showConseils)
+        ret = tuto.exec_()
+        if(ret==1):
+            self.showConseils()
+        </div></div>
+<div class="viewcode-block" id="LinesTutorial"><a class="viewcode-back" href="../Tutorial.html#Tutorial.LinesTutorial">[docs]</a>class LinesTutorial(Tutorial):
+    """Class for the tutorial specific to the treatment to extract the pennation angle using the ellipsoids detection or the Radon transform. """
+<div class="viewcode-block" id="LinesTutorial.__init__"><a class="viewcode-back" href="../Tutorial.html#Tutorial.LinesTutorial.__init__">[docs]</a>    def __init__(self, parent):
+        """Constructor
+        
+        :param parent: The widget who asked to create this tutorial.
+        :type parent: QWidget"""
+        self.parent=parent
+        super(LinesTutorial, self).__init__(self.parent)
+        self.drawlist=['line', 'line']
+        </div>
+<div class="viewcode-block" id="LinesTutorial.displayIntroduction"><a class="viewcode-back" href="../Tutorial.html#Tutorial.LinesTutorial.displayIntroduction">[docs]</a>    def displayIntroduction(self):
+        """Display to the user basic information of what he has to do"""
+        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
+'&lt;p&gt;La méthode nécessite d\'une position initiale pour les deux aponévroses:\
+&lt;ul&gt;&lt;li&gt;Sur la vidéo, cliquez sur une extrémité au choix d\'une des deux aponévroses. Si rien n\'apparait, c\'est que vous avez mal cliqué.&lt;/li&gt;\
+&lt;li&gt;Si un point rouge est apparu à  l\'endroit où vous avez cliquez, cliquez sur l\'autre extrémité de la même aponévrose. Une ligne rouge devrait apparaitre à  l\'écran.&lt;/li&gt; \
+&lt;li&gt;Faites de même avec la deuxième aponévrose. &lt;/li&gt;&lt;/ul&gt;&lt;/p&gt; \
+&lt;p&gt;&lt;strong&gt;N\'oubliez pas de modifier les options en bas de la fenêtre à  votre convenance avant de placer les aponévroses.&lt;/strong&gt;&lt;/p&gt;\
+', QtGui.QMessageBox.NoButton, self.parent)
+        tutoLayout = tuto.layout()
+        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
+        textMovieLayout = QtGui.QVBoxLayout()
+        tutoLayout.addLayout(textMovieLayout, 0, 1)
+        
+        gifLabel = QtGui.QLabel()
+        gif = QtGui.QMovie("Images/mouseSelection1.gif", QtCore.QByteArray(), tuto)
+        gif.setCacheMode(QtGui.QMovie.CacheAll)
+        gif.setSpeed(100)
+        gifLabel.setMovie(gif)
+        
+        textMovieLayout.addWidget(tutoWidget)
+        textMovieLayout.addWidget(gifLabel)
+        gifLabel.show()
+        gif.start()
+        tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
+        tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
+#         hintButton.clicked.connect(self.showConseils)
+        ret = tuto.exec_()
+        if(ret==1):
+            self.showConseils()
+        </div></div>
+<div class="viewcode-block" id="MuscleTutorial"><a class="viewcode-back" href="../Tutorial.html#Tutorial.MuscleTutorial">[docs]</a>class MuscleTutorial(Tutorial):
+    """Class for the tutorial specific to the treatment to extract the pennation angle using the Lucas-Kanade algorithm. """
+<div class="viewcode-block" id="MuscleTutorial.__init__"><a class="viewcode-back" href="../Tutorial.html#Tutorial.MuscleTutorial.__init__">[docs]</a>    def __init__(self, parent):
+        """Constructor
+        
+        :param parent: The widget who asked to create this tutorial.
+        :type parent: QWidget"""
+        self.parent=parent
+        super(MuscleTutorial, self).__init__(self.parent)
+        self.drawlist=['line', 'line', 'line']
+        </div>
+<div class="viewcode-block" id="MuscleTutorial.displayIntroduction"><a class="viewcode-back" href="../Tutorial.html#Tutorial.MuscleTutorial.displayIntroduction">[docs]</a>    def displayIntroduction(self):
+        """Display to the user basic information of what he has to do"""
+        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
+'&lt;p&gt;La méthode nécessite une position initiale pour chacune des deux aponévroses et l\'orientation des fibres : \
+&lt;ul&gt;&lt;li&gt;Sur la vidéo, cliquez sur une extrémité au choix d\'une des deux aponévroses. Si rien n\'apparait, c\'est que vous avez mal cliqué.&lt;/li&gt;\
+&lt;li&gt;Si un point rouge est apparu à  l\'endroit où vous avez cliquez, cliquez sur l\'autre extrémité de la même aponévrose. Une ligne rouge devrait maintenant être à  l\'écran.&lt;/li&gt; \
+&lt;li&gt;Faites de même avec la deuxième aponévrose.&lt;/li&gt; \
+&lt;li&gt; Faites de même avec une des fibres. Il n\'est pas nécessaire d\'aller d\'une extremité à  l\'autre de la fibre puisque seule l\'orienation sera utilisée&lt;/li&gt;&lt;/ul&gt;&lt;/p&gt; \
+&lt;p&gt;&lt;strong&gt;N\'oubliez pas de modifier les options en bas de la fenêtre à  votre convenance avant de placer les aponévroses.&lt;/strong&gt;&lt;/p&gt;\
+',QtGui.QMessageBox.NoButton, self.parent)
+        tutoLayout = tuto.layout()
+        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
+        textMovieLayout = QtGui.QVBoxLayout()
+        tutoLayout.addLayout(textMovieLayout, 0, 1)
+        
+        gifLabel = QtGui.QLabel()
+        gif = QtGui.QMovie("Images\mouseSelectionLK.gif", QtCore.QByteArray(), tuto)
+        gif.setCacheMode(QtGui.QMovie.CacheAll)
+        gif.setSpeed(100)
+        gifLabel.setMovie(gif)
+        
+        textMovieLayout.addWidget(tutoWidget)
+        textMovieLayout.addWidget(gifLabel)
+        gifLabel.show()
+        gif.start()
+        tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
+        tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
+#         hintButton.clicked.connect(self.showConseils)
+        ret = tuto.exec_()
+        if(ret==1):
+            self.showConseils()
+        
+        </div></div>
+</pre>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">MasterThesis 1.0 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Yves-Rémi Van Eycke.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
