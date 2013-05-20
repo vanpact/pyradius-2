@@ -20,8 +20,8 @@ def main():
     :return: 0 if success
     :rtype: int
     """
-    sys.stdout = open("nul", "w")
-    sys.stderr = open("nul", "w")
+#     sys.stdout = open("nul", "w")
+#     sys.stderr = open("nul", "w")
     app = QtGui.QApplication(sys.argv)
 #     styleSheet = QtCore.QFile("darkorange.stylesheet")
 #     styleSheet.open(QtCore.QFile.ReadOnly)

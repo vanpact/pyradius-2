@@ -86,7 +86,7 @@ class ResultsWriter(object):
             self.sheet=sheet
             if(self.sheet==None):
                 self.sheet = xlsFile.sheet_names[0]
-            self.parsedInfo = xlsFile.parse(self.sheet, header=0, index_col=0)
+            self.parsedInfo = xlsFile.parse(self.sheet, header=0)
         else:
             self.parsedInfo = pandas.DataFrame()
             self.sheet='sheet1'
@@ -112,11 +112,15 @@ class ResultsWriter(object):
         :type info: a list of dictionnaries
         """
         if(self.fileExist):
-            self.parsedInfo = self.parsedInfo.set_index(keys=[str('Time')], inplace=True)
+            if([col for col in self.parsedInfo.columns].count('Time')==1):
+                self.parsedInfo = self.parsedInfo.set_index(keys=[str('Time')], inplace=False)
 #         info = pandas.DataFrame(info).dropna(how = 'any', subset = ['Time'])
         dataToMerge = pandas.DataFrame(info)
-        dataToMerge.set_index(keys=[str('Time')], inplace=True)
+        dataToMerge = dataToMerge.set_index(keys=[str('Time')], inplace=False)
         for colName in dataToMerge.columns:
+            for colName1 in self.parsedInfo.columns:
+                if(colName == colName1):
+                    self.parsedInfo = self.parsedInfo.drop(colName1, axis=1)
             self.columnsToPad.add(colName)
         self.parsedInfo = pandas.merge(self.parsedInfo, dataToMerge, left_index=True, right_index=True, copy=False, how='outer')
         

@@ -7,6 +7,10 @@ from VideoWidget import VideoWidget, Movie
 class Tutorial(object):
     """Class for all tutorials"""
     def __init__(self, parent):
+        """Constructor
+        
+        :param parent: The widget who asked to create this tutorial.
+        :type parent: QWidget"""
         if(type(self) is Tutorial):
             raise NotImplementedError('This class is abstract and cannot be instantiated') 
         super(Tutorial, self).__init__()
@@ -31,6 +35,7 @@ class JunctionTutorial(Tutorial):
     """Class for the tutorial specific to the treatment to extract the junction position."""
     def __init__(self, parent):
         """Constructor
+        
         :param parent: The widget who asked to create this tutorial.
         :type parent: QWidget"""
         self.parent=parent
@@ -72,6 +77,7 @@ class LinesTutorial(Tutorial):
     """Class for the tutorial specific to the treatment to extract the pennation angle using the ellipsoids detection or the Radon transform. """
     def __init__(self, parent):
         """Constructor
+        
         :param parent: The widget who asked to create this tutorial.
         :type parent: QWidget"""
         self.parent=parent
@@ -113,6 +119,7 @@ class MuscleTutorial(Tutorial):
     """Class for the tutorial specific to the treatment to extract the pennation angle using the Lucas-Kanade algorithm. """
     def __init__(self, parent):
         """Constructor
+        
         :param parent: The widget who asked to create this tutorial.
         :type parent: QWidget"""
         self.parent=parent

@@ -3,7 +3,7 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import sys, os, py2exe
 from glob import glob
-
+from subprocess import _args_from_interpreter_flags
 def runSetup(setup_args):
     setup(
     name = 'Pyradius',
@@ -20,8 +20,6 @@ def runSetup(setup_args):
 
 if __name__=='__main__':
     try:
-        sys.stdout = open("nul", "w")
-        sys.stderr = open("nul", "w")
         os.rename('Applier.py', 'Applier.pyx')
         os.rename('MainTreatments.py', 'MainTreatments.pyx')
         os.rename('PreTreatments.py', 'PreTreatments.pyx')
@@ -41,11 +39,13 @@ if __name__=='__main__':
                   ("data", glob(r'C:\Python27\lib\site-packages\scipy\interpolate\dfitpack.pyd')), 
                   ("data", glob(r'C:\Python27\lib\site-packages\numpy-1.7.1-py2.7-win32.egg\numpy\fft\fftpack_lite.pyd')),
                   ("data", glob(r'C:\Python27\lib\site-packages\skimage\_shared\geometry.pyd')),
+                  ("data", glob(r'C:\Python27\Lib\subprocess.pyc')),
                   ("data", glob(r'C:\Program Files (x86)\CMake 2.8\bin\MSVCP90.dll')),
                   ("imageformats", glob(r'C:\Python27\Lib\site-packages\PyQt4\plugins\imageformats\qgif4.dll')),
                   ("Images", glob(r'Images\*.gif')),
                   ("Images", glob(r'Images\*.png')),
                   ("Images", glob(r'Images\*.jpg')),
+                  ("Images", glob(r'Images\*.bmp'))
                   ("Images", glob(r'Images\*.ico')),
                   ("", glob(r'gpl-3.0-standalone.html'))]
         runSetup(setup_args)
@@ -58,7 +58,7 @@ if __name__=='__main__':
                    ("", glob(r'build\lib.win32-2.7\TotalTreatments.pyd')),
                    ("", glob(r'build\lib.win32-2.7\imageConverter.pyd')),
                    ("", glob(r'build\lib.win32-2.7\PostTreatments.pyd'))])
-        setup_args2['options']={"py2exe": {"includes": ["sip", "skimage._shared.*", "scipy.sparse.csgraph._validation", "six", "openpyxl.workbook"]}}
+        setup_args2['options']={"py2exe": {"includes": ["sip", "skimage._shared.*", "scipy.sparse.csgraph._validation", "six", "openpyxl.workbook", "subprocess"]}}
         setup_args2['windows']=[{"script": "main.py"}]
         runSetup(setup_args2)
     finally:
