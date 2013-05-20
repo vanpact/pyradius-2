@@ -39,13 +39,14 @@ class blobDetectionTreatment(AbstractTreatment):
     """This class use Ellipsoid to detect the angle of the aponeurosis."""
     def __init__(self, mode = cv2.cv.CV_RETR_LIST, method=cv2.cv.CV_CHAIN_APPROX_NONE, lines=None):
         """    
+        Constructor
+        
         :param mode: The mode argument in the OpenCV method findcontours
         :type mode: Int
         :param method: The method argument in the OpenCV method findcontours
         :type method: Int
         :param lines: The two extremities of the aponeurosis
-        :type lines: Collection of QPoints
-        Constructor      
+        :type lines: Collection of QPoints      
         """
         super(blobDetectionTreatment, self).__init__()
         self.mode = mode
@@ -311,8 +312,10 @@ class MuscleTracker2(AbstractTreatment):
         fiberSlope = numpy.float(fiber[1].y()-fiber[0].y())/numpy.float(fiber[1].x()-fiber[0].x())#*(oldmaxx-oldminx)
 #         offsetFiber=(fiber[leftpointfiber].y()-oldminy)
 
-        self.upperAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[0]
-        self.lowerAponeurosis = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[1]
+        left0 = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[0]
+        left1 = numpy.argsort(numpy.asarray([lines[1][0].y(), lines[1][1].y()]))[0]
+        self.upperAponeurosis = numpy.argsort(numpy.asarray([lines[0][left0].y(), lines[1][left1].y()]))[0]
+        self.lowerAponeurosis = numpy.argsort(numpy.asarray([lines[0][left0].y(), lines[1][left1].y()]))[1]
         self.leftpointUpper = numpy.argsort(numpy.asarray([lines[self.upperAponeurosis][0].x(), lines[self.upperAponeurosis][1].x()]))[0]
         self.leftpointLower = numpy.argsort(numpy.asarray([lines[self.lowerAponeurosis][0].x(), lines[self.lowerAponeurosis][1].x()]))[0]
         self.rightpointUpper = numpy.argsort(numpy.asarray([lines[self.upperAponeurosis][0].x(), lines[self.upperAponeurosis][1].x()]))[1]
@@ -401,9 +404,9 @@ class MuscleTracker2(AbstractTreatment):
 #            for point in line:
 #                point = numpy.squeeze(point)
 #                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (128, 128, 128))
-        if(len(self.vecAngle)>0 and len(self.vecAngle)>1):
-            self.vecAngle[0] = [(value+numpy.pi/2.0) for value in self.vecAngle[0]]
-            self.vecAngle[1] = [(value+numpy.pi/2.0) for value in self.vecAngle[1]]
+        if(len(self.vecAngle)>1):
+            self.vecAngle[self.upperAponeurosis] = [(value+numpy.pi/2.0) for value in self.vecAngle[self.upperAponeurosis]]
+            self.vecAngle[self.lowerAponeurosis] = [(value+numpy.pi/2.0) for value in self.vecAngle[self.lowerAponeurosis]]
         
             meanY01=0
             meanX01=0
@@ -413,20 +416,20 @@ class MuscleTracker2(AbstractTreatment):
             meanX0=0
             meanY1=0
             meanX1=0
-            for mag, angle in zip(self.vecLength[0], self.vecAngle[0]):
+            for mag, angle in zip(self.vecLength[self.upperAponeurosis], self.vecAngle[self.upperAponeurosis]):
                 meanY0 = meanY0 + numpy.sin(angle+numpy.pi/2.0)*mag
                 meanY01 = meanY01 + numpy.sin(angle)*mag
                 meanX0 = meanX0 + numpy.cos(angle-numpy.pi/2.0)*mag
                 meanX01 = meanX01 + numpy.cos(angle)*mag
-            for mag, angle in zip(self.vecLength[1], self.vecAngle[1]):
+            for mag, angle in zip(self.vecLength[self.lowerAponeurosis], self.vecAngle[self.lowerAponeurosis]):
                 meanY1 = meanY1 + numpy.sin(angle+numpy.pi/2.0)*mag
                 meanX1 = meanX1 + numpy.cos(angle-numpy.pi/2.0)*mag
                 meanY11 = meanY11 + numpy.sin(angle)*mag
                 meanX11 = meanX11 + numpy.cos(angle)*mag
-            meanY0 = meanY0/len(self.vecLength[0])
-            meanX0 = meanX0/len(self.vecLength[0])
-            meanY1 = meanY1/len(self.vecLength[1])
-            meanX1 = meanX1/len(self.vecLength[1])
+            meanY0 = meanY0/len(self.vecLength[self.upperAponeurosis])
+            meanX0 = meanX0/len(self.vecLength[self.upperAponeurosis])
+            meanY1 = meanY1/len(self.vecLength[self.lowerAponeurosis])
+            meanX1 = meanX1/len(self.vecLength[self.lowerAponeurosis])
             
             yVal = numpy.sin(self.angle)*self.length - meanY0 + meanY1
             xVal = numpy.cos(self.angle)*self.length - meanX0 + meanX1
@@ -479,6 +482,7 @@ class testRadon(AbstractTreatment):
     def __init__(self, lines=None, manyCircles=False):
         """
         Constructor
+        
         :param lines: The two extremity of the aponeurosis
         :type lines: Collection of QPoints      
         :param manyCircles: if True, use 3 samples instead of one but is three times slower
@@ -500,9 +504,11 @@ class testRadon(AbstractTreatment):
             self.oldminy = min(newminy, self.oldminy)
             newmaxy = max(line[0].y(), line[1].y())
             self.oldmaxy = max(newmaxy, self.oldmaxy)
-            
-        highestLine = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[0]
-        lowestLine = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[1][0].y()]))[1]
+
+        leftpoint0 = numpy.argsort(numpy.asarray([lines[0][0].x(), lines[0][1].x()]))[0]
+        leftpoint1 = numpy.argsort(numpy.asarray([lines[1][0].x(), lines[1][1].x()]))[0]  
+        highestLine = numpy.argsort(numpy.asarray([lines[0][leftpoint0].y(), lines[1][leftpoint1].y()]))[0]
+        lowestLine = numpy.argsort(numpy.asarray([lines[0][leftpoint0].y(), lines[1][leftpoint1].y()]))[1]
         leftpoint0 = numpy.argsort(numpy.asarray([lines[highestLine][0].x(), lines[highestLine][1].x()]))[0]
         leftpoint1 = numpy.argsort(numpy.asarray([lines[lowestLine][0].x(), lines[lowestLine][1].x()]))[0]
         slope0 = numpy.float(lines[highestLine][1].y()-lines[highestLine][0].y())/numpy.float(lines[highestLine][1].x()-lines[highestLine][0].x())*(self.oldmaxx-self.oldminx)
@@ -599,6 +605,7 @@ class seamCarving(AbstractTreatment):
     def __init__(self, limits, firstApproximation):
         """
         Constructor
+        
         :param limits: The region of interest
         :type limits: Collection of QPoints
         :param firstApproximation: The value of initialisation of the position of the junction
@@ -618,20 +625,16 @@ class seamCarving(AbstractTreatment):
         
     def compute(self, img):
         """
+        Make the seams carving process on the image to find the white lines and the junction point
+        The image for this application needs to be an ultrasound image (in grey).
+        The hiding area is the thickness of the fasciae (in pixel). 
+        
         :param img: matrix of the image
         :param a: thickness of the hiding area (below)
         :param b: thickness of the hiding area (above)
         :param hide: boolean to show or not the hiding area
         :param ref: boolean to show or not a reference point
-    
-        
-        The image for this application needs to be an ultrasound image (in grey).
-        The hiding area is the thickness of the fasciae (in pixel). 
-        
-        make the seams carving process on the image to find the white lines and the junction point
-        
         :return: the image with the fasciae in blue and the junction in red, the coordinates of the junction
-        
         """
         img_orig = numpy.copy(img)
         for pretreatments in self.filtersToPreApply:
@@ -666,9 +669,7 @@ class seamCarving(AbstractTreatment):
     def addOffset(self, pointList):
         """
         :param pointList: List of the points for which the offset will be added
-        
         :return: the offset list
-        
         """
         for point in pointList:
             point[0] = point[0]+self.yoffset;
@@ -678,9 +679,7 @@ class seamCarving(AbstractTreatment):
     def makeSeams(self, img):
         """
         :param img: Matrix of the image
-        
         :return: the array of the Seams Carving Image
-        
         """
                 
         dimr = img.shape[0] #rows
@@ -747,8 +746,7 @@ class seamCarving(AbstractTreatment):
         :param dimr: dimension for the rows
         :param dimc: dimension for the columns
         
-        :return: the coordinates of the seams (way with the lowest cost)
-        
+        :return: the coordinates of the seams (way with the lowest cost) 
         """ 
         coord=[]
 #!!!        
@@ -761,14 +759,13 @@ class seamCarving(AbstractTreatment):
     
     def findSeamsHor(self, coord, i, img_score, dimr, dimc):
         """
+        Add coordinates of the seams in a list, by finding the minimum value of the adjacent rows of the next column
+        
         :param coord: list of the coordinates of the seams
         :param i: arguments of the row with minimum value
         :param img_score: matrix of the image score
         :param dimr: dimension of rows
         :param dimc: dimension of columns
-        
-        add coordinates of the seams in a list, by finding the minimum value of the adjacent rows of the next column
-        
         """
         
         for j in range(dimc-1):
@@ -792,11 +789,10 @@ class seamCarving(AbstractTreatment):
     
     def drawSeamsBlue(self, img, coord):
         """
-        :param img: matrix of the image
-        :param coord: array of the coordinates [x,y] of the seams
-        
         Draw the image with seams in blue
-        
+                
+        :param img: matrix of the image
+        :param coord: array of the coordinates [x,y] of the seams       
         :return: the image with the seams in blue
         
         """
@@ -811,11 +807,10 @@ class seamCarving(AbstractTreatment):
     def drawSeamsBlack(self, img, coord):
         #images jpeg a=5 et b = 40
         """
-        :param img: matrix of the image
-        :param coord: array of the coordinates [x,y] of the seams
-        
         Draw the image with some thickness in black following the first seam
         
+        :param img: matrix of the image
+        :param coord: array of the coordinates [x,y] of the seams        
         :return: the image with the seams in black
         """
         minVal=0
@@ -834,11 +829,10 @@ class seamCarving(AbstractTreatment):
     
     def drawPointRed(self, img, point):
         """
-        :param img: matrix of the image
-        :param point: coordinate of the point of junction
-        
         Draw a red little square at the position given by "point"
         
+        :param img: matrix of the image
+        :param point: coordinate of the point of junction       
         :return: the image with the red point
         
         """
@@ -855,9 +849,7 @@ class seamCarving(AbstractTreatment):
         """
         :param coord1: coordinates of the first fascia
         :param coord2: coordinates of the second fascia
-        
         :return: the coordinate of the junction
-        
         """
         junct= []
         

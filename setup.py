@@ -20,14 +20,16 @@ def runSetup(setup_args):
 
 if __name__=='__main__':
     try:
-        os.rename('Treatments.py', 'Treatments.pyx')
+        os.rename('Applier.py', 'Applier.pyx')
+        os.rename('MainTreatments.py', 'MainTreatments.pyx')
         os.rename('PreTreatments.py', 'PreTreatments.pyx')
         os.rename('TotalTreatments.py', 'TotalTreatments.pyx')
         os.rename('imageConverter.py', 'imageConverter.pyx')
         os.rename('PostTreatments.py', 'PostTreatments.pyx')
         setup_args = {}
         setup_args['cmdclass'] = {'build_ext': build_ext}
-        setup_args['ext_modules'] = [Extension("Treatments", ["Treatments.pyx"]), 
+        setup_args['ext_modules'] = [Extension("Applier", ["Applier.pyx"]),
+                                         Extension("MainTreatments", ["MainTreatments.pyx"]), 
                                          Extension("PreTreatments", ["PreTreatments.pyx"]), 
                                          Extension("TotalTreatments", ["TotalTreatments.pyx"]),
                                          Extension("imageConverter", ["imageConverter.pyx"]),
@@ -41,10 +43,14 @@ if __name__=='__main__':
                   ("imageformats", glob(r'C:\Python27\Lib\site-packages\PyQt4\plugins\imageformats\qgif4.dll')),
                   ("Images", glob(r'Images\*.gif')),
                   ("Images", glob(r'Images\*.png')),
-                  ("Images", glob(r'Images\*.jpg'))]
+                  ("Images", glob(r'Images\*.jpg')),
+                  ("Images", glob(r'Images\*.ico')),
+                  ("", glob(r'gpl-3.0-standalone.html'))]
         runSetup(setup_args)
         setup_args2 = {}
         setup_args2['data_files'] = setup_args['data_files'].append([
+                    ("", glob(r'build\lib.win32-2.7\Applier.pyd')),
+                    ("", glob(r'build\lib.win32-2.7\MainTreatments.pyd')),
                     ("", glob(r'build\lib.win32-2.7\Treatments.pyd')),
                    ("", glob(r'build\lib.win32-2.7\PreTreatments.pyd')),
                    ("", glob(r'build\lib.win32-2.7\TotalTreatments.pyd')),
@@ -54,7 +60,8 @@ if __name__=='__main__':
         setup_args2['windows']=[{"script": "main.py"}]
         runSetup(setup_args2)
     finally:
-        os.rename('Treatments.pyx', 'Treatments.py')
+        os.rename('Applier.pyx', 'Applier.py')
+        os.rename('MainTreatments.pyx', 'MainTreatments.py')
         os.rename('PreTreatments.pyx', 'PreTreatments.py')
         os.rename('TotalTreatments.pyx', 'TotalTreatments.py')
         os.rename('imageConverter.pyx', 'imageConverter.py')

@@ -10,6 +10,7 @@
 
 from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
+import Tutorial
 from Applier import Applier
 import TotalTreatments #import Applier, CannyTreatment, GaborTreatment
 
@@ -61,15 +62,29 @@ class Window(QtGui.QMainWindow):
         fileMenu = menubar.addMenu('&Fichiers')
         fileMenu.addAction(self.createAction('&Fermer', QtGui.qApp.quit, 'Ctrl+Q', 'Quitte application'))
         fileMenu.addAction(self.createAction('&Ouvrir', self.openFile, 'Ctrl+O', 'Ouvre un film'))
-        fileMenu.addAction(self.createAction('&Sauver image', self.captureImage, 'Ctrl+S', 'Sauvegarde l\'image présente à l\'écran'))
+        self.printImageAction=self.createAction('&Sauver image', self.captureImage, 'Ctrl+S', 'Sauvegarde l\'image présente à l\'écran')
+        fileMenu.addAction(self.printImageAction)
+        self.printImageAction.setDisabled(True)
         helpMenu = menubar.addMenu('Aide')
         helpMenu.addAction(self.createAction('A propos', self.printAbout, 'Ctrl+?', 'A propos'))
         helpMenu.addAction(self.createAction('A propos de Qt', self.printAboutQt, 'A propos de qt'))
         
     def printAbout(self):
-        QtGui.QMessageBox.about(self, 'A propos de Pyradius', 'TOFILL')
+        """Display the information about the application"""
+        QtGui.QMessageBox.about(self, 'A propos de Pyradius', '<p><strong>Pyradius V1.0</strong></p>\
+        <p>Pyradius est un logiciel de traitement d\'images permettant l\'extraction de l\'angle de pennation et de la position de la jonction des aponévroses.</p>\
+        <p>Copyright&copy; 2013 Yves-Rémi Van Eycke.</p>\
+        <p>Ce logiciel est sous licence <a href=https://www.gnu.org/licenses/quick-guide-gplv3.fr.html>GNU GPLv3</a>.\
+        Il a été rendu possible grâce à: \
+        <a href=\'http://www.python.org/\'>Python</a>, <a href=\'http://www.cython.org/\'>Cython</a>, \
+        <a href=\'http://www.riverbankcomputing.co.uk/software/pyqt\'>PyQt</a>, <a href=\'http://www.numpy.org/\'>Numpy</a>, \
+        <a href=\'http://opencv.org/\'>OpenCV</a>, <a href=\'http://scikit-image.org/\'>scikit-image</a>, \
+        <a href=\'https://bitbucket.org/zakhar/ffvideo/wiki/Home\'>FFVideo</a>, <a href=\'http://www.ffmpeg.org/\'>FFMpeg</a>, \
+        <a href=\'http://pandas.pydata.org/\'>Pandas</a>.</p>\
+        Le code source est disponible <a href=\'https://code.google.com/p/pyradius/\'>ici</a>.<p></p>')
         
     def printAboutQt(self):
+        """Display the information about Qt"""
         QtGui.QMessageBox.aboutQt(self, 'A propos de Qt')
         
     def createAction(self, name, funct, shortcut='', statusTip=''):
@@ -104,7 +119,7 @@ class Window(QtGui.QMainWindow):
     def createLayout(self):
         """ Create the layout of the window. """
         centralWidget = QtGui.QWidget(self)
-        mainLayout = QtGui.QVBoxLayout(centralWidget)
+        self.mainLayout = QtGui.QVBoxLayout(centralWidget)
         self.videoWidget = VideoWidget()
         self.surface = self.videoWidget.videoSurface()
         self.videoWidget.setStringStartPosition((self.videoWidget.size().width()*0.9, self.videoWidget.size().height()))
@@ -119,8 +134,8 @@ class Window(QtGui.QMainWindow):
         self.creatBasicControls()
         self.createOptionControls()
         
-        mainLayout.addWidget(self.videoWidget)
-        mainLayout.insertLayout(1, self.controlLayout)
+        self.mainLayout.addWidget(self.videoWidget)
+        self.mainLayout.insertLayout(1, self.controlLayout)
 
         self.setCentralWidget(centralWidget)
         self.treatmentComboBox.currentIndexChanged.emit(0)
@@ -130,7 +145,7 @@ class Window(QtGui.QMainWindow):
         self.basicControlLayout = QtGui.QHBoxLayout()
         self.controlLayout.addLayout(self.basicControlLayout)
         
-        self.playButton = QtGui.QPushButton('play')
+        self.playButton = QtGui.QPushButton(QtGui.QIcon("Images/play.png"), 'Commencer')
         self.playButton.resize(50, 50)
         self.progressBar = QtGui.QProgressBar()
         self.progressBar.setOrientation(QtCore.Qt.Horizontal)
@@ -164,7 +179,9 @@ class Window(QtGui.QMainWindow):
         self.basicOptionWidget.setContentsMargins(0, 0, 0, 0)
 #         self.basicOptionLayout.setContentsMargins(0, 0, 0, 0)
 
-                
+        self.resetTreatmentButton = QtGui.QPushButton("Réinitialiser")
+        self.resetTreatmentButton.setEnabled(False)
+        
         self.treatmentComboBox = QtGui.QComboBox()
         self.treatmentComboBox.addItem('Lucas-Kanade')
         self.treatmentComboBox.addItem('Fit ellipsoïde')
@@ -179,10 +196,12 @@ class Window(QtGui.QMainWindow):
         self.SkipFrameSpinBox.setMinimum(0)
         self.SkipFrameSpinBox.setMaximum(25)
         
+        self.resetTreatmentButton.clicked.connect(self.changeTutorial)
         self.treatmentComboBox.currentIndexChanged.connect(self.loadCorrectInterface)
 #         self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)
         
         self.basicOptionLayout.addStretch()
+        self.basicOptionLayout.addWidget(self.resetTreatmentButton)
         self.basicOptionLayout.addWidget(self.treatmentComboBox)
         self.basicOptionLayout.addWidget(self.SkipFrameLabel)
         self.basicOptionLayout.addWidget(self.SkipFrameSpinBox)
@@ -349,6 +368,8 @@ class Window(QtGui.QMainWindow):
             self.firstTimePlayed = True;
             self.playButton.setEnabled(False)
             self.toggleProcessVideo()
+            self.printImageAction.setEnabled(True)
+            self.resetTreatmentButton.setEnabled(True)
 #            self.source.play()
 
     def resetMovie(self):
@@ -359,8 +380,8 @@ class Window(QtGui.QMainWindow):
         else:
             self.source = Movie()
     def finishVideo(self):
-        self.statusBar().showMessage('Traitement terminé')
         """ Close the video, ask the applier to write the output file if necessary and quit. """
+        self.statusBar().showMessage('Traitement terminé')
         box = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Sauvegarde', 
                   '<p><strong>Le traitement est terminé! Voulez vous sauver les résultats?</strong></p> \
                   <p>Si vous sélectionnez oui, deux fenêtres de dialogue vont s\'ouvrir. \
@@ -368,6 +389,7 @@ class Window(QtGui.QMainWindow):
                   <li>La deuxième va permettre de choisir où les résultats seront sauvegardés.</li></ul></p>', 
                   QtGui.QMessageBox.Yes|QtGui.QMessageBox.No, self)
         self.treatmentComboBox.setEnabled(True)
+        self.resetTreatmentButton.setEnabled(True)
         self.playButton.setEnabled(False)
         self.surface.stop()
         ret = box.exec_()
@@ -382,7 +404,7 @@ class Window(QtGui.QMainWindow):
         box.show()
         
     def savingProcedure(self):
-        
+        """Save the results in a file"""
         cont=True
         while(cont):
             if(self.InputFile is None or not self.InputFile):
@@ -414,19 +436,20 @@ class Window(QtGui.QMainWindow):
             self.playButton.setEnabled(True)
             self.filterApplied.toggle()
             if(self.filterApplied.wait):
-                self.playButton.setText("Play")
-            if(not(self.filterApplied.wait or self.filterApplied.isRunning())):
+                self.playButton.setIcon(QtGui.QIcon("Images/play.png"))
+                self.playButton.setText("Continuer")
+            if(not(self.filterApplied.wait) or not(self.filterApplied.isRunning())):
                     self.treatmentComboBox.setEnabled(False)
+                    self.resetTreatmentButton.setEnabled(True)
                     self.SkipFrameSpinBox.setEnabled(False)
-#                     self.outputCheckBox.setEnabled(False)
+                    self.playButton.setIcon(QtGui.QIcon("Images/pause.png"))
                     self.playButton.setText("Pause")
-#                     self.filterApplied.run()
+#                    self.filterApplied.run()
                     self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
     def frameChanged(self):
         """ Update the view when the frame has changed. """
-#        frame = self.source.currentFrame()
         frame = self.filterApplied.getLastComputedFrame()
         info = self.filterApplied.getLastInformation()
         if(info is not None):
@@ -436,17 +459,13 @@ class Window(QtGui.QMainWindow):
             QtGui.QMessageBox(QtGui.QMessageBox.Critical, 'Error', 'Frame not valid!', QtGui.QMessageBox.Ok, self).show()
             return False;
         currentFormat = self.surface.surfaceFormat()
-#        currentFormat = self.videoItem.surfaceFormat()
         if (frame.pixelFormat() != currentFormat.pixelFormat() or frame.size() != currentFormat.frameSize()):
             fmt = QtMultimedia.QVideoSurfaceFormat(frame.size(), frame.pixelFormat())
             if (not(self.surface.start(fmt))):
-#            if (not(self.videoItem.start(fmt))):
                 QtGui.QMessageBox(QtGui.QMessageBox.Critical, 'Error', 'Surface could not start!', QtGui.QMessageBox.Ok, self).show()
                 return False
         if (not(self.surface.present(frame))):
-#        if (not(self.videoItem.present(frame))):
             self.surface.stop()
-#            self.videoItem.stop()
         self.progressBar.setValue((self.source.currentPositionRatio()*self.progressBar.maximum()))
         del(frame)
 
@@ -474,162 +493,67 @@ class Window(QtGui.QMainWindow):
         """Get the position of the cursor in the video and ask the surface to draw a shape if necessary."""
         p=QtGui.QCursor.pos()
         p=self.videoWidget.mapFromGlobal(p)
-#         p = self.videoWidget.mapToVideo(p)
-        if(self.videoWidget.getPointNumbers() == 0 and not self.drawPoint):
-            self.videoWidget.appendPoint(p)
-        elif(self.tuto1 or self.tutoMuscle):
+        shape=self.drawlist[0]
+        if(shape=='point' or self.videoWidget.getPointNumbers() == 0):
+            self.videoWidget.appendPoint(p) 
+            if(shape=='point'):
+                self.drawlist.pop(0)
+        elif(shape=='rectangle' and self.videoWidget.getPointNumbers() == 1):
             p1 = self.videoWidget.popLastPoint()
-            self.lines.append((p1, p))
+            self.videoWidget.appendRect(p1, p)  
+            self.drawlist.pop(0)
+        elif(shape=='line' and self.videoWidget.getPointNumbers() == 1):
+            p1 = self.videoWidget.popLastPoint()
             self.videoWidget.appendLine(p1, p)
-        elif(self.tutoJunction and self.drawRect):
-            p1 = self.videoWidget.popLastPoint()
-            self.rect.append((p1, p))
-            self.videoWidget.appendRect(p1, p)     
-            self.drawPoint=True
-            self.drawRect=False
-        elif(self.tutoJunction and self.drawPoint):
-            self.videoWidget.appendPoint(p)
-            self.point.append(p)
-                      
-        if((self.videoWidget.getLineNumbers() >=self.lineNumber and not self.tutoJunction) or (self.tutoJunction and len(self.rect)>=1 and len(self.point)>=1)):
+            self.drawlist.pop(0)                  
+        if(len(self.drawlist)==0):
             self.videoWidget.clicked.disconnect(self.getsurfacePosition)
             self.chooseTreatment(self.treatmentComboBox.currentIndex())
             self.videoWidget.resetShapes()
+            self.statusBar().showMessage('Traitement en cours')
             self.toggleProcessVideo()
             
     def launchTutorial(self):
         """Launch a tutorial specific to the selected treatment."""
+        self.statusBar().showMessage('En attente d\'informations de la part de l\'utilisateur')
         self.treatmentComboBox.currentIndexChanged.connect(self.changeTutorial)
-        self.drawRect = False
-        self.drawPoint=False
-        self.tuto1 = False
-        self.tutoJunction = False
-        self.tutoMuscle = False
-        self.lineNumber=0
+        self.drawlist=[]
+        self.tutorial=None
         if(self.treatmentComboBox.currentIndex() == 0):
-            self.tutorialmuscle()
+            tutorial = Tutorial.MuscleTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 1):
-            self.tutorial1()
+            tutorial = Tutorial.LinesTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 2):
-            self.tutorial1()
+            tutorial = Tutorial.LinesTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 3):
-            self.tutorialjunction()
+            tutorial = Tutorial.JunctionTutorial(self)
+        self.drawlist=tutorial.drawlist
+        tutorial.displayIntroduction()
+        self.videoWidget.clicked.connect(self.getsurfacePosition)
 #             self.chooseTreatment(self.treatmentComboBox.currentIndex())
 #             self.toggleProcessVideo()
     
     def changeTutorial(self):
         """Reset the shapes drawn on the surface and reload a new tutorial specific to the selected treatment."""
+        self.statusBar().showMessage('En attente d\'informations de la part de l\'utilisateur')
         self.videoWidget.clicked.disconnect(self.getsurfacePosition)
-        self.drawRect = False
-        self.drawPoint=False
-        self.tuto1 = False
-        self.tutoMuscle = False
-        self.tutoJunction = False
-        self.lineNumber=0
+        self.drawlist=[]
         self.videoWidget.resetShapes()
-        self.lines = []
-        self.rect = []
-        self.point = []
+        self.tutorial=None
         if(self.treatmentComboBox.currentIndex() == 0):
-            self.tutorialmuscle()
+            tutorial = Tutorial.MuscleTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 1):
-            self.tutorial1()
+            tutorial = Tutorial.LinesTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 2):
-            self.tutorial1()
+            tutorial = Tutorial.LinesTutorial(self)
         if(self.treatmentComboBox.currentIndex() == 3):
-            self.tutorialjunction()
+            tutorial = Tutorial.JunctionTutorial(self)
+        self.drawlist=tutorial.drawlist
+        tutorial.displayIntroduction()
+        self.videoWidget.clicked.connect(self.getsurfacePosition)
 #             self.chooseTreatment(self.treatmentComboBox.currentIndex())
 #             self.toggleProcessVideo()
             
-    def tutorialjunction(self):
-        """Launch the tutorial specific to the treatment to extract the junction position."""
-        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
-'<p>La méthode nécessite de connaitre la position de la région d\'intérêt et d\'avoir une première approximation pour la position de la jonction :\
-<ul><li>Sur la vidéo, cliquez sur un point désignant un coin de la zone d\'intéret rectangulaire. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
-<li>Si un point rouge est apparu à l’endroit où vous avez cliquez, cliquez sur le coin diagonalement opposé de la région d\'intéret. Un rectangle rouge devrait apparaitre à l’écran.</li>\
-<li>Cliquez à la position de la jonction.<\li></ul></p>\
-<p><strong>N’oubliez pas de modifier les options en bas de la fenêtre à votre convenance avant de placer les aponévroses.</strong></p>\
-', QtGui.QMessageBox.Ok, self)
-        tutoLayout = tuto.layout()
-        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
-        textMovieLayout = QtGui.QVBoxLayout()
-        tutoLayout.addLayout(textMovieLayout, 0, 1)
-        
-        gifLabel = QtGui.QLabel()
-        gif = QtGui.QMovie("Images/mouseSelectionJunction.gif", QtCore.QByteArray(), tuto)
-        gif.setCacheMode(QtGui.QMovie.CacheAll)
-        gif.setSpeed(100)
-        gifLabel.setMovie(gif)
-        
-        textMovieLayout.addWidget(tutoWidget)
-        textMovieLayout.addWidget(gifLabel)
-        gifLabel.show()
-        gif.start()
-        tuto.show()
-        self.drawRect = True
-        self.tutoJunction = True
-        self.videoWidget.clicked.connect(self.getsurfacePosition)
-        
-    def tutorial1(self):
-        """Launch the tutorial specific to the treatment to extract the pennation angle using the ellipsoids detection or the Radon transform. """
-        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
-'<p>La méthode nécessite d\'une position initiale pour les deux aponévroses:\
-<ul><li>Sur la vidéo, cliquez sur une extrémité au choix d’une des deux aponévroses. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
-<li>Si un point rouge est apparu à l’endroit où vous avez cliquez, cliquez sur l’autre extrémité de la même aponévrose. Une ligne rouge devrait apparaitre à l’écran.</li> \
-<li>Faites de même avec la deuxième aponévrose. </li></ul></p> \
-<p><strong>N’oubliez pas de modifier les options en bas de la fenêtre à votre convenance avant de placer les aponévroses.</strong></p>\
-', QtGui.QMessageBox.Ok, self)
-        tutoLayout = tuto.layout()
-        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
-        textMovieLayout = QtGui.QVBoxLayout()
-        tutoLayout.addLayout(textMovieLayout, 0, 1)
-        
-        gifLabel = QtGui.QLabel()
-        gif = QtGui.QMovie("Images/mouseSelection1.gif", QtCore.QByteArray(), tuto)
-        gif.setCacheMode(QtGui.QMovie.CacheAll)
-        gif.setSpeed(100)
-        gifLabel.setMovie(gif)
-        
-        textMovieLayout.addWidget(tutoWidget)
-        textMovieLayout.addWidget(gifLabel)
-        gifLabel.show()
-        gif.start()
-        tuto.show()
-        self.lineNumber = 2
-        self.tuto1 = True
-        self.videoWidget.clicked.connect(self.getsurfacePosition)
-        
-    def tutorialmuscle(self):
-        """Launch the tutorial specific to the treatment to extract the pennation angle using the Lucas-Kanade algorithm. """
-        tuto = QtGui.QMessageBox(QtGui.QMessageBox.Information, 'Information nécessaire', 
-'<p>La méthode nécessite une position initiale pour chacune des deux aponévroses et l\'orientation des fibres : \
-<ul><li>Sur la vidéo, cliquez sur une extrémité au choix d’une des deux aponévroses. Si rien n’apparait, c’est que vous avez mal cliqué.</li>\
-<li>Si un point rouge est apparu à l’endroit où vous avez cliquez, cliquez sur l’autre extrémité de la même aponévrose. Une ligne rouge devrait maintenant être à l’écran.</li> \
-<li>Faites de même avec la deuxième aponévrose.</li> \
-<li> Faites de même avec une des fibres. Il n\'est pas nécessaire d\'aller d\'une extremité à l\'autre de la fibre puisque seule l\'orienation sera utilisée</li></ul></p> \
-<p><strong>N’oubliez pas de modifier les options en bas de la fenêtre à votre convenance avant de placer les aponévroses.</strong></p>\
-', QtGui.QMessageBox.Ok, self)
-        tutoLayout = tuto.layout()
-        tutoWidget = tuto.layout().itemAtPosition(0, 1).widget()
-        textMovieLayout = QtGui.QVBoxLayout()
-        tutoLayout.addLayout(textMovieLayout, 0, 1)
-        
-        gifLabel = QtGui.QLabel()
-#         import os
-#         QtCore.qDebug("PWD is :"+str(QtCore.QFileInfo('Images\mouseSelectionLK.gif').absoluteFilePath()))
-        gif = QtGui.QMovie("Images\mouseSelectionLK.gif", QtCore.QByteArray(), tuto)
-        gif.setCacheMode(QtGui.QMovie.CacheAll)
-        gif.setSpeed(100)
-        gifLabel.setMovie(gif)
-        
-        textMovieLayout.addWidget(tutoWidget)
-        textMovieLayout.addWidget(gifLabel)
-        gifLabel.show()
-        gif.start()
-        tuto.show()
-        self.lineNumber = 3
-        self.tutoMuscle = True 
-        self.videoWidget.clicked.connect(self.getsurfacePosition)
                 
     def chooseTreatment(self, index):
         """Add the chosen treatment to the Applier.

@@ -410,6 +410,7 @@ class VideoWidget(QtGui.QWidget):
         self.Points = []
         self.Lines = []
         self.Rect = []
+        self.repaint()
         
     def paintEvent(self, event): 
         """Slot called when the widget receives a paint event.

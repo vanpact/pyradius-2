@@ -31,7 +31,7 @@ class LKMethod(object):
 		self.treatmentsList = []
 		self.treatmentsList.append(MainTreatments.AponeurosisTracker(line=Aponeurosises[upperAponeurosis]))
 		self.treatmentsList.append(MainTreatments.AponeurosisTracker(line=Aponeurosises[lowerAponeurosis]))
-		self.treatmentsList.append(MainTreatments.MuscleTracker2(lines=Aponeurosises, fiber = fiber))
+		self.treatmentsList.append(MainTreatments.MuscleTracker2(lines=[Aponeurosises[upperAponeurosis],Aponeurosises[lowerAponeurosis]], fiber = fiber))
 		
 	def compute(self, img):
 		"""
