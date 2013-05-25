@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Oct 12, 2012
-
-@author: yvesremi
+    .. module:: PostTreatments
+        :platform: Unix, Windows
+        :synopsis: module which contains the functions for the post treatments
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
 import numpy

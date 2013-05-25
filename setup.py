@@ -1,9 +1,16 @@
+"""
+    .. module:: PostTreatments
+        :platform: Unix, Windows
+        :synopsis: Setup script
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
+"""
+
 from distutils.core import setup
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
-import sys, os, py2exe
+import os
 from glob import glob
-from subprocess import _args_from_interpreter_flags
+
 def runSetup(setup_args):
     setup(
     name = 'Pyradius',

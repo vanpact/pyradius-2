@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Oct 20, 2012
-
-@author: yvesremi
+    .. module:: MainTreatments
+        :platform: Unix, Windows
+        :synopsis: module Containing the main part of each treatments
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>, Than Van Phan
 """
 
 import cv2, numpy
@@ -12,7 +13,6 @@ import skimage.transform
 import PreTreatments
 from PyQt4 import QtCore
 import gc
-#import pyximport; pyximport.install() 
 
 class AbstractTreatment(object):
     """Abstract class for treatments."""
@@ -27,7 +27,7 @@ class AbstractTreatment(object):
         
     def compute(self, img):
         """
-        abstract method
+        Abstract method
         
         :param img: The image to process
         :type img: Numpy array    
@@ -158,7 +158,6 @@ class blobDetectionTreatment(AbstractTreatment):
             if(self.previousAngle!=None):
                 if(not numpy.isnan(newAngle)):
                     self.previousAngleSin = numpy.sin(2.0*self.previousAngle/5.0)*numpy.cos(3.0*newAngle/5.0) + numpy.sin(3.0*newAngle/5.0)*numpy.cos(2.0*self.previousAngle/5.0)
-    #                self.previousAngleCos = numpy.cos(2.0*self.previousAngle/5.0)*numpy.cos(3.0*newAngle/5.0)-numpy.sin(2.0*self.previousAngle/5.0)*numpy.sin(3.0*newAngle/5.0)
                     self.previousAngleCos = numpy.cos(2.0*self.previousAngle/5.0)*numpy.cos(3.0*newAngle/5.0)-numpy.sin(2.0*self.previousAngle/5.0)*numpy.sin(3.0*newAngle/5.0)
                     self.previousAngle = numpy.arctan2(self.previousAngleSin, self.previousAngleCos)
             else:
@@ -186,7 +185,7 @@ class blobDetectionTreatment(AbstractTreatment):
         cv2.line(img, (mx0+self.xoffset-mvx0, my0+self.yoffset-mvy0), (mx0+self.xoffset+mvx0, my0+self.yoffset+mvy0), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
 
         gc.collect()
-        return (img, self.previousAngle)#self.normalizeData(data)
+        return (img, self.previousAngle)
     
 
 
@@ -205,8 +204,8 @@ class AponeurosisTracker(AbstractTreatment):
         self.sortedLines = [(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))]
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([self.sortedLines[0][0], self.sortedLines[0][1]-100], [self.sortedLines[1][0], self.sortedLines[1][1]+100])))
 #        self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 15, gamma = 0.02, psi = 0))#, angleToProcess = [numpy.pi/2.0]))
-        self.xoffset = self.sortedLines[0][0]#self.line[0][0].x()
-        self.yoffset =  0#self.sortedLines[0][1]-100#self.line[0][0].y()
+        self.xoffset = self.sortedLines[0][0]
+        self.yoffset =  0
         self.prevPts = []
         for percentage in numpy.arange(0.5, 0.96, 0.01):
             self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset)))
@@ -216,23 +215,7 @@ class AponeurosisTracker(AbstractTreatment):
         for percentage in numpy.arange(0.15, 0.86, 0.03):
             self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset-5)))
             self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset+5)))
-#         for percentage in numpy.arange(0.25, 0.76, 0.05):
-#             self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset-9)))
-#             self.prevPts.append((numpy.float32((self.line[0].x()+(self.line[1].x()-self.line[0].x())*percentage)-self.xoffset), numpy.float32((self.line[0].y()+(self.line[1].y()-self.line[0].y())*percentage)-self.yoffset+9)))
         self.prevPts = numpy.asarray(self.prevPts)
-
-        
-#        leftpoint0 = numpy.argsort(numpy.asarray([line[0][0].x(), line[0][1].x()]))[0]
-#        leftpoint1 = numpy.argsort(numpy.asarray([line[1][0].x(), line[1][1].x()]))[0]
-#        slope0 = numpy.float(line[0][1].y()-line[0][0].y())/numpy.float(line[0][1].x()-line[0][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
-#        slope1 = numpy.float(line[1][1].y()-line[1][0].y())/numpy.float(line[1][1].x()-line[1][0].x())*(self.sortedLines[1][0]-self.sortedLines[0][0])
-#        offset0=(line[0][leftpoint0].y()-self.sortedLines[0][1])
-#        offset1=(line[1][leftpoint1].y()-self.sortedLines[0][1])
-#        
-#        self.prevPts = []
-#        self.pts = [(self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+10), (self.line[0][0].x()-self.sortedLines[0][0]+10, self.line[0][0].y()-self.sortedLines[0][1]+50), (self.line[0][1].x()-self.sortedLines[0][0]-10, self.line[0][1].y()-self.sortedLines[0][1]+50), (self.lines[0][1].x()-self.sortedLines[0][0]-10, self.lines[0][1].y()-self.sortedLines[0][1]+10)]
-#        self.mask0 = None
-#        self.mask1 = None
         
     def compute(self, img):
         """
@@ -302,15 +285,13 @@ class MuscleTracker2(AbstractTreatment):
         self.xoffset = self.limitx[0]
         self.yoffset =  self.limity[0]-30
         self.filtersToPreApply.append(PreTreatments.cropTreatment(([oldminx, oldminy-30], [oldmaxx, oldmaxy+30])))
-#         self.filtersToPreApply.append(PreTreatments.GaborTreatment(ksize = 31, sigma = 1.5, lambd = 8, gamma = 0.02, psi = 0))
-                                      
+                                           
         self.prevImg = None
         leftpointfiber = numpy.argsort(numpy.asarray([fiber[0].x(), fiber[1].x()]))[0]
         distXFiber = fiber[1-leftpointfiber].x()-fiber[leftpointfiber].x()
         distYFiber = fiber[1-leftpointfiber].y()-fiber[leftpointfiber].y()
         self.angle = numpy.pi-numpy.arctan2(distXFiber, distYFiber)
         fiberSlope = numpy.float(fiber[1].y()-fiber[0].y())/numpy.float(fiber[1].x()-fiber[0].x())#*(oldmaxx-oldminx)
-#         offsetFiber=(fiber[leftpointfiber].y()-oldminy)
 
         left0 = numpy.argsort(numpy.asarray([lines[0][0].y(), lines[0][1].y()]))[0]
         left1 = numpy.argsort(numpy.asarray([lines[1][0].y(), lines[1][1].y()]))[0]
@@ -320,7 +301,7 @@ class MuscleTracker2(AbstractTreatment):
         self.leftpointLower = numpy.argsort(numpy.asarray([lines[self.lowerAponeurosis][0].x(), lines[self.lowerAponeurosis][1].x()]))[0]
         self.rightpointUpper = numpy.argsort(numpy.asarray([lines[self.upperAponeurosis][0].x(), lines[self.upperAponeurosis][1].x()]))[1]
         self.rightpointLower = numpy.argsort(numpy.asarray([lines[self.lowerAponeurosis][0].x(), lines[self.lowerAponeurosis][1].x()]))[1]
-#         slope0 = numpy.float(lines[self.upperAponeurosis][self.rightpointUpper].y()-lines[self.upperAponeurosis][self.leftpointUpper].y())/numpy.float(lines[self.upperAponeurosis][self.rightpointUpper].x()-lines[self.upperAponeurosis][self.leftpointUpper].x())*(oldmaxx-oldminx)
+
         slope1 = numpy.float(lines[self.lowerAponeurosis][self.rightpointLower].y()-lines[self.lowerAponeurosis][self.leftpointLower].y())/numpy.float(lines[self.lowerAponeurosis][self.rightpointLower].x()-lines[self.lowerAponeurosis][self.leftpointLower].x())#*(oldmaxx-oldminx)
         offset0=(lines[self.upperAponeurosis][self.leftpointUpper].y()-oldminy-30)
         offset1=(lines[self.lowerAponeurosis][self.leftpointLower].y()-oldminy-30)
@@ -328,10 +309,9 @@ class MuscleTracker2(AbstractTreatment):
         self.length=numpy.sqrt(distXFiber^2 + distYFiber^2)
         x0 = 0
         y0 = offset0
-        goodSlope = (slope1-fiberSlope)#/(oldmaxx-oldminx)
+        goodSlope = (slope1-fiberSlope)
         goodOffset= offset1-offset0
         intersectx = -goodOffset/goodSlope
-#         intersecty = slope1*intersectx/(oldmaxx-oldminx)+offset1
         x1 = intersectx 
         y1 = slope1*x1+offset1
         fiberBegining = (x0, y0)
@@ -357,7 +337,6 @@ class MuscleTracker2(AbstractTreatment):
         imgPre = numpy.copy(img.astype(numpy.uint8)) 
         for pretreatments in self.filtersToPreApply:
             imgPre = pretreatments.compute(imgPre)
-#        imgPre = cv2.GaussianBlur( imgPre, (9, 9), sigmaX=1.0, sigmaY=1.0)
 #        i=0
 #        imgPreToPrint = numpy.copy(imgPre)
 #        for line in self.prevPts:
@@ -383,8 +362,6 @@ class MuscleTracker2(AbstractTreatment):
             if(numpy.asarray(line).shape[0]>1):
                 res = cv2.calcOpticalFlowPyrLK(prevImg = self.prevImg, nextImg = imgPre, prevPts = numpy.asarray(line, dtype=numpy.float32), winSize  = (15, 15), maxLevel = 3, criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 1000, 0.0001))[0]
                 nextPts.append(res)
-#                linefitted = cv2.fitLine(nextPts[len(nextPts)-1], distType = cv2.cv.CV_DIST_WELSCH, param = 0, reps = 1, aeps = 1)
-#                angle.append(numpy.arctan2(linefitted[1], linefitted[0])+numpy.pi/2)
                 if(len(nextPts)-1<i or nextPts[i] is None):
                     nextPts.append(line)
         self.vecLength = [] 
@@ -393,7 +370,6 @@ class MuscleTracker2(AbstractTreatment):
         for prevLine, nextLine in zip(self.prevPts, nextPts):
             self.vecLength.append([])
             self.vecAngle.append([])
-#            movement = numpy.squeeze(numpy.array((prevLine, nextLine)))
             for prevPoint, nextPoint in zip(numpy.squeeze(prevLine), numpy.squeeze(nextLine)):
                 if(isinstance(prevPoint, numpy.ndarray)and isinstance(nextPoint, numpy.ndarray)):
                     self.vecLength[i].append(numpy.sqrt(numpy.square(nextPoint[0]-prevPoint[0])+numpy.square(nextPoint[1]-prevPoint[1])))
@@ -435,15 +411,6 @@ class MuscleTracker2(AbstractTreatment):
             xVal = numpy.cos(self.angle)*self.length - meanX0 + meanX1
             sumAngle = numpy.arctan2(yVal, xVal)
             self.length = numpy.sqrt(numpy.square(xVal)+ numpy.square(yVal))
-#        if(sumLength!=0):
-#            sumAngle = numpy.arcsin(meanLength0*numpy.sin(sumAngle)/sumLength)
-#
-#        sinSumAngle = numpy.sin(self.angle)*numpy.cos(sumAngle)+numpy.sin(sumAngle)*numpy.cos(self.angle)
-#        cosSumAngle = numpy.cos(self.angle)*numpy.cos(sumAngle)-numpy.sin(self.angle)*numpy.sin(sumAngle)
-#        sumAngle = numpy.arctan2(sinSumAngle, cosSumAngle)
-#        sumLength = numpy.sqrt(numpy.square(mx0)+ numpy.square(sumLength) + 2*mx0*sumLength*numpy.cos(sumAngle))
-#        if(sumLength!=0):
-#            sumAngle = numpy.arcsin(mx0*numpy.sin(sumAngle)/sumLength)
             if(sumAngle<0):
                 sumAngle = sumAngle+numpy.pi*2.0
             sumAngle = sumAngle%(numpy.pi*2.0)
@@ -458,20 +425,11 @@ class MuscleTracker2(AbstractTreatment):
             self.prevPts = []
             self.prevPts.append(tmpPts0)
             self.prevPts.append(tmpPts1)
-#        i=0
-#        for line in self.prevPts:
-#            i=i+1
-#            for point in line:
-#                cv2.circle(imgPreToPrint, (point[0], point[1]), 3, (255, 255, 255))
-#        self.angle = numpy.median(angle)
-#        finalValueSin = numpy.sin(finalValue)*numpy.cos(self.angle)+numpy.sin(self.angle)*numpy.cos(finalValue)
-#        finalValueCos = numpy.cos(finalValue)*numpy.cos(self.angle)-numpy.sin(finalValue)*numpy.sin(self.angle)
-#        self.angle = numpy.arctan2(finalValueSin, finalValueCos)
-        mx0=self.lines[self.upperAponeurosis][self.leftpointUpper].x()#(self.limitx[1]-self.limitx[0])/2
+            
+        mx0=self.lines[self.upperAponeurosis][self.leftpointUpper].x()
         my0=self.lines[self.upperAponeurosis][self.leftpointUpper].y()
         mvx0 = numpy.int(numpy.sin(self.angle)*5000.0)
         mvy0 = numpy.int(-numpy.cos(self.angle)*5000.0)
-#        self.angle = numpy.median(value)+self.angle
         cv2.line(img, (int(mx0-mvx0), int(my0-mvy0)), (int(mx0+mvx0), int(my0+mvy0)), cv2.cv.Scalar(255, 0, 0), 2, cv2.CV_AA, 0)
 #         cv2.putText(img, "angle = " + numpy.str(numpy.degrees(self.angle))[:6], org=(numpy.uint32(img.shape[0]*0.0), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
         return img, self.angle
@@ -526,9 +484,6 @@ class testRadon(AbstractTreatment):
             self.circlesLimits.append((numpy.int(((self.oldmaxx-self.oldminx)/4.0)), numpy.int(self.limit0x0+numpy.abs(self.limit0x0-self.limit1x0)/2.0), numpy.int(numpy.abs(self.limit0x0-self.limit1x0)/2.0)))
             self.circlesLimits.append((numpy.int((3.0*(self.oldmaxx-self.oldminx)/4.0)), numpy.int(self.limit0x2+numpy.abs(self.limit0x2-self.limit1x2)/2.02), numpy.int(numpy.abs(self.limit0x2-self.limit1x2)/2.0)))
         
-#        self.sortedLines = []
-#        for line in self.lines:
-#            self.sortedLines.append((QtCore.QPoint(min(line[0].x(), line[1].x()), min(line[0].y(), line[1].y())),QtCore.QPoint(max(line[0].x(), line[1].x()), max(line[0].y(), line[1].y()))))
         self.xoffset = self.oldminx
         self.yoffset =  self.oldminy
         
@@ -588,17 +543,6 @@ class testRadon(AbstractTreatment):
 #         cv2.putText(img, "angle = " + numpy.str(numpy.degrees(strAngle))[:6], org=(numpy.uint32(img.shape[0]*0.75), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
 #        cv2.putText(img, "angle = " + numpy.str(strAngle)[:6], org=(numpy.uint32(img.shape[0]*0.75), numpy.uint32(img.shape[1]*0.75)), fontFace=cv2.FONT_HERSHEY_SIMPLEX, fontScale=0.8, color=(255, 255, 255), thickness=2, bottomLeftOrigin=False)
         return (img, strAngle)
-        
-
-    
-'''
-Created on 25 oct 2012
-
-This module has all methods to realize the junction detection on ultrasound images, by seam carving algorithm
-
-@author: Van
-'''
-
 
 class seamCarving(AbstractTreatment):
     """This function use SeamCarving to extract the junction position"""

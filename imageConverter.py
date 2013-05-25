@@ -2,14 +2,14 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Oct 12, 2012
-
-@author: yvesremi
+    .. module:: imageConverter
+        :platform: Unix, Windows
+        :synopsis: module to convert image from the Qt format to numpy arrays
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
 from PyQt4 import QtGui
-import numpy, cv2
-import gc, sys, debugsp
+import numpy
 
 class ImageConverter(object):
     """Class to convert a numpy array to QImage and a QImage to a Numpy array."""
@@ -67,9 +67,8 @@ class ImageConverter(object):
         """
         if(isinstance(ndimg, numpy.ndarray)):
             ndimg1 = numpy.asarray(ndimg, numpy.uint8)
-            if(len(ndimg1.shape)==2):#Grayscale images
-                ndimg1 = numpy.dstack((ndimg1, numpy.copy(ndimg1), numpy.copy(ndimg1)))#cv2.cvtColor(ndimg1, cv2.cv.CV_GRAY2RGB)
-#                ndimg = numpy.resize(ndimg,(ndimg.shape[0], ndimg.shape[1], 3))
+            if(len(ndimg1.shape)==2):
+                ndimg1 = numpy.dstack((ndimg1, numpy.copy(ndimg1), numpy.copy(ndimg1)))
             shape=ndimg1.shape
             ndimg3 = numpy.ravel(ndimg1)
             ndimg3.tostring()
@@ -77,9 +76,3 @@ class ImageConverter(object):
         else:
             raise TypeError('Argument 1 must be a numpy.ndarray') 
             return None
-
-#if __name__ == '__main__':
-#    app = QtGui.QApplication(sys.argv)
-#    image = QtGui.QImage('testGoodSize.png')
-#    ndarray=ImageConverter.qimageToNdarray(image, True)
-#    ImageConverter.ndarrayToQimage(ndarray).save('testConversion.png')

@@ -1,13 +1,15 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
-Created on Apr 11, 2013
-
-@author: yvesremi
+    .. module:: ResultsWriter
+        :platform: Unix, Windows
+        :synopsis: module To write into xls and csv files
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
 import os
 from sets import Set
 import pandas
-from PyQt4 import QtGui, QtCore
 
 class ResultsWriter(object):
     """Class for outputing results in csv or xls files"""
@@ -114,7 +116,6 @@ class ResultsWriter(object):
         if(self.fileExist):
             if([col for col in self.parsedInfo.columns].count('Time')==1):
                 self.parsedInfo = self.parsedInfo.set_index(keys=[str('Time')], inplace=False)
-#         info = pandas.DataFrame(info).dropna(how = 'any', subset = ['Time'])
         dataToMerge = pandas.DataFrame(info)
         dataToMerge = dataToMerge.set_index(keys=[str('Time')], inplace=False)
         for colName in dataToMerge.columns:

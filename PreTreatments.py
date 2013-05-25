@@ -60,12 +60,7 @@ class CannyTreatment(AbstractPreTreatment):
         """
         if(len(img.shape)==2):
             img= cv2.GaussianBlur( img, (9, 9), sigmaX=1.0, sigmaY=1.0)
-    #        image = cv2.cvtColor( image, cv2.cv.CV_RGB2GRAY)
-#            img = cv2.blur(img, self.kernelSize)
-#            edges = cv2.medianBlur(numpy.uint8(img), 3)
             edges = cv2.Canny(numpy.uint8(img), self.minThreshold, self.minThreshold*self.ratio, apertureSize=self.kernelSize, L2gradient=self.L2gradient)#self.kernelSize )
-#            result = numpy.zeros( img.shape, img.dtype )
-    #        image.copyTo(result, edges)
         else:
             raise ValueError("The image must have 2 dimension(gray scale).")
         return edges
@@ -142,7 +137,7 @@ class GaborTreatment(AbstractPreTreatment):
        
     def getGaborKernel(self, theta): 
         """        
-        create a Gabor kernel with all the arguments given in the constructor. the Theta is the last missing argument
+        Create a Gabor kernel with all the arguments given in the constructor. the Theta is the last missing argument
         
         :param theta: The orientation of the kernel
         :type theta: float
@@ -159,12 +154,8 @@ class GaborTreatment(AbstractPreTreatment):
         ymax = xmax
         ymin = -ymax
         xmin=-xmax
-#        if( self.ksize > 0 ):
-#            ymax = self.ksize/2
-#        else:
-#            ymax = max(math.fabs(nstds*sigma_x*c), math.fabs(nstds*sigma_y*s))
         kernel = numpy.zeros((ymax - ymin + 1, xmax - xmin + 1), dtype = self.ktype)
-        scale = 1.0#1/(2*numpy.pi*sigma_x*sigma_y)
+        scale = 1.0
         ex = -0.5/(sigma_x*sigma_x)
         ey = -0.5/(sigma_y*sigma_y)
         cscale = numpy.pi*2/self.lambd
@@ -173,14 +164,13 @@ class GaborTreatment(AbstractPreTreatment):
             for x in range(xmin, xmax):
                 xr = x*c + y*s
                 yr = -x*s + y*c
-#                v = scale*math.exp(ex*xr*xr + ey*yr*yr)*math.cos(cscale*xr + self.psi)
                 v = scale*math.exp(ex*xr*xr + ey*yr*yr)*math.cos(cscale*xr + self.psi)
                 kernel[ymax + y, xmax + x] = v
         return kernel
     
     def buildFilters(self):
         """                
-        build all the kernel for the Gabor bank filter. the orientation is the varying parameter
+        Build all the kernel for the Gabor bank filter. the orientation is the varying parameter
         """
         if(self.angleToProcess==[]):
             self.angleToProcess = numpy.arange(0, numpy.pi, numpy.pi / 32)
@@ -204,23 +194,10 @@ class GaborTreatment(AbstractPreTreatment):
         :rtype: Numpy array
         """
         accum = numpy.zeros_like(img)
-#        angle = numpy.zeros_like(img,dtype=numpy.float32)
         for kern, _ in self.filters:
-#            fimg = numpy.zeros_like(img, img.dtype)
-#            kern = numpy.ones(kern.shape, kern.dtype)
-#            cv2.cv.Filter2D(cv2.cv.fromarray(img), cv2.cv.fromarray(fimg), cv2.cv.fromarray(kern))
-#            if(len(img.shape)>2):
-#                for d in range(0, img.shape[2]):
-#                    tmp = numpy.copy(img[:, :, d])
-#                    fimg[:, :, d] = cv2.filter2D(tmp, cv2.CV_8U, kern)
-#            elif(len(img.shape)==2):
             fimg = cv2.filter2D(img[:, :], cv2.CV_8U, kern)
-            
-#            else:
-#                raise ValueError("The image must have 2 or 3 dimension.")
             numpy.maximum(accum, fimg, accum)
             del(fimg)
-#            angle[numpy.equal(fimg,accum)] = params['theta']
         del(img)
         return accum
 
@@ -234,37 +211,17 @@ class GaborTreatment(AbstractPreTreatment):
         :rtype: Numpy array
         """
         accum = numpy.zeros_like(img)
-#        angle = numpy.zeros_like(img,dtype=numpy.float32)
         accumLock = multiprocessing.Lock()
-#        idx=None
         def f(filt):
             kern, _ = filt
-#            fimg = numpy.zeros_like(img, img.dtype)
-#            if(len(img.shape)>2):
-#                for d in range(0, img.shape[2]):
-#                    tmp = numpy.copy(img[:, :, d])
-#                    fimg[:, :, d] = cv2.filter2D(tmp, cv2.CV_8U, kern)
-#            elif(len(img.shape)==2):
             fimg = cv2.filter2D(img[:, :], cv2.CV_8U, kern)
-#            else:
-#                raise ValueError("The image must have 2 or 3 dimension.")
             with accumLock:
-#                if(len(img.shape)>2):
-#                    for d in range(0, img.shape[2]):
-#                        idx = numpy.argmax(numpy.dstack((accum[:, :, d], fimg[:, :, d])),axis=2)
-#                        accum[:, :, d][idx==1]=fimg[:, :, d][idx==1]
-#                        angle[:, :, d][idx==1]=numpy.sin(params['theta'])*100
-#                elif(len(img.shape)==2):
                 idx = numpy.argmax(numpy.dstack((accum, fimg)),axis=2)
                 accum[idx==1]=fimg[idx==1]
                 del idx
             del fimg
             del kern
             del filt
-#            angle[idx==1]=numpy.sin(params['theta'])*100
-#                else:
-#                    raise ValueError("The image must have 2 or 3 dimension.")
-    
         
         self.pool.map(f,self.filters)
         return accum
@@ -428,9 +385,9 @@ class rotateTreatment(AbstractPreTreatment):
         """
         center = (img.shape[0]/2.0, img.shape[1]/2.0)
         M = cv2.getRotationMatrix2D(center, numpy.degrees(self.angle), 1.0)
-        sizemaxX = numpy.int(numpy.abs(self.alpha*img.shape[1]))#-beta*img.shape[0])
+        sizemaxX = numpy.int(numpy.abs(self.alpha*img.shape[1]))
         sizemaxY = numpy.int(numpy.abs(self.beta*img.shape[1]+self.alpha*img.shape[0]))
-        return cv2.warpAffine(img, M, (sizemaxX, sizemaxY), borderMode=cv2.BORDER_WRAP).copy()#[sizemaxY/2-30:sizemaxY/2+30, 0:sizemaxX]
+        return cv2.warpAffine(img, M, (sizemaxX, sizemaxY), borderMode=cv2.BORDER_WRAP).copy()
         
 class LaplacianTreatment(AbstractPreTreatment):
     """Perform filtering using a Laplacian of Gaussian"""
@@ -459,12 +416,9 @@ class LaplacianTreatment(AbstractPreTreatment):
         :return: The processed image
         :rtype: Numpy array
         """
-#        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
         result = cv2.Laplacian( numpy.uint8(img), ddepth=cv2.CV_32F, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
-#        result = -result
         result[result<0]=0
         return numpy.uint8((result/numpy.max(result))*255.0)
-#        result[result<50]=0
     
 class SobelTreatment(AbstractPreTreatment):
     """Compute the Sobel derivative of an image"""
@@ -499,26 +453,20 @@ class SobelTreatment(AbstractPreTreatment):
         :return: The processed image
         :rtype: Numpy array
         """
-#        img= cv2.GaussianBlur( img, (31,31), sigmaX=1.0, sigmaY=1.0)
         result = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=self.dx, dy=self.dy, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         result[result<0] = 0
-#        result = numpy.abs(result)
         result = result - numpy.min(result)
         del(img)
         return numpy.uint8((result/numpy.max(result))*255.0)
-#        result = cv2.convertScaleAbs( result)
-#        result[result<50]=0
         return result
     
 #     def compute2(self, img):
-# #        img = cv2.GaussianBlur( img, (7, 7), sigmaX=0.0, sigmaY=0.0);
 #         grad_x = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=1, dy=0, ksize=7, scale=1, delta=0)
-# #        abs_grad_x = cv2.convertScaleAbs( grad_x,  alpha=255.0/numpy.max(numpy.abs(grad_x)))
 #         
 #         grad_y = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=0, dy=1, ksize=7, scale=1, delta=0)
-# #        abs_grad_y = cv2.convertScaleAbs( grad_y,  alpha=255.0/numpy.max(numpy.abs(grad_y)))
 #         norm =  numpy.sqrt(numpy.add(numpy.square(numpy.asarray(grad_x, dtype=numpy.float)), numpy.square(numpy.asarray(grad_y, dtype=numpy.float))))#cv2.addWeighted( numpy.abs(grad_x), 0.5, numpy.abs(grad_y), 0.5, 0)
 #         return numpy.asarray((norm/numpy.max(norm))*255.0, dtype=numpy.uint8)
+
 class DOHTreatment(AbstractPreTreatment):
     """Compute the determinant of the Hessian matrix"""
     def __init__(self, kernelSize=7, scale=1, delta=0):
@@ -546,7 +494,6 @@ class DOHTreatment(AbstractPreTreatment):
         :return: The processed image
         :rtype: Numpy array
         """
-#        img= cv2.GaussianBlur( img, (9, 9), sigmaX=0, sigmaY=0)
         resultxy = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=1, dy=1, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         resultxx = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=2, dy=0, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
         resultyy = cv2.Sobel( numpy.uint8(img), ddepth=cv2.CV_32F, dx=0, dy=2, ksize=self.kernelSize, scale=self.scale, delta=self.delta);
@@ -554,33 +501,7 @@ class DOHTreatment(AbstractPreTreatment):
         
         result[not numpy.all((result>0, resultxx<=0))]=0
         result[numpy.all((result>0, resultxx<=0))]=255
-#        result[result<numpy.median(result)]=0
-#        result = result-numpy.median(result)
         return numpy.uint8((result/numpy.max(result))*255.0)
-#        result[result<50]=0
-   
-# class rotationTreatment(AbstractPreTreatment):
-#     def __init__(self, angle):
-#         super(rotationTreatment, self).__init__()
-#         self.angle = angle
-#         
-#     def compute(self, img):
-#         """        
-#         :param img: The image to process
-#         :type img: Numpy array    
-#         :return: The processed image
-#         :rtype: Numpy array
-#         
-#         Process one image.
-#         """
-#         center = (img.shape[0]/2.0, img.shape[1]/2.0)
-#         M = cv2.getRotationMatrix2D(center, self.angle, 1.0)
-#         alpha = numpy.cos(-numpy.radians(self.angle))
-#         beta = numpy.sin(-numpy.radians(self.angle))
-#         sizemaxX = numpy.int(alpha*img.shape[1])#-beta*img.shape[0])
-#         sizemaxY = numpy.int(beta*img.shape[1]+alpha*img.shape[0])
-#         result = cv2.warpAffine(img, M, (sizemaxX, sizemaxY))
-#         return result[result.shape[0]/2-30:result.shape[0]/2+30, 0:result.shape[1]].copy()
     
 class ThresholdTreatment(AbstractPreTreatment):
     """"Perform Thesholding"""
@@ -637,7 +558,6 @@ class addHlineTreatment(AbstractPreTreatment):
         """
         x = img.shape[1]
         y = img.shape[0]
-#        lineNumber = numpy.int(y/self.lineDistance)
         for i in numpy.arange(self.lineDistance-1,y,self.lineDistance):
             cv2.rectangle(img, (0, i), (x, i+self.thickness), (0, 0, 0), thickness=-1)
         return img.copy()
@@ -667,7 +587,7 @@ class DilationTreatment(AbstractPreTreatment):
         :rtype: Numpy array
         """
         elem = cv2.getStructuringElement( self.morphology, self.size )
-        return cv2.dilate(img, elem)#cv2.dilate(cv2.erode(img, elem), elem)
+        return cv2.dilate(img, elem)
 
 class erosionTreatment(AbstractPreTreatment):
     """Perform morphological erosion"""
@@ -694,7 +614,7 @@ class erosionTreatment(AbstractPreTreatment):
         :rtype: Numpy array
         """
         elem = cv2.getStructuringElement( self.morphology, self.size )
-        return cv2.erode(img, elem)#cv2.dilate(cv2.erode(img, elem), elem)
+        return cv2.erode(img, elem)
 
 class SkeletonTreatment(AbstractPreTreatment):
     """Compute morphological skeleton of blobs in an image"""
@@ -728,42 +648,7 @@ class SkeletonTreatment(AbstractPreTreatment):
             skel = numpy.logical_or(skel, temp)
             img = cv2.erode(img, k)
             done = not numpy.any(img)
-#        for i in numpy.arange(0, 20, 1):
-#            elem = numpy.array([(-1, -1, -1),(0, 1, 0),(1, 1, 1)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(0, -1, -1),(1, 1, -1),(1, 1, 0)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(-1, 0, 1),(-1, 1, 1),(-1, 0, 1)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(-1, -1, 0),(-1, 1, 1),(0, 1, 0)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(1, 1, 1),(0, 1, 0),(-1, -1, -1)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(0, 1, 0),(-1, 1, 1),(-1, -1, 0)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(1, 0, -1),(1, 1, -1),(1, 0, -1)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
-#            elem = numpy.array([(0, 1, 0),(1, 1, -1),(0, -1, -1)], dtype=numpy.int8)
-#            img = self.erodeSP(img, elem)
         return skel.astype(numpy.uint8)*255
-#     def erodeSP(self, img, elem):
-#         """        
-#         :param img: The image to process
-#         :type img: Numpy array
-#         :param elem: The size of the shape
-#         :type elem: int
-#         
-#         Special erosion function. internal to the class.
-#         """
-#         imgPre = numpy.copy(img)
-#         for y in numpy.arange(1, img.shape[0]-2, 1):
-#             for x in (1, img.shape[1]-2, 1):
-#                 tmp = numpy.copy(img[max(y-numpy.int(elem.shape[0]/2), 0):min(y+numpy.int(elem.shape[0]/2)+1, img.shape[0]), max(x-numpy.int(elem.shape[1]/2), 0):min(x+numpy.int(elem.shape[1]/2)+1, img.shape[1])]).astype(numpy.int)
-#                 tmp[numpy.where(elem==-1)] = -1
-#                 tmp[numpy.where(tmp>0)] = 1
-#                 if(numpy.all(elem == tmp) and tmp[1][1]!=1 or (not(numpy.all(elem == tmp)) and tmp[1][1]==1)):
-#                     imgPre[y][x] = 255 if (numpy.all(elem == tmp)) else 0
-#         return imgPre
     
 # class ThinningTreatment(AbstractTreatment):
 #     def __init__(self, size=(3, 3)):

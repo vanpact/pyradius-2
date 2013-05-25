@@ -1,3 +1,11 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+    .. module:: PostTreatments
+        :platform: Unix, Windows
+        :synopsis: module used to connect the data, the interface and the treatments
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
+"""
 
 import gc
 from PyQt4 import QtCore, QtMultimedia
@@ -8,25 +16,22 @@ from ResultsWriter import ResultsWriter
 class Applier(QtCore.QThread):
     """This is the class which apply all the filters. For the preTreatment and the treatments."""
     frameComputed = QtCore.pyqtSignal()
-    """Qt signal indicacting a frame has been computer"""
+    """Qt signal indicacting a frame has been computer."""
     endOfProcessing = QtCore.pyqtSignal()
-    """Qt signal indicacting the end of the processing"""
+    """Qt signal indicacting the end of the processing."""
     frameToSend = None
     """The computed frame. workaround for a problem with memory allocation."""
     
     def __init__(self, src=None, nrSkipFrame=0):
-        """    
+        """ 
+        Constructor. 
+           
         :param src: The video to process
         :type src: Movie
         :param nrSkipFrame: The number of frame to skip
         :type nrSkipFrame: Int
-        
-        Constructor. 
         """
-#            Applier.__single = Applier.__single
         super(Applier, self).__init__()
-#        Applier.__single.filtersToPreApply = []
-#        Applier.__single.filtersToPreApply = [ [] for i in range(nrChannel)]
         self.backToFirst=False
         self.methodToApply = None
         self.processedVideo = []
@@ -41,12 +46,12 @@ class Applier(QtCore.QThread):
     
     def setParameters(self, src=None, nrSkipFrame=0):
         """    
+        Set the parameters for the applier.
+        
         :param src: The video to process
         :type src: Movie
         :param nrSkipFrame: The number of frame to skip
         :type nrSkipFrame: Int
-        
-        Set the parameters for the applier.
         """
         del(self.processedVideo)
         self.processedVideo = []
@@ -56,7 +61,7 @@ class Applier(QtCore.QThread):
         
     def __del__(self):
         """    
-        Destructor    
+        Destructor.
         """
         del(self.methodToApply)
         del(self.processedVideo)
@@ -70,11 +75,11 @@ class Applier(QtCore.QThread):
         
           
     def setSource(self, src=file):
-        """    
+        """  
+        Set the source of the video.
+          
         :param src: The video to process
         :type src: Movie
-        
-        Set the source of the video.
         """
         if(isinstance(src, Movie)):
             self.wait=True
@@ -89,21 +94,21 @@ class Applier(QtCore.QThread):
         
     def setMethod(self, method):
         """    
-        :param method: The treatment to apply
-        :type method: Treatment
+        Set the treatment to apply to the video. 
         
-        Set the treatment to apply to the video.  
+        :param method: The treatment to apply
+        :type method: Treatment 
         """
         self.methodToApply=method
         
     def apply(self, img):
-        """    
+        """ 
+        Process the image and collect the results for further use.
+           
         :param img: The img to process
         :type img: Numpy array 
         :return: the processed image
         :rtype: Numpy array
-        
-        Process the image and collect the results for further use.
         """
         img, info = self.methodToApply.compute(img)
         info[str('Time')] = self.src.getEllapsedTime()
@@ -126,10 +131,8 @@ class Applier(QtCore.QThread):
             del(self.lastComputedFrame)
             self.lastComputedFrame=ndimg
             del(ndimg)
-#        self.processedVideo.append(ndimg)
             self.frameComputed.emit()
-#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
-        
+      
     def applyOne(self):
         """    
         Apply the method on the first frame of the video. 
@@ -140,15 +143,12 @@ class Applier(QtCore.QThread):
         del(self.lastComputedFrame)
         self.lastComputedFrame=ndimg
         del(ndimg)
-#        self.processedVideo.append(ndimg)
         self.frameComputed.emit()
-#        return QtMultimedia.QVideoFrame(ImageConverter.ndarrayToQimage(ndimg))
-        
+     
     def applyAll(self):
         """    
         Apply the method on the whole video. 
         """
-        frameNb = self.src.getFrameNumber()
         self.finished=False
         while(not self.finished):
             self.applyNext()
@@ -160,8 +160,6 @@ class Applier(QtCore.QThread):
         Method necessary for the multi-threading with Qt.
         """
         self.applyAll()
-#         self.finished=True
-#         self.endOfProcessing.emit()
     
     def finishedVideo(self):
         """    
@@ -171,31 +169,30 @@ class Applier(QtCore.QThread):
         self.endOfProcessing.emit()
         
     def getLastComputedFrame(self):
-        """    
+        """  
+        Get the last processed frame.
+          
         :return: the frame
         :rtype: QVideoFrame
-        
-        Get the last processed frame.
         """
-        self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)#self.processedVideo[-1]).copy()
+        self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)
         return QtMultimedia.QVideoFrame(self.frameToSend)
 
     def getLastComputedImage(self):
         """    
+        Get the last processed image.
+        
         :return: the image
         :rtype: QImage
-        
-        Get the last processed image.
         """
-#         self.frameToSend = ImageConverter.ndarrayToQimage(self.lastComputedFrame)#self.processedVideo[-1]).copy()
         return self.frameToSend
     
     def getLastInformation(self):
         """    
+        Get the information extracted from the last processed frame.
+        
         :return: the information
         :rtype: Dictionnary
-        
-        Get the information extracted from the last processed frame.
         """
         if(len(self.infoGathered)>0):
             return self.infoGathered[-1]

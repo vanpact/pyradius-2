@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Oct 12, 2012
-
-@author: yvesremi
+    .. module:: TotalTreatments
+        :platform: Unix, Windows
+        :synopsis: module used to put the mainTreatments, and the postTreatments together
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
 import MainTreatments
 import PostTreatments
 import numpy
-import cv2
-import time
 
 class LKMethod(object):
 	"""Class performing the pretreatments, treatments and post-treatments for the method using the Lucas-Kanade algorithm"""
@@ -170,4 +169,4 @@ class junctionComputation(object):
 		if(len(img.shape)>2):
 			img = img[:, :, 0]*0.299+img[:, :, 1]*0.587+img[:, :, 2]*0.114
 		img, center = self.treatment.compute(img)
-		return(img, {'center':center})
+		return(img, {'27 center':center})

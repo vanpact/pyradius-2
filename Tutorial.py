@@ -1,8 +1,14 @@
 ﻿#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+"""
+    .. module:: Tutorial
+        :platform: Unix, Windows
+        :synopsis: module containing the tutorial for the different pretreatments
+    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
+"""
+
 from PyQt4 import QtGui, QtCore
-from VideoWidget import VideoWidget, Movie
 
 class Tutorial(object):
     """Class for all tutorials"""
@@ -68,7 +74,6 @@ class JunctionTutorial(Tutorial):
         gif.start()
         tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
         tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
-#         hintButton.clicked.connect(self.showConseils)
         ret = tuto.exec_()
         if(ret==1):
             self.showConseils()
@@ -110,7 +115,6 @@ class LinesTutorial(Tutorial):
         gif.start()
         tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
         tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
-#         hintButton.clicked.connect(self.showConseils)
         ret = tuto.exec_()
         if(ret==1):
             self.showConseils()
@@ -153,7 +157,6 @@ class MuscleTutorial(Tutorial):
         gif.start()
         tuto.addButton("Ok", QtGui.QMessageBox.AcceptRole)
         tuto.addButton("Conseils", QtGui.QMessageBox.HelpRole)
-#         hintButton.clicked.connect(self.showConseils)
         ret = tuto.exec_()
         if(ret==1):
             self.showConseils()

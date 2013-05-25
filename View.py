@@ -12,13 +12,12 @@ from PyQt4 import QtGui, QtCore, QtMultimedia
 from VideoWidget import VideoWidget, Movie
 import Tutorial
 from Applier import Applier
-import TotalTreatments #import Applier, CannyTreatment, GaborTreatment
+import TotalTreatments
 
 
 class Window(QtGui.QMainWindow):
     finishedWork = QtCore.pyqtSignal()
     """ This is the class which contains all the GUI."""
-#    timeSlider = None
     
     def __init__(self):
         """ Create the view object."""
@@ -42,11 +41,6 @@ class Window(QtGui.QMainWindow):
         self.point = []
         self.OutputFile=None
         self.InputFile=None
-#        self.source = movie()
-#        QtCore.QObject.connect(self.source, QtCore.SIGNAL('frameChanged'), self.frameChanged)
-#        self.source.frameChanged.connect(self.frameChanged)
-#        self.filterApplied = PreTreatments.Applier()
-#        self.filterApplied.frameComputed.connect(self.frameChanged)
         self.statusBar().showMessage('Prêt')
         
     def centerWindow(self):
@@ -123,10 +117,6 @@ class Window(QtGui.QMainWindow):
         self.videoWidget = VideoWidget()
         self.surface = self.videoWidget.videoSurface()
         self.videoWidget.setStringStartPosition((self.videoWidget.size().width()*0.9, self.videoWidget.size().height()))
-#        scene = QtGui.QGraphicsScene(self)
-#        graphicsView = QtGui.QGraphicsView(scene)
-#        self.videoItem = VideoItem(scene)
-#        scene.addItem(self.videoItem)
         
         self.controlLayout = QtGui.QVBoxLayout()
         self.createInfoInterface()
@@ -177,7 +167,6 @@ class Window(QtGui.QMainWindow):
         self.basicOptionLayout = QtGui.QHBoxLayout()
         self.basicOptionWidget.setLayout(self.basicOptionLayout)
         self.basicOptionWidget.setContentsMargins(0, 0, 0, 0)
-#         self.basicOptionLayout.setContentsMargins(0, 0, 0, 0)
 
         self.resetTreatmentButton = QtGui.QPushButton("Réinitialiser")
         self.resetTreatmentButton.setEnabled(False)
@@ -187,8 +176,6 @@ class Window(QtGui.QMainWindow):
         self.treatmentComboBox.addItem('Fit ellipsoïde')
         self.treatmentComboBox.addItem('Radon transform')
         self.treatmentComboBox.addItem('Seam Carving')
-#         self.outputLabel = QtGui.QLabel('Sauver les résultats :')
-#         self.outputCheckBox = QtGui.QCheckBox()
         
         self.SkipFrameLabel = QtGui.QLabel("Nombre d'images à passer:")
         self.SkipFrameLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignVCenter)
@@ -198,15 +185,12 @@ class Window(QtGui.QMainWindow):
         
         self.resetTreatmentButton.clicked.connect(self.changeTutorial)
         self.treatmentComboBox.currentIndexChanged.connect(self.loadCorrectInterface)
-#         self.outputCheckBox.stateChanged.connect(self.chooseOutputFile)
         
         self.basicOptionLayout.addStretch()
         self.basicOptionLayout.addWidget(self.resetTreatmentButton)
         self.basicOptionLayout.addWidget(self.treatmentComboBox)
         self.basicOptionLayout.addWidget(self.SkipFrameLabel)
         self.basicOptionLayout.addWidget(self.SkipFrameSpinBox)
-#         self.basicOptionLayout.addWidget(self.outputLabel)
-#         self.basicOptionLayout.addWidget(self.outputCheckBox)
         self.basicOptionLayout.addStretch()
         
         self.createEllipsoidMethodInterface()
@@ -251,8 +235,6 @@ class Window(QtGui.QMainWindow):
         for i, key in enumerate(info):
             self.infoLabelList[i].setText(key + " : ")
             self.infoValueList[i].setText(str(info[key]))
-#         self.infoInterfaceWidget.update()
-
             
     def createEllipsoidMethodInterface(self):
         """ Create the layout for the widgets specific to the treatment which use ellipsoids. """
@@ -263,8 +245,6 @@ class Window(QtGui.QMainWindow):
         self.ellipsoidOptionWidget.setLayout(self.ellipsoidOptionLayout)
         self.ellipsoidOptionLayout.addStretch()
         self.ellipsoidOptionWidget.setContentsMargins(0, 0, 0, 0)
-#         self.ellipsoidOptionLayout.setContentsMargins(0, 0, 0, 0)
-
         
     def createRadonMethodInterface(self):
         """ Create the layout for the widgets specific to the treatment which use the Radon transform. """
@@ -280,8 +260,7 @@ class Window(QtGui.QMainWindow):
         self.radonOptionLayout.addWidget(self.multipleRadonCheckBox)
         self.radonOptionLayout.addStretch()
         self.radonOptionWidget.setContentsMargins(0, 0, 0, 0)
-#         self.radonOptionLayout.setContentsMargins(0, 0, 0, 0)
-        
+                
     def createLKMethodInterface(self):
         """ Create the layout for the widgets specific to the treatment which use Lucas-Kanade algorithm. """
         self.LKOptionWidget = QtGui.QGroupBox()
@@ -291,7 +270,6 @@ class Window(QtGui.QMainWindow):
         self.LKOptionWidget.setLayout(self.LKOptionLayout)
         self.LKOptionLayout.addStretch()
         self.LKOptionWidget.setContentsMargins(0, 0, 0, 0)
-#         self.LKOptionLayout.setContentsMargins(0, 0, 0, 0)
     
     def createSCMethodInterface(self):
         """ Create the layout for the widgets specific to the treatment extraction the junction position. """
@@ -301,7 +279,6 @@ class Window(QtGui.QMainWindow):
         self.SCOptionLayout = QtGui.QHBoxLayout()
         self.SCOptionWidget.setLayout(self.SCOptionLayout)
         self.SCOptionWidget.setContentsMargins(0, 0, 0, 0)
-#         self.SCOptionLayout.setContentsMargins(0, 0, 0, 0)
         
     def loadCorrectInterface(self):
         """ Select the correct layout depending on the method chosen by the user. """
@@ -358,7 +335,6 @@ class Window(QtGui.QMainWindow):
         fileName = QtCore.QString(QtGui.QFileDialog.getOpenFileName(self, "ouvrir la vidéo", QtCore.QDir.homePath(), 'Fichiers vidéo (*.avi *.mpeg *.mpg);;Autres (*.*)'))
         if (not (fileName.isEmpty())):
             self.surface.stop()
-#            self.videoItem.stop()
             self.resetMovie()
             self.source.setMovie(unicode(fileName))
             self.filterApplied = Applier()
@@ -370,7 +346,6 @@ class Window(QtGui.QMainWindow):
             self.toggleProcessVideo()
             self.printImageAction.setEnabled(True)
             self.resetTreatmentButton.setEnabled(True)
-#            self.source.play()
 
     def resetMovie(self):
         """ Reset the movie. """
@@ -444,7 +419,6 @@ class Window(QtGui.QMainWindow):
                     self.SkipFrameSpinBox.setEnabled(False)
                     self.playButton.setIcon(QtGui.QIcon("Images/pause.png"))
                     self.playButton.setText("Pause")
-#                    self.filterApplied.run()
                     self.filterApplied.start(QtCore.QThread.HighestPriority)
             
         
@@ -483,11 +457,9 @@ class Window(QtGui.QMainWindow):
          
     def captureImage(self):
         """ Take a snapshot of the video and save it. """
-#        snapshot = self.source.currentImage()
         snapshot = self.filterApplied.getLastComputedImage()
         fileName = QtGui.QFileDialog.getSaveFileName(self, "save an image", QtCore.QDir.homePath(), 'Image (*.png *.PNG)')
         snapshot.save(fileName, "png")
-#         self.source.play()
         
     def getsurfacePosition(self):
         """Get the position of the cursor in the video and ask the surface to draw a shape if necessary."""
@@ -530,8 +502,6 @@ class Window(QtGui.QMainWindow):
         self.drawlist=tutorial.drawlist
         tutorial.displayIntroduction()
         self.videoWidget.clicked.connect(self.getsurfacePosition)
-#             self.chooseTreatment(self.treatmentComboBox.currentIndex())
-#             self.toggleProcessVideo()
     
     def changeTutorial(self):
         """Reset the shapes drawn on the surface and reload a new tutorial specific to the selected treatment."""
@@ -550,10 +520,7 @@ class Window(QtGui.QMainWindow):
             tutorial = Tutorial.JunctionTutorial(self)
         self.drawlist=tutorial.drawlist
         tutorial.displayIntroduction()
-        self.videoWidget.clicked.connect(self.getsurfacePosition)
-#             self.chooseTreatment(self.treatmentComboBox.currentIndex())
-#             self.toggleProcessVideo()
-            
+        self.videoWidget.clicked.connect(self.getsurfacePosition)            
                 
     def chooseTreatment(self, index):
         """Add the chosen treatment to the Applier.

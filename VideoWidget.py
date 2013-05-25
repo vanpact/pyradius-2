@@ -51,10 +51,8 @@
  """
  
 from PyQt4 import QtMultimedia, QtGui, QtCore
-import cv2, numpy, ffvideo
+import ffvideo
 from ffvideo import VideoStream
-import gc, sys
-
 
 class VideoWidgetSurface(QtMultimedia.QAbstractVideoSurface):
     """ VideoWidgetSurface is a class used for the video presentation in a QWidget."""
@@ -488,9 +486,6 @@ class Movie(QtCore.QObject):
             self.setMovie(fileName)
         self.timer = None
         self.frame = None
-        #    source = None
-        #    imageBuffer = None
-        #    rawBuffer = None
         self.isPlaying = False
         self.frameRate = 0
         self.frameNumber = 0
@@ -519,14 +514,6 @@ class Movie(QtCore.QObject):
         
         self.frameRate = self.source.framerate
         self.frameNumber = self.source.duration*1000/self.source.framerate
-#        if(self.frameRate==0):
-#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 1)
-#            timeMax = float(self.source.get(cv2.cv.CV_CAP_PROP_POS_MSEC))/1000.0
-#            if(self.frameNumber >= 1 and timeMax >= 1):
-#                self.frameRate = float(self.frameNumber)/float(timeMax)
-#            self.source.set(cv2.cv.CV_CAP_PROP_POS_AVI_RATIO, 0)
-#        if(self.frameRate==0):
-#            self.frameRate = 25#Take a probable value
         self.timer = QtCore.QTimer()
         self.timer.setInterval(1000.0/self.frameRate)
         self.timer.setSingleShot(False)
@@ -552,29 +539,6 @@ class Movie(QtCore.QObject):
         :raise: Exception: The file cannot be read because the codec is not supported or the video is compressed.
         """
         self.readNextFrame()
-        
-#    def currentImage(self):
-#        """Returns a QImage representing the image in the current frame.
-#        
-#        Returns: 
-#            A QtGui.QImage representing the current frame.
-#        """
-#        return self.imageBuffer
-    
-#    def currentFrame(self):
-#        """Returns the current frame.
-#        
-#        Returns: 
-#            A QtMultimedia.QVideoFrame representing the current frame."""
-#        return self.frame
-    
-#    def currentNdarrayFrame(self):
-#        """Returns a NdArray representing the image in the current frame.
-#        
-#        Returns: 
-#            A QtGui.QImage representing the current frame.
-#        """
-#        return self.rawBuffer
     
     def toggleState(self):
         """Toggle between playing and pausing the video."""
@@ -606,16 +570,6 @@ class Movie(QtCore.QObject):
             self.pause()
             self.rawBuffer = None
             self.endOfVideo.emit()
-#        if(error==0):
-#            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
-#        imSize = image.shape
-#        self.rawBuffer=numpy.copy(image)
-#        image = numpy.ravel(image)
-#        image.tostring()
-#        image = QtGui.QImage(image, imSize[1], imSize[0], imSize[1]*3, QtGui.QImage.Format_RGB888)
-#        self.frame = QtMultimedia.QVideoFrame(image)
-#        del(imSize)
-#        del(image)
         self.frameChanged.emit()
         
     def readNCFrame(self, number):
@@ -633,15 +587,6 @@ class Movie(QtCore.QObject):
             self.isPlaying = False
             self.pause()
             self.endOfVideo.emit()
-#        error, image = self.source.read()
-#        if(error==0):
-#            raise ValueError('Cannot read the file. Be sure the video is not compressed.')
-#        image = numpy.ravel(image)
-#        image.tostring()
-#        self.rawBuffer=image
-#        image = QtGui.QImage(image, image.shape[1], image.shape[0], image.shape[1]*3, QtGui.QImage.Format_RGB888)
-#        self.frame = QtMultimedia.QVideoFrame(image)
-#        del(image)
         self.frameChanged.emit()
 
         
