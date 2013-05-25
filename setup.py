@@ -1,8 +1,10 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
     .. module:: PostTreatments
         :platform: Unix, Windows
         :synopsis: Setup script
-    .. moduleauthor:: Yves-Rémi Van Eycke <yveycke [at] ulb.ac.be>
+    .. moduleauthor:: Yves-Rï¿½mi Van Eycke <yveycke [at] ulb.ac.be>
 """
 
 from distutils.core import setup
@@ -10,6 +12,7 @@ from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import os
 from glob import glob
+import py2exe
 
 def runSetup(setup_args):
     setup(
@@ -52,7 +55,7 @@ if __name__=='__main__':
                   ("Images", glob(r'Images\*.gif')),
                   ("Images", glob(r'Images\*.png')),
                   ("Images", glob(r'Images\*.jpg')),
-                  ("Images", glob(r'Images\*.bmp'))
+                  ("Images", glob(r'Images\*.bmp')),
                   ("Images", glob(r'Images\*.ico')),
                   ("", glob(r'gpl-3.0-standalone.html'))]
         runSetup(setup_args)
@@ -79,4 +82,7 @@ if __name__=='__main__':
             os.remove('dist/pyradius.exe')
         except:
             pass
-        os.rename('dist/main.exe', 'dist/pyradius.exe')
+        try:
+            os.rename('dist/main.exe', 'dist/pyradius.exe')
+        except:
+            pass
