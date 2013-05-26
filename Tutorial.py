@@ -45,7 +45,7 @@ class JunctionTutorial(Tutorial):
         :param parent: The widget who asked to create this tutorial.
         :type parent: QWidget"""
         self.parent=parent
-        super(LinesTutorial, self).__init__(self.parent)
+        super(JunctionTutorial, self).__init__(self.parent)
         self.drawlist=['rectangle', 'point']
         
     def displayIntroduction(self):
